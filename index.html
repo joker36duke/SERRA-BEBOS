@@ -335,3 +335,20 @@
             setTimeout(() => {
                 f.classList.add('hidden'); f2.classList.remove('hidden');
                 setTimeout(() => { f2.classList.remove('
+                                                       window.onload = () => {
+    let progress = 0;
+    const bar = document.getElementById("loading-bar");
+
+    const interval = setInterval(() => {
+        progress += 1;
+        bar.style.width = progress + "%";
+
+        if (progress >= 100) {
+            clearInterval(interval);
+
+            setTimeout(() => {
+                navTo('screen-splash', 'screen-start');
+            }, 300);
+        }
+    }, 120); // ~12 segundos
+};
