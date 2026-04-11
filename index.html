@@ -989,6 +989,24 @@
                 showModal(title, desc, "Próxima Mão", startSeringalGame);
             }
         }
+        // LÓGICA DE CARREGAMENTO - 12 SEGUNDOS
+        window.addEventListener('load', () => {
+            const bar = document.getElementById('loading-bar');
+            const splash = document.getElementById('splash-screen');
+            
+            // Inicia o enchimento da barra
+            setTimeout(() => { 
+                if(bar) bar.style.width = '100%'; 
+            }, 500);
+
+            // Remove a tela após 12 segundos
+            setTimeout(() => {
+                splash.classList.add('opacity-0');
+                setTimeout(() => { 
+                    splash.style.display = 'none'; 
+                }, 1000);
+            }, 12000);
+        });
 
     </script>
 </body>
