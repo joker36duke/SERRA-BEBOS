@@ -1093,21 +1093,32 @@
             }
         }
 
-        // --- ATIVAÇÃO DA INTRODUÇÃO E LOADER ---
+                // --- ATIVAÇÃO DA INTRODUÇÃO E LOADER ---
         window.addEventListener("load", () => {
+            
+            // Lógica da contagem de 0% a 100%
+            let percent = 0;
+            const percentText = document.getElementById('loading-percentage');
+            // 58 milissegundos * 100 = 5.8 segundos (mesmo tempo da barra CSS)
+            const countInterval = setInterval(() => {
+                percent++;
+                if (percentText) percentText.innerText = percent + '%';
+                if (percent >= 100) clearInterval(countInterval);
+            }, 58); 
+
             // A tela de carregamento (loader) fica visível por 6 segundos (6000 ms)
             setTimeout(() => {
                 navTo('screen-loader', 'screen-intro', () => {
-                    // A tela de intro com a frase fica visível por 2.5 segundos
+                    // A tela de intro com a frase fica visível por 5 segundos
                     setTimeout(() => {
                         navTo('screen-intro', 'screen-start');
-                    }, 10000);
+                    }, 5000);
                 });
             }, 6000);
         });
-    
-</script>
+    </script>
 </body>
 </html>
+
 
 
