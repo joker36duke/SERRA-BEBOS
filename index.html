@@ -205,22 +205,27 @@
 <body>
 
     <!-- TELA DE CARREGAMENTO (LOADER) -->
-        <div id="screen-loader" class="screen">
-        <div class="flex flex-col items-center justify-center w-full max-w-sm px-6">
+            <div id="screen-loader" class="screen relative overflow-hidden">
+        
+        <img src="fundoseringal.png" alt="Seringal Amazônico" class="absolute inset-0 w-full h-full object-cover z-0">
+        
+        <div class="absolute inset-0 bg-black/60 z-10"></div>
+
+        <div class="flex flex-col items-center justify-center w-full max-w-sm px-6 relative z-20">
             
-            <img src="logoserrabebos.png" alt="Logo Serra Bebos" class="w-64 md:w-80 mb-8 animate-blink object-contain drop-shadow-xl">
+            <img src="logoserrabebos.png" alt="Logo Serra Bebos" class="w-64 md:w-80 mb-8 animate-blink object-contain drop-shadow-2xl">
             
             <div class="w-full relative mt-6">
                 <div class="flex justify-between items-end mb-2 px-2">
-                    <span class="text-clay font-cinzel text-xs font-bold tracking-[2px] uppercase">Iniciando</span>
-                    <span id="loading-percentage" class="text-wine font-black text-lg">0%</span>
+                    <span class="text-white/80 font-cinzel text-xs font-bold tracking-[2px] uppercase">Iniciando</span>
+                    <span id="loading-percentage" class="text-white font-black text-lg">0%</span>
                 </div>
 
-                <div class="h-5 w-full bg-[#3d1f14]/20 rounded-full overflow-hidden border-2 border-[#d4af37]/50 shadow-inner">
-                    <div class="h-full bg-[#722f1b] loading-bar-fill shadow-[0_0_10px_rgba(114,47,27,0.8)]"></div>
+                <div class="h-5 w-full bg-white/10 rounded-full overflow-hidden border-2 border-luxury-gold shadow-inner">
+                    <div class="h-full bg-wine loading-bar-fill shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
                 </div>
                 
-                <p class="text-black tracking-[4px] text-sm md:text-base mt-4 uppercase font-black text-center w-full">
+                <p class="text-white tracking-[4px] text-sm md:text-base mt-4 uppercase font-black text-center w-full drop-shadow-lg">
                     MADE IN AMAZÔNIA
                 </p>
             </div>
