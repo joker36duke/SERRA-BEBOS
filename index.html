@@ -236,14 +236,21 @@
 
 
     <!-- TELA 1: INÍCIO -->
-    <div id="screen-start" class="screen hidden transparent">
-        <div class="text-center mb-12">
-            <h1 class="font-cinzel font-black uppercase tracking-[8px] text-wine text-4xl md:text-5xl whitespace-nowrap">Serra Bebos</h1>
-            <p class="text-clay font-cinzel tracking-[6px] text-[10px] mt-4 opacity-70 uppercase font-bold">MADE IN AMAZÔNIA</p>
+        <div id="screen-start" class="screen hidden transparent relative w-full h-full bg-black">
+        
+        <img src="telaincial.png" alt="Castelo de El Dionysos" class="absolute inset-0 w-full h-full object-cover object-center">
+        
+        <div class="absolute inset-x-0 bottom-[18%] sm:bottom-[15%] flex justify-center px-6">
+            <div class="flex justify-between w-full max-w-[380px] h-[65px] gap-4 z-50">
+                
+                <button onclick="alert('O Castelo de El Dionysos em breve abrirá seus portões para Login!')" class="w-1/2 h-full bg-transparent focus:outline-none cursor-pointer rounded-md" aria-label="Login"></button>
+                
+                <button onclick="navTo('screen-start', 'screen-luck', renderLuckGrid)" class="w-1/2 h-full bg-transparent focus:outline-none cursor-pointer rounded-md" aria-label="Jogar Agora"></button>
+                
+            </div>
         </div>
-        <button onclick="navTo('screen-start', 'screen-luck', renderLuckGrid)" class="btn-main">ENTRAR NO JOGO</button>
-    
     </div>
+
 
     <!-- TELA 2: SORTEIO -->
     <div id="screen-luck" class="screen hidden transparent">
