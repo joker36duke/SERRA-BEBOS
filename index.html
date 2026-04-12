@@ -277,22 +277,30 @@
 
     <!-- TELA 3: RESULTADO SORTEIO -->
     <div id="screen-result" class="screen hidden transparent">
-        <div class="bg-white p-12 border border-luxury-gold/20 text-center rounded-sm max-w-sm w-full shadow-2xl relative">
-            <p class="font-cinzel text-clay text-[9px] uppercase tracking-[6px] mb-6 opacity-70">O Baralho Falou</p>
-            <h2 id="final-status-text" class="text-4xl font-black font-cinzel mb-12 tracking-tighter"></h2>
-            <div class="space-y-6 mb-12">
-                <div class="flex justify-between items-center border-b border-luxury-gold/10 pb-4">
-                    <span class="font-cinzel text-[8px] text-luxury-blue uppercase tracking-[3px] font-bold">Dono da Mesa</span>
-                    <span id="label-dono" class="font-cinzel text-[11px] text-amazon font-black uppercase tracking-[2px]"></span>
+        <div id="screen-result" class="screen hidden transparent relative overflow-hidden">
+        
+        <img src="Mesa da sorte_20260412_022516_0000.png" alt="Resultado do Sorteio" class="absolute inset-0 w-full h-full object-cover object-center opacity-60">
+        
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+
+        <div class="bg-white/80 backdrop-blur-md p-8 border border-luxury-gold/40 text-center rounded-sm max-w-sm w-[85%] shadow-2xl relative z-10">
+            <p class="font-cinzel text-clay text-[9px] uppercase tracking-[6px] mb-4 opacity-80">O Baralho Falou</p>
+            <h2 id="final-status-text" class="text-3xl font-black font-cinzel mb-8 tracking-tighter"></h2>
+            
+            <div class="space-y-4 mb-10">
+                <div class="flex justify-between items-center border-b border-luxury-gold/20 pb-3">
+                    <span class="font-cinzel text-[8px] text-luxury-blue uppercase tracking-[2px] font-bold">Dono da Mesa</span>
+                    <span id="label-dono" class="font-cinzel text-[10px] text-amazon font-black uppercase tracking-[1px]"></span>
                 </div>
-                <div class="flex justify-between items-center border-b border-luxury-gold/10 pb-4">
-                    <span class="font-cinzel text-[8px] text-luxury-blue uppercase tracking-[3px] font-bold">No Serra</span>
-                    <span id="label-serra" class="font-cinzel text-[11px] text-wine font-black uppercase tracking-[2px]"></span>
+                <div class="flex justify-between items-center border-b border-luxury-gold/20 pb-3">
+                    <span class="font-cinzel text-[8px] text-luxury-blue uppercase tracking-[2px] font-bold">No Serra</span>
+                    <span id="label-serra" class="font-cinzel text-[10px] text-wine font-black uppercase tracking-[1px]"></span>
                 </div>
             </div>
-            <button onclick="navTo('screen-result', 'screen-battle', startSeringalGame)" class="btn-main w-full">ir para a mesa</button>
+            <button onclick="navTo('screen-result', 'screen-battle', startSeringalGame)" class="btn-main w-full py-4 text-[10px]">ir para a mesa</button>
         </div>
     </div>
+
 
     <!-- TELA 4: ARENA/MESA -->
     <div id="screen-battle" class="screen hidden transparent">
