@@ -1110,7 +1110,7 @@
             }
         }
 
-                        // --- ATIVAÇÃO DA INTRODUÇÃO E LOADER ---
+                                // --- ATIVAÇÃO DO LOADER PARA A TELA INICIAL ---
         window.addEventListener("load", () => {
             
             // Lógica da contagem de 0% a 100%
@@ -1122,19 +1122,12 @@
                 if (percent >= 100) clearInterval(countInterval);
             }, 58); 
 
-            // 1. A tela de carregamento (loader) sai após 6 segundos
+            // A tela de carregamento (loader) sai após 6 segundos e vai DIRETO para o Castelo
             setTimeout(() => {
-                navTo('screen-loader', 'screen-intro', () => {
-                    
-                    // 2. A tela de intro (Adelino) vai para o Castelo após 4.5 segundos
-                    // (Isso impede que ela fique branca antes de trocar)
-                    setTimeout(() => {
-                        navTo('screen-intro', 'screen-start');
-                    }, 4500);
-
-                });
+                navTo('screen-loader', 'screen-start');
             }, 6000);
         });
+
     </script>
 </body>
 </html>
