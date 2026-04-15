@@ -214,13 +214,17 @@
 <body>
 
     <!-- TELA DE CARREGAMENTO (LOADER) -->
-                      <div id="screen-loader" class="screen relative overflow-hidden h-full w-full">
+                          <div id="screen-loader" class="screen relative overflow-hidden h-full w-full">
         
         <img src="fundoseringal.png" alt="Seringal Amazônico" class="absolute inset-0 w-full h-full object-cover z-0">
         
         <div class="absolute inset-0 bg-black/60 z-10"></div>
 
-        <div class="flex flex-col items-center justify-center w-full max-w-sm px-6 relative z-20">
+        <div class="absolute bottom-0 right-0 z-20 w-[50%] max-w-[250px] pointer-events-none">
+            <img src="placa36.png" alt="Seringal Ocidental, a 36 cartas de distância" class="w-full drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] scale-[2.5] origin-bottom-right transition-transform">
+        </div>
+
+        <div class="flex flex-col items-center justify-center w-full max-w-sm px-6 relative z-30">
             <img src="logoserrabebos.png" alt="Logo SerraBebos" class="w-64 md:w-80 mb-8 animate-blink object-contain drop-shadow-2xl">
             
             <div class="w-full relative mt-6">
@@ -238,6 +242,8 @@
                 </p>
             </div>
         </div>
+
+    </div>
 
                         <div class="absolute bottom-4 right-4 z-30 w-[50%] max-w-[250px]">
             <img src="placa36.png" alt="Seringal Ocidental, a 36 cartas de distância" class="w-full drop-shadow-[0_15px_30px_rgba(0,0,0,0.9)] scale-[2.5] origin-bottom-right transition-transform hover:scale-[2.7]">
