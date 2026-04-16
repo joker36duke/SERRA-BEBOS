@@ -303,16 +303,18 @@
 
 
     <!-- TELA 1: INÍCIO -->
-        <div id="screen-start" class="screen hidden transparent relative w-full h-full bg-black">
+            <div id="screen-start" class="screen hidden transparent relative w-full h-full bg-black">
         
+        <audio id="som-botoes" src="cricrio.mp3"></audio>
+
         <img src="telaincial.png" alt="Castelo de El Dionysos" class="absolute inset-0 w-full h-full object-cover object-center">
         
         <div class="absolute inset-x-0 bottom-[18%] sm:bottom-[15%] flex justify-center px-6">
             <div class="flex justify-between w-full max-w-[380px] h-[65px] gap-4 z-50">
                 
-                <button onclick="alert('O Castelo de El Dionysos em breve abrirá seus portões para Login!')" class="w-1/2 h-full bg-transparent focus:outline-none cursor-pointer rounded-md" aria-label="Login"></button>
+                <button onclick="tocarSomBotao(); setTimeout(() => alert('O Castelo de El Dionysos em breve abrirá seus portões para Login!'), 100);" class="w-1/2 h-full bg-transparent focus:outline-none cursor-pointer rounded-md" aria-label="Login"></button>
                 
-                <button onclick="startGameFlow()" class="w-1/2 h-full bg-transparent focus:outline-none cursor-pointer rounded-md" aria-label="Jogar Agora"></button>
+                <button onclick="tocarSomBotao(); startGameFlow();" class="w-1/2 h-full bg-transparent focus:outline-none cursor-pointer rounded-md" aria-label="Jogar Agora"></button>
                 
             </div>
         </div>
