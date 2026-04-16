@@ -1163,6 +1163,24 @@
                 som.play().catch(e => console.log("Áudio bloqueado ou não encontrado"));
             }
         }
+
+                // --- FLUXO DE ENTRADA DO JOGO ---
+        function startGameFlow() {
+            // 1. Toca o som do vinho a ser servido na Adega
+            let somDrink = document.getElementById('som-drink');
+            if (somDrink) {
+                somDrink.currentTime = 0; // Garante que o som começa do zero
+                somDrink.play().catch(e => console.log("Áudio bloqueado"));
+            }
+
+            // 2. Sai da Tela Inicial e vai para a Adega Mística (Intro)
+            navTo('screen-start', 'screen-intro', () => {
+                // Tempo para leitura do pergaminho (5.6 segundos)
+                setTimeout(() => {
+                    navTo('screen-intro', 'screen-luck', renderLuckGrid);
+                }, 5625);
+            });
+        }
         
     </script>
 </body>
