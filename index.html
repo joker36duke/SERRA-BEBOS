@@ -507,7 +507,7 @@
                         somDrink.currentTime = 0;
                         somDrink.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
                     }
-                }, 800); 
+                }, 1000); 
 
                 // 2. Tempo AUMENTADO para leitura do pergaminho (foi de 5625 para 8500ms = 8,5 segundos)
                 setTimeout(() => {
@@ -518,7 +518,7 @@
                         somDrink.currentTime = 0;
                     }
                     navTo('screen-intro', 'screen-luck', renderLuckGrid);
-                }, 8500); 
+                }, 12000); 
             });
         }
         
