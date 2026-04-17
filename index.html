@@ -492,13 +492,24 @@
                 f.classList.add('hidden'); f2.classList.remove('hidden');
                 setTimeout(() => { f2.classList.remove('transparent'); if(cb) cb(); }, 50);
             }, 600);
-        }
-                        // --- FLUXO DE ENTRADA DO JOGO ---
+        }        // --- FLUXO DE ENTRADA DO JOGO ---
         function startGameFlow() {
+            // Prepara e toca o som do drink
+            let somDrink = document.getElementById('som-drink');
+            if (somDrink) {
+                somDrink.currentTime = 0;
+                somDrink.play().catch(e => console.log("Áudio bloqueado pelo navegador"));
+            }
+
             // Sai da Tela Inicial e vai para a Adega Mística (Intro)
             navTo('screen-start', 'screen-intro', () => {
-                // Tempo aumentado em 1/4 (de 4500 para 5625ms) para leitura do pergaminho
+                // Tempo aumentado para leitura do pergaminho (5625ms)
                 setTimeout(() => {
+                    // Corta o som do drink antes de ir para a mesa de sorteio
+                    if (somDrink) {
+                        somDrink.pause();
+                        somDrink.currentTime = 0;
+                    }
                     navTo('screen-intro', 'screen-luck', renderLuckGrid);
                 }, 5625);
             });
