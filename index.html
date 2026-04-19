@@ -215,14 +215,12 @@
 
     <!-- TELA DE CARREGAMENTO (LOADER) -->
 
-    <div id="screen-loader" class="screen relative overflow-hidden h-full w-full">
         <div id="screen-loader" class="screen relative overflow-hidden h-full w-full">
         
         <img src="fundoseringal.png" alt="Seringal Amazônico" class="absolute inset-0 w-full h-full object-cover z-0">
-        
         <div class="absolute inset-0 bg-black/40 z-10"></div> 
 
-        <div class="absolute top-[40%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-full flex justify-center px-6 pointer-events-none">
+        <div class="absolute top-[55%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-full flex justify-center px-6 pointer-events-none">
             <img src="logoserrabebos.png" alt="Logo SerraBebos" class="w-64 md:w-80 animate-blink object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
         </div>
 
@@ -231,11 +229,9 @@
                 <span class="text-white/90 font-cinzel text-xs font-bold tracking-[2px] uppercase drop-shadow-md">Iniciando</span>
                 <span id="loading-percentage" class="text-white font-black text-lg drop-shadow-md">0%</span>
             </div>
-
             <div class="h-4 w-full bg-black/60 rounded-full overflow-hidden border border-luxury-gold shadow-inner backdrop-blur-sm">
                 <div class="h-full bg-wine loading-bar-fill shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
             </div>
-            
             <p class="text-white/80 tracking-[4px] text-[9px] md:text-xs mt-4 uppercase font-black text-center w-full drop-shadow-lg">
                 MADE IN ADELINO'S GARDEN
             </p>
@@ -245,16 +241,16 @@
         
         <script>
             let percent = 0;
+            // Ajustado de 58 para 85 para a barra encher no tempo certo (mais devagar)
             let countInterval = setInterval(() => {
                 percent++;
                 let percentText = document.getElementById('loading-percentage');
                 if (percentText) percentText.innerText = percent + '%';
                 if (percent >= 100) clearInterval(countInterval);
-            }, 58);
+            }, 85);
 
             let somPassaro = document.getElementById('som-passaro');
             let repeticoes = 0;
-            
             if (somPassaro) {
                 somPassaro.addEventListener('ended', function() {
                     repeticoes++;
@@ -264,24 +260,23 @@
                     }
                 });
             }
-
             document.addEventListener('click', function() {
                 if (somPassaro && somPassaro.paused && repeticoes === 0) {
                     somPassaro.play().catch(() => {});
                 }
             }, { once: true });
 
+            // Tempo aumentado de 6000 para 9000 (9 segundos de tela)
             setTimeout(() => {
                 document.getElementById('screen-loader').classList.add('hidden', 'transparent');
-                
                 let telaStart = document.getElementById('screen-start');
                 if (telaStart) {
                     telaStart.classList.remove('hidden', 'transparent');
                 }
-            }, 6000);
+            }, 9000);
         </script>
-
     </div> 
+
 
     <!-- TELA DE INTRODUÇÃO -->
                        </div><div id="screen-intro" class="screen hidden transparent relative overflow-hidden h-full w-full">
