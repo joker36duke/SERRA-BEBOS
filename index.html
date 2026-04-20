@@ -1262,6 +1262,103 @@
                 som.play().catch(e => console.log("Áudio bloqueado ou não encontrado"));
             }
         }
+
+            // === DADOS E LÓGICA DO CARROSSEL DE GUARDIÕES ===
+    const amazoniaGuardians = [
+        {
+            name: "Testúrion",
+            species: "O Sábio Jabuti",
+            img: "avatar_testurion.png", 
+            desc: "<p>Ancião da mata, mestre da paciência e da defesa. Sua casca é um escudo natural e sua sabedoria guia o caminho daqueles que buscam o equilíbrio.</p><p>Sua estratégia é baseada na resiliência: absorver o ataque do oponente e responder com a precisão de quem conhece o tempo.</p>"
+        },
+        {
+            name: "Lentorion",
+            species: "A Paciente Preguiça",
+            img: "avatar_lentorion.png",
+            desc: "<p>Observador silencioso dos ritmos da floresta. Sua aparente lentidão não é preguiça, mas sim a estratégia da observação perfeita.</p><p>Lentorion entende que a verdadeira força está em saber o momento exato de agir, economizando energia para a jogada decisiva que ninguém prevê.</p>"
+        },
+        {
+            name: "Caimã-kay",
+            species: "O Guardião do Lago",
+            img: "avatar_caimakay.png",
+            desc: "<p>Senhor das águas turvas, mestre da emboscada e do ataque surpresa. Resiliência é o seu codinome.</p><p>Ele esconde seu poder sob a superfície, esperando o Pirarucog baixar a guarda para desferir um ataque poderoso e inevitável.</p>"
+        },
+        {
+            name: "Zé Bigode",
+            species: "O Mestre Sagui",
+            img: "avatar_zebigode.png",
+            desc: "<p>Ágil, astuto e cheio de truques. Conhece todos os segredos da copa das árvores e como usá-los a seu favor.</p><p>Mestre em confundir o oponente com movimentos rápidos e inteligentes. Com Zé Bigode, a batalha é um jogo de inteligência e agilidade.</p>"
+        },
+        {
+            name: "Yara",
+            species: "A Soberana da Mata",
+            img: "avatar_yara.png",
+            desc: "<p>A rainha guerreira. Sua força e coragem são inigualáveis. Quando ela entra no Tribunal, a vitória é a única opção.</p><p>Sua presença intimida, mas é sua lealdade à floresta que a torna uma força da natureza imparável.</p>"
+        },
+        {
+            name: "Aethernox",
+            species: "O Senhor dos Ares",
+            img: "avatar_aethernox.png",
+            desc: "<p>Observador tático dos céus. Nada escapa à sua visão perfeita. Ele prevê as jogadas do oponente antes que aconteçam.</p><p>Garante que você tenha sempre a melhor carta na mão e a estratégia certa para cada rodada.</p>"
+        }
+    ];
+
+    let currentAvatarIndex = 0;
+
+    function updateCarouselUI() {
+        const guardian = amazoniaGuardians[currentAvatarIndex];
+        const imgEl = document.getElementById('carousel-avatar-img');
+        const nameEl = document.getElementById('carousel-avatar-name');
+        const speciesEl = document.getElementById('carousel-avatar-species');
+        const descEl = document.getElementById('carousel-avatar-description');
+        
+        const contentParent = imgEl.parentElement.parentElement;
+        contentParent.classList.remove('animate-fade-in');
+        
+        setTimeout(() => {
+            if(imgEl) imgEl.src = guardian.img;
+            if(nameEl) nameEl.innerText = guardian.name;
+            if(speciesEl) speciesEl.innerText = guardian.species;
+            if(descEl) descEl.innerHTML = guardian.desc; 
+            contentParent.classList.add('animate-fade-in');
+        }, 10);
+    }
+
+    function nextAvatar() {
+        currentAvatarIndex = (currentAvatarIndex + 1) % amazoniaGuardians.length;
+        updateCarouselUI();
+    }
+
+    function prevAvatar() {
+        currentAvatarIndex = (currentAvatarIndex - 1 + amazoniaGuardians.length) % amazoniaGuardians.length;
+        updateCarouselUI();
+    }
+
+    // Navegação: Da tela inicial (Castelo) para o Carrossel
+    function irParaAvatar() {
+        document.getElementById('screen-start').classList.add('hidden', 'transparent');
+        let telaAvatar = document.getElementById('screen-avatar-carousel');
+        if (telaAvatar) {
+            telaAvatar.classList.remove('hidden', 'transparent');
+            updateCarouselUI(); 
+        }
+    }
+
+    // Navegação: Do Carrossel para o Sorteio (Tribunal)
+    function confirmGuardian() {
+        const guardian = amazoniaGuardians[currentAvatarIndex];
+        
+        // A mágica acontece aqui: Troca "Damião" pelo nome do Guardião escolhido!
+        player_name = guardian.name; 
+        
+        document.getElementById('screen-avatar-carousel').classList.add('hidden', 'transparent');
+        
+        let telaLuck = document.getElementById('screen-luck');
+        if (telaLuck) {
+            telaLuck.classList.remove('hidden', 'transparent');
+            startGameFlow(); // Começa o sorteio das cartas
+        }
+    }
         
     </script>
 </body>
