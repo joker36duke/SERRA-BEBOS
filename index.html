@@ -715,7 +715,7 @@
                     let pPower = getSorteioPower(cardP);
                     let ePower = getSorteioPower(cardE);
 
-                    // Nova Regra: Se der empate, o sorteio é refeito!
+                 // Nova Regra: Se der empate
                     if (pPower === ePower) {
                         const luckTitle = document.querySelector('#screen-luck h2');
                         const originalText = luckTitle.innerText;
@@ -736,11 +736,16 @@
                     state.pSerraScore = 1;
                     state.eSerraScore = 1;
                     
-                    document.getElementById('final-status-text').innerText = pWins ? "VOCÊ DOMINA" : "PIRARUCOG DOMINA";
+                    // === MÁGICA DOS NOMES DINÂMICOS ===
+                    // Pega o nome do bicho escolhido e deixa tudo em MAIÚSCULO
+                    const nomeJogador = player_name.toUpperCase(); 
+                    
+                    document.getElementById('final-status-text').innerText = pWins ? nomeJogador + " DOMINA" : "PIRARUCOG DOMINA";
                     document.getElementById('final-status-text').className = `text-4xl font-black font-cinzel mb-12 tracking-tighter ${pWins ? 'text-amazon' : 'text-wine'}`;
                     
-                    document.getElementById('label-dono').innerText = pWins ? "DAMIÃO" : "PIRARUCOG";
-                    document.getElementById('label-serra').innerText = pWins ? "PIRARUCOG" : "DAMIÃO";
+                    document.getElementById('label-dono').innerText = pWins ? nomeJogador : "PIRARUCOG";
+                    document.getElementById('label-serra').innerText = pWins ? "PIRARUCOG" : nomeJogador;
+                    // ===================================
                     
                     setTimeout(() => navTo('screen-luck', 'screen-result'), 1500);
                 }, 1200);
