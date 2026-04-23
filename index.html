@@ -806,7 +806,8 @@
             // Pontuações
             document.getElementById('score-p').innerText = state.pScore;
             document.getElementById('score-e').innerText = state.eScore;
-            
+            document.getElementById('ui-player-name').innerText = player_name.toUpperCase() + ":";
+
             // Atualiza quem é Dono e quem é Serra
             document.getElementById('ui-role-p').innerText = state.isDono ? "DONO DA MESA" : "NO SERRA";
             document.getElementById('ui-role-e').innerText = !state.isDono ? "DONO DA MESA" : "NO SERRA";
