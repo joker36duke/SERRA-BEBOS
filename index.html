@@ -1370,31 +1370,42 @@
         updateCarouselUI();
     }
 
-    // Navegação: Da tela inicial (Castelo) para o Carrossel
-    function irParaAvatar() {
-        document.getElementById('screen-start').classList.add('hidden', 'transparent');
-        let telaAvatar = document.getElementById('screen-avatar-carousel');
-        if (telaAvatar) {
-            telaAvatar.classList.remove('hidden', 'transparent');
-            updateCarouselUI(); 
-        }
-    }
+    // Navegação: Da tela inicial para a Introdução (Pergaminho) e depois Avatares
+function iniciarFluxoJogo() {
+    navTo('screen-start', 'screen-intro', () => {
+        
+        // Toca o som do vinho
+        setTimeout(() => {
+            let somDrink = document.getElementById('som-drink');
+            if (somDrink) {
+                somDrink.currentTime = 0;
+                somDrink.play().catch(e => console.log("Áudio bloqueado"));
+            }
+        }, 1000); 
 
-    // Navegação: Do Carrossel para o Sorteio (Tribunal)
-    function confirmGuardian() {
-        const guardian = amazoniaGuardians[currentAvatarIndex];
-        
-        // A mágica acontece aqui: Troca "Damião" pelo nome do Guardião escolhido!
-        player_name = guardian.name; 
-        
-        document.getElementById('screen-avatar-carousel').classList.add('hidden', 'transparent');
-        
-        let telaLuck = document.getElementById('screen-luck');
-        if (telaLuck) {
-            telaLuck.classList.remove('hidden', 'transparent');
-            startGameFlow(); // Começa o sorteio das cartas
-        }
-    }
+        // Aguarda 10 segundos no pergaminho e vai automático para o Carrossel
+        setTimeout(() => {
+            let somDrink = document.getElementById('som-drink');
+            if (somDrink) {
+                somDrink.pause();
+                somDrink.currentTime = 0;
+            }
+            navTo('screen-intro', 'screen-avatar-carousel', updateCarouselUI);
+        }, 10000); 
+    });
+}
+
+// Navegação: Do Carrossel para o Sorteio
+function confirmGuardian() {
+    const guardian = amazoniaGuardians[currentAvatarIndex];
+    
+    // Troca "Damião" pelo nome do Guardião
+    player_name = guardian.name; 
+    
+    // Vai direto para o Sorteio (a Sorte no Seringal)
+    navTo('screen-avatar-carousel', 'screen-luck', renderLuckGrid);
+}
+
         
     </script>
 </body>
