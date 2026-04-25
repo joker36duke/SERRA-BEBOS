@@ -257,9 +257,8 @@
 
         <audio id="som-passaro" src="cricrio.mp3"></audio>
         
-                <script>
+      <script>
             let percent = 0;
-            // Ajustado de 58 para 85 para a barra encher no tempo certo (mais devagar)
             let countInterval = setInterval(() => {
                 percent++;
                 let percentText = document.getElementById('loading-percentage');
@@ -269,6 +268,8 @@
 
             let somPassaro = document.getElementById('som-passaro');
             let repeticoes = 0;
+            let cantoIniciado = false;
+
             if (somPassaro) {
                 somPassaro.addEventListener('ended', function() {
                     repeticoes++;
@@ -278,22 +279,40 @@
                     }
                 });
             }
-            
-            // Cronômetro para atrasar o canto em 5 segundos (5000 milissegundos)
-            setTimeout(() => {
-                if (somPassaro && somPassaro.paused && repeticoes === 0) {
-                    somPassaro.play().catch(() => {
-                        // Se o navegador bloquear o som automático, ele toca assim que o jogador tocar na tela
-                        document.addEventListener('click', function() {
-                            if (somPassaro.paused && repeticoes === 0) {
+
+            // Função que faz o suspense antes de cantar
+            function iniciarCantoComAtraso() {
+                if (cantoIniciado || !somPassaro) return;
+                cantoIniciado = true;
+                
+                // Truque para telemóveis: "destrava" o áudio tocando e pausando rápido em silêncio
+                let playPromise = somPassaro.play();
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        somPassaro.pause();
+                        somPassaro.currentTime = 0;
+                        
+                        // Suspense: Aguarda 4 segundos (4000ms) antes de soltar o canto de verdade
+                        setTimeout(() => {
+                            if (repeticoes === 0) {
                                 somPassaro.play().catch(() => {});
                             }
-                        }, { once: true });
+                        }, 4000); 
+                        // Dica: Se achar 4 segundos pouco, mude o 4000 para 5000 (5 segundos)!
+                        
+                    }).catch(() => {
+                        // Se o navegador bloquear o autoplay silêncioso, permite tentar no clique
+                        cantoIniciado = false; 
                     });
                 }
-            }, 5000);
+            }
 
-            // Tempo aumentado de 6000 para 9000 (9 segundos de tela)
+            // Tenta iniciar o suspense sozinho assim que abre a tela
+            setTimeout(iniciarCantoComAtraso, 100);
+
+            // Garante que o suspense inicie assim que você tocar na tela
+            document.addEventListener('click', iniciarCantoComAtraso, { once: true });
+
             setTimeout(() => {
                 document.getElementById('screen-loader').classList.add('hidden', 'transparent');
                 let telaStart = document.getElementById('screen-start');
