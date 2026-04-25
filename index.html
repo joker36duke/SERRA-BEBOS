@@ -257,7 +257,7 @@
 
         <audio id="som-passaro" src="cricrio.mp3"></audio>
         
-        <script>
+                <script>
             let percent = 0;
             // Ajustado de 58 para 85 para a barra encher no tempo certo (mais devagar)
             let countInterval = setInterval(() => {
@@ -278,11 +278,20 @@
                     }
                 });
             }
-            document.addEventListener('click', function() {
+            
+            // Cronômetro para atrasar o canto em 5 segundos (5000 milissegundos)
+            setTimeout(() => {
                 if (somPassaro && somPassaro.paused && repeticoes === 0) {
-                    somPassaro.play().catch(() => {});
+                    somPassaro.play().catch(() => {
+                        // Se o navegador bloquear o som automático, ele toca assim que o jogador tocar na tela
+                        document.addEventListener('click', function() {
+                            if (somPassaro.paused && repeticoes === 0) {
+                                somPassaro.play().catch(() => {});
+                            }
+                        }, { once: true });
+                    });
                 }
-            }, { once: true });
+            }, 5000);
 
             // Tempo aumentado de 6000 para 9000 (9 segundos de tela)
             setTimeout(() => {
@@ -293,7 +302,7 @@
                 }
             }, 9000);
         </script>
-    </div> 
+    </div>
 
 
     <!-- TELA 1: INÍCIO -->
