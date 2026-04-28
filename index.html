@@ -236,24 +236,29 @@
         <div id="screen-loader" class="screen relative overflow-hidden h-full w-full">
 
         <img src="fundoseringal.png" alt="Seringal Amazônico" class="absolute inset-0 w-full h-full object-cover z-0">
-        <div class="absolute inset-0 bg-black/40 z-10"></div> 
+                <div class="absolute top-[15%] left-1/2 transform -translate-x-1/2 w-full max-w-sm flex flex-col items-center z-30 px-6">
 
-        <div class="absolute top-[50%] left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-30 w-full flex justify-center px-6 pointer-events-none">
-            <img src="logoserrabebos.png" alt="Logo SerraBebos" class="w-64 md:w-80 animate-blink object-contain drop-shadow-[0_10px_20px_rgba(0,0,0,0.8)]">
-        </div>
+            <img src="logoserrabebos.png" alt="Logo SerraBebos" class="w-64 md:w-80 mb-6 animate-blink object-contain drop-shadow-[0_15px_25px_rgba(0,0,0,0.9)] pointer-events-none">
 
-        <div class="absolute bottom-24 left-1/2 transform -translate-x-1/2 w-full max-w-sm flex flex-col items-center z-30 px-8">
             <div class="flex justify-between items-end mb-2 px-2 w-full">
-                <span class="text-white/90 font-cinzel text-xs font-bold tracking-[2px] uppercase drop-shadow-md">Iniciando</span>
-                <span id="loading-percentage" class="text-white font-black text-lg drop-shadow-md">0%</span>
+                <span class="text-[#d4af37] font-cinzel text-[11px] font-black tracking-[4px] uppercase drop-shadow-[0_3px_5px_rgba(0,0,0,1)]">
+                    Extraindo
+                </span>
+                <span id="loading-percentage" class="text-[#d4af37] font-black text-lg drop-shadow-[0_3px_5px_rgba(0,0,0,1)]">
+                    0%
+                </span>
             </div>
-            <div class="h-4 w-full bg-black/60 rounded-full overflow-hidden border border-luxury-gold shadow-inner backdrop-blur-sm">
-                <div class="h-full bg-wine loading-bar-fill shadow-[0_0_15px_rgba(212,175,55,0.8)]"></div>
+
+            <div class="h-4 w-full bg-[#3d1f14] rounded-full overflow-hidden border-2 border-[#d4af37]/70 shadow-[0_10px_20px_rgba(0,0,0,0.9)] relative">
+                
+                <div class="h-full bg-[#fdfcf0] loading-bar-fill shadow-[0_0_15px_rgba(253,252,240,0.9)] rounded-r-full relative">
+                    <div class="absolute top-0 right-0 bottom-0 w-3 bg-white/60 blur-[1px]"></div>
+                </div>
+                
             </div>
-            <p class="text-white/80 tracking-[4px] text-[9px] md:text-xs mt-4 uppercase font-black text-center w-full drop-shadow-lg">
-                MADE IN ADELINO'S GARDEN
-            </p>
-        </div>
+            
+            </div>
+
 
         <audio id="som-passaro" src="cricrio.mp3"></audio>
         
