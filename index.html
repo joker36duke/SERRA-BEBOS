@@ -541,16 +541,16 @@
     </div>
     
     <!-- MODAL DE JOGO -->
-    <div id="game-modal" class="hidden fixed inset-0 z-[1000] bg-wood-dark/80 flex items-center justify-center p-8 transition-opacity">
-        <div class="modal-premium">
-            <p id="modal-subtitle" class="font-cinzel text-luxury-blue text-[10px] tracking-[6px] mb-4 uppercase font-bold">Veredito</p>
-            <h2 id="modal-title" class="text-4xl font-black font-cinzel mb-4 tracking-tighter"></h2>
-            <p id="modal-desc" class="text-zinc-600 mb-8 text-sm italic font-medium leading-relaxed"></p>
-            <div class="flex flex-col gap-4">
-                <button id="btn-continue" onclick="closeModal()" class="btn-main">Continuar</button>
-            </div>
+    <div id="game-modal" class="hidden fixed inset-0 z-[1000] bg-black/90 flex items-center justify-center p-8 transition-opacity">
+    <div class="modal-premium">
+        <p id="modal-subtitle" class="font-cinzel text-[#d4af37] text-[12px] tracking-[6px] mb-4 uppercase font-bold drop-shadow-md">Veredito</p>
+        <h2 id="modal-title" class="text-4xl font-black font-cinzel mb-4 tracking-tighter text-white drop-shadow-lg"></h2>
+        <p id="modal-desc" class="text-gray-300 mb-8 text-sm italic font-medium leading-relaxed"></p>
+        <div class="flex flex-col gap-4 items-center">
+            <button id="btn-continue" onclick="closeModal()" class="btn-main w-full max-w-[200px]">Continuar</button>
         </div>
     </div>
+</div>
 
     <script>
         // --- CONSTANTES DO JOGO ---
