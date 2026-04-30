@@ -469,23 +469,25 @@
             <div id="trunfada-ui" class="status-banner trunfada-status hidden">TRUNFADA ATIVA</div>
             
             <div class="score-ui">
-                <div class="flex flex-col">
-                    <span id="ui-role-p" class="player-name-luxury"></span>
-                    <div class="flex items-baseline gap-2">
-                        <span id="ui-player-name" class="font-cinzel text-[10px] font-black opacity-60">DAMIÃO:</span>
-                        <span id="score-p" class="text-2xl text-amazon font-black font-cinzel">0</span>
-                    </div>
-                    <div id="serras-container-p" class="hidden mt-2"><span id="serras-p" class="serra-badge">0/3</span></div>
-                </div>
-                <div class="flex flex-col items-end text-right">
-                    <span id="ui-role-e" class="player-name-luxury"></span>
-                    <div class="flex items-baseline gap-2">
-                        <span id="score-e" class="text-2xl text-wine font-black font-cinzel">0</span>
-                        <span class="font-cinzel text-[10px] font-black opacity-60">PIRARUCOG:</span>
-                    </div>
-                    <div id="serras-container-e" class="hidden mt-2"><span id="serras-e" class="serra-badge">0/3</span></div>
-                </div>
-            </div>
+    <div class="flex flex-col bg-black/70 border border-[#d4af37]/50 rounded-lg px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.5)] backdrop-blur-sm">
+        <span id="ui-role-p" class="font-cinzel font-black text-[9px] tracking-[2px] text-[#d4af37] uppercase"></span>
+        <div class="flex items-baseline gap-2 mt-1">
+            <span id="ui-player-name" class="font-cinzel text-[10px] font-black text-white">DAMIÃO:</span>
+            <span id="score-p" class="text-2xl text-[#22c55e] font-black font-cinzel drop-shadow-md">0</span>
+        </div>
+        <div id="serras-container-p" class="hidden mt-1"><span id="serras-p" class="serra-badge">0/3</span></div>
+    </div>
+
+    <div class="flex flex-col items-end text-right bg-black/70 border border-[#d4af37]/50 rounded-lg px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.5)] backdrop-blur-sm">
+        <span id="ui-role-e" class="font-cinzel font-black text-[9px] tracking-[2px] text-[#d4af37] uppercase"></span>
+        <div class="flex items-baseline gap-2 mt-1">
+            <span id="score-e" class="text-2xl text-[#ef4444] font-black font-cinzel drop-shadow-md">0</span>
+            <span class="font-cinzel text-[10px] font-black text-white">PIRARUCOG:</span>
+        </div>
+        <div id="serras-container-e" class="hidden mt-1"><span id="serras-e" class="serra-badge">0/3</span></div>
+    </div>
+</div>
+
 
             <div id="enemy-hand-table" class="absolute top-[33%] left-1/2 -translate-x-1/2 flex gap-2 pointer-events-none"></div>
 
