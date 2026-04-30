@@ -704,12 +704,13 @@
                 eInner.classList.add('flipped');
                 
                 setTimeout(() => {
-                    // Avaliação de força considerando a hierarquia correta dos Bebos
+    // Avaliação de força considerando a hierarquia correta dos Bebos
                     function getSorteioPower(c) {
-                        if (c.rank === '3' && c.suit === 'Paus') return 100;    // Coringa (Maior de todos)
-                        if (c.rank === 'Q' && c.suit === 'Espadas') return 99; // Pé de Pinto (Segundo maior)
-                        if (c.rank === 'A' && c.suit === 'Paus') return 98;    // Terceiro Bebo
-                        return c.power;
+                    if (c.rank === 'Q' && c.suit === 'Espadas') return 100; // Dama Fina (Maior de todos)
+                    if (c.rank === '3' && c.suit === 'Paus') return 99;     // Coringa (Segundo maior)
+                    if (c.rank === 'A' && c.suit === 'Paus') return 98;     // Pé de Pinto (Terceiro maior)
+    return c.power;
+
                     }
 
                     let pPower = getSorteioPower(cardP);
