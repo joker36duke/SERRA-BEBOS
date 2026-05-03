@@ -1272,11 +1272,21 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
                         matchEndDesc = "Pela Regra do 7, Pirarucog não fez nenhuma vaza na rodada 1/3 e sofreu derrota instantânea! O vinho El Dionysos é seu, " + player_name + "!";
                     } else {
                         state.eSerraScore++;
-                        if (state.eSerraScore > 3) {
+                                                if (state.pSerraScore >= 3) { 
+                            matchOver = true;
+                            matchWinnerIsPlayer = false;
+                            matchEndReason = "FIM DE JOGO";
+                            matchEndDesc = player_name + " foi derrotado 3 vezes na Serra. A selva tem um novo dono, e não é você.";
+                            // ===> ESCONDE O BOTÃO ONLINE QUANDO VOCÊ PERDE:
+                            document.getElementById('btn-go-online').classList.add('hidden');
+                            
+                        } else if (state.eSerraScore >= 3) {
                             matchOver = true;
                             matchWinnerIsPlayer = true;
                             matchEndReason = "DOMÍNIO TOTAL";
                             matchEndDesc = "Pirarucog foi derrotado 3 vezes! SERRADO! O Seringal é de " + player_name + "!";
+                            // ===> MOSTRA O BOTÃO ONLINE QUANDO VOCÊ GANHA:
+                            document.getElementById('btn-go-online').classList.remove('hidden');
                         }
                     }
                 } else {
