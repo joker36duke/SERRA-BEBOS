@@ -1521,7 +1521,44 @@ function confirmGuardian() {
         }, 1200);
     }
     
+          // Função para ABRIR a tela de cadastro
+    function openRegistrationScreen() {
+        document.getElementById('screen-registration').classList.remove('hidden');
+    }
+
+    // Função para FECHAR a tela de cadastro
+    function closeRegistrationScreen() {
+        document.getElementById('screen-registration').classList.add('hidden');
+    }
+
+    // Lógica que processa o cadastro e junta o nome com o Guardião
+    document.getElementById('form-register').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evita que a página recarregue
         
+        // 1. Pega o nome que o visitante digitou
+        let nomeDigitado = document.getElementById('reg-username').value.trim();
+        
+        // 2. Tenta pegar o Guardião lá do placar do jogador
+        let elementoGuardiao = document.getElementById('ui-role-p');
+        let textoGuardiao = elementoGuardiao ? elementoGuardiao.innerText.trim() : "";
+        
+        // 3. Arruma as letras (De "TESTÚRION" para "Testúrion")
+        let guardiaoEscolhido = "Seringueiro"; // Nome padrão caso dê erro
+        if (textoGuardiao !== "") {
+            guardiaoEscolhido = textoGuardiao.charAt(0).toUpperCase() + textoGuardiao.slice(1).toLowerCase();
+        }
+        
+        // 4. Junta tudo!
+        let nomeNoJogo = nomeDigitado + ' ' + guardiaoEscolhido;
+        
+        // Mostra o resultado do nome completo
+        alert("Bem-vindo ao Online, " + nomeNoJogo + "!\nSua lenda no SerraBebos começa agora.");
+        
+        // Limpa os campos e fecha a tela
+        this.reset();
+        closeRegistrationScreen();
+    });
+  
     </script>
 
     <script type="module">
