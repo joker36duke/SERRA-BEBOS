@@ -2713,10 +2713,10 @@ function confirmGuardian() {
 };
 
 
-     // ========================================================
-        // O JUIZ ONLINE: RESOLVE A VAZA E ATUALIZA
-    // ========================================================
-                window.resolveTrickOnline = async function(mesa, meuUid, inimigoUid) {
+        // ========================================================
+        // O JUIZ ONLINE: RESOLVE A VAZA E ATUALIZA (CORRIGIDO)
+        // ========================================================
+        window.resolveTrickOnline = async function(mesa, meuUid, inimigoUid) {
             const euLiderei = (state.liderAtual === meuUid);
             
             const winner = determineTrickWinner(
@@ -2765,10 +2765,14 @@ function confirmGuardian() {
                 state.isFirstTrick = false;
                 state.isBiscaNaRodaActive = false;
 
+                // ==========================================================
+                // 🔥 A GRANDE CORREÇÃO: Destrava a mesa ANTES da nuvem
+                // ==========================================================
+                state.resolvendoVaza = false; 
+
                 if (state.isDono) {
                     const ganhadorDaVazaUid = (winner === 'p') ? meuUid : inimigoUid;
                     
-                    // CORREÇÃO: Força conversão de Objetos para Arrays puros
                     let novoBaralho = Array.isArray(mesa.baralho) ? mesa.baralho : Object.keys(mesa.baralho || {}).map(k => mesa.baralho[k]);
                     let maoDono = Array.isArray(mesa.maos[meuUid]) ? mesa.maos[meuUid] : Object.keys(mesa.maos[meuUid] || {}).map(k => mesa.maos[meuUid][k]);
                     let maoSerra = Array.isArray(mesa.maos[inimigoUid]) ? mesa.maos[inimigoUid] : Object.keys(mesa.maos[inimigoUid] || {}).map(k => mesa.maos[inimigoUid][k]);
@@ -2803,12 +2807,14 @@ function confirmGuardian() {
                     };
 
                     await update(ref(database), updates);
+                } else {
+                    // Se você não for o Dono, recarrega a UI local para destravar
+                    state.canPlay = state.pTurn && !state.pCard;
+                    window.updateArenaUI();
                 }
                 
                 if (state.pHand.length === 0 && state.eHand.length === 0) {
                     endRound(); 
-                } else {
-                    state.resolvendoVaza = false;
                 }
 
             }, 1800);
