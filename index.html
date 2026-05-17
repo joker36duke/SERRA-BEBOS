@@ -2479,95 +2479,103 @@ function confirmGuardian() {
                 }
             }
         };
-                        // ==========================================
-                       // JOGAR A CARTA (O ELO QUE FALTAVA PRO ONLINE)
-                       // ==========================================
-        window.playPlayerCard = async function(index) {
-            if (!state.canPlay || !state.pHand[index]) return;
+                
+    // ==========================================
+    // JOGAR A CARTA (O ELO QUE FALTAVA PRO ONLINE)
+    // ==========================================
+     window.playPlayerCard = async function(index) {
+    // Se não for o seu turno ou o jogo estiver a calcular a vaza, ignora o clique
+    if (!state.canPlay || state.resolvendoVaza || !state.pHand[index]) return;
 
-            // Puxa a função de trunfo lá de cima de forma segura
-            const checkTrump = window.isTrumpOrBebo || isTrumpOrBebo;
+    // Puxa a função de trunfo lá de cima de forma segura
+    const checkTrump = window.isTrumpOrBebo || isTrumpOrBebo;
 
-            // Regra da Trunfada (Proteção visual)
-            if (state.deck.length === 0 && !state.pTurn && state.eCard && checkTrump(state.eCard)) {
-                const hasTrumpOrBebo = state.pHand.some(checkTrump);
-                if (hasTrumpOrBebo && !checkTrump(state.pHand[index])) {
-                    const cUI = document.getElementById('ui-hand').children[index];
-                    if(cUI) {
-                        cUI.classList.remove('invalid-shake');
-                        void cUI.offsetWidth; 
-                        cUI.classList.add('invalid-shake');
-                    }
-                    const trunfadaUi = document.getElementById('trunfada-ui');
-                    const trunfadaText = document.getElementById('trunfada-text');
-                    if(trunfadaUi && trunfadaText) {
-                        trunfadaText.innerHTML = "OBRIGATÓRIO<br>JOGAR<br>TRUNFO!";
-                        trunfadaUi.classList.remove('hidden');
-                        trunfadaUi.classList.add('trunfada-alert');
-                        setTimeout(() => {
-                            trunfadaUi.classList.remove('trunfada-alert');
-                            trunfadaUi.classList.add('hidden');
-                            trunfadaText.innerHTML = "TRUNFADA<br>ATIVA";
-                        }, 1500);
-                    }
-                    return; 
-                }
+    // Regra da Trunfada (Validação e Proteção visual original)
+    if (state.deck.length === 0 && !state.pTurn && state.eCard && checkTrump(state.eCard)) {
+        const hasTrumpOrBebo = state.pHand.some(checkTrump);
+        if (hasTrumpOrBebo && !checkTrump(state.pHand[index])) {
+            const cUI = document.getElementById('ui-hand').children[index];
+            if(cUI) {
+                cUI.classList.remove('invalid-shake');
+                void cUI.offsetWidth; 
+                cUI.classList.add('invalid-shake');
             }
-
-            // Trava a jogada localmente e remove a carta da sua mão
-            state.canPlay = false;
-            state.pCard = state.pHand.splice(index, 1)[0];
-            
-            // Regra da Bisca na Roda
-            const activeSerraScore = state.isDono ? state.eSerraScore : state.pSerraScore;
-            if (!state.eCard && state.isFirstTrick && activeSerraScore === 1) {
-                if (state.pCard.rank === '7' || state.pCard.rank === 'A') {
-                    state.isBiscaNaRodaActive = true;
-                    const bAlert = document.getElementById('bisca-alert');
-                    if(bAlert) bAlert.classList.remove('hidden');
-                }
+            const trunfadaUi = document.getElementById('trunfada-ui');
+            const trunfadaText = document.getElementById('trunfada-text');
+            if(trunfadaUi && trunfadaText) {
+                trunfadaText.innerHTML = "OBRIGATÓRIO<br>JOGAR<br>TRUNFO!";
+                trunfadaUi.classList.remove('hidden');
+                trunfadaUi.classList.add('trunfada-alert');
+                setTimeout(() => {
+                    trunfadaUi.classList.remove('trunfada-alert');
+                    trunfadaUi.classList.add('hidden');
+                    trunfadaText.innerHTML = "TRUNFADA<br>ATIVA";
+                }, 1500);
             }
+            return; 
+        }
+    }
 
-            // Animação local da carta jogada no centro da sua mesa
-            const playedArea = document.getElementById('played-p');
-            playedArea.innerHTML = '';
-            playedArea.style.zIndex = state.eCard ? "20" : "10";
-            
-            const createCard = window.createCardUI || createCardUI;
-            const cUI = createCard(state.pCard);
-            cUI.classList.add('played-card');
-            playedArea.appendChild(cUI);
-            
-            window.updateArenaUI();
+    // Trava a interface local imediatamente para evitar cliques duplos rápidos
+    state.canPlay = false;
+    
+    // Retira a carta da cópia local primeiro para enviar o estado perfeito da mão
+    const cartaJogada = state.pHand[index];
+    const novaMaoLocal = [...state.pHand];
+    novaMaoLocal.splice(index, 1);
 
-            // 🌐 AQUI É A MÁGICA: MANDA PRA INTERNET OU PRO BOT?
-            if (state.isOnline) {
-                try {
-                    const meuUid = auth.currentUser.uid;
-                    // Descobre quem é o adversário de verdade
-                    const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
-                    
-                    // 1. Atualiza a sua mão no Firebase (com 1 carta a menos)
-                    await set(ref(database, `salas/${state.salaId}/mesa_jogo/maos/${meuUid}`), state.pHand);
-                    
-                    // 2. Coloca a sua carta no centro da mesa da nuvem!
-                    await set(ref(database, `salas/${state.salaId}/mesa_jogo/estado/cartasJogadas/${meuUid}`), state.pCard);
-                    
-                    // 3. O MAIS IMPORTANTE: Passa o turno para o celular do adversário!
-                    await set(ref(database, `salas/${state.salaId}/mesa_jogo/estado/turnoAtual`), inimigoUid);
-                    
-                } catch(erro) {
-                    alert("Erro ao enviar jogada para a internet: " + erro.message);
-                }
-            } else {
-                // MODO OFFLINE (O velho Tutorial contra a Máquina que mantém o Pirarucog vivo!)
-                if (!state.pTurn) {
-                    setTimeout(window.resolveTrick || resolveTrick, 800);
-                } else {
-                    setTimeout(window.enemyPlay || enemyPlay, 1000); 
-                }
-            }
-        };
+    // Regra da Bisca na Roda (Primeira vaza da primeira rodada 1/3)
+    const activeSerraScore = state.isDono ? state.eSerraScore : state.pSerraScore;
+    if (!state.eCard && state.isFirstTrick && activeSerraScore === 1) {
+        if (cartaJogada.rank === '7' || cartaJogada.rank === 'A') {
+            state.isBiscaNaRodaActive = true;
+            const bAlert = document.getElementById('bisca-alert');
+            if(bAlert) bAlert.classList.remove('hidden');
+        }
+    }
+
+    // Animação local imediata da carta jogada no centro da mesa
+    const playedArea = document.getElementById('played-p');
+    playedArea.innerHTML = '';
+    playedArea.style.zIndex = state.eCard ? "20" : "10";
+    
+    const createCard = window.createCardUI || createCardUI;
+    const cUI = createCard(cartaJogada);
+    cUI.classList.add('played-card');
+    playedArea.appendChild(cUI);
+
+    // 🌐 ROTEADOR: ENVIA PARA A INTERNET OU MANTÉM NO BOT?
+    if (state.isOnline) {
+        try {
+            const meuUid = auth.currentUser.uid;
+            // Descobre quem é o adversário real da sala
+            const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
+            
+            // 🔥 MÁGICA: Junta tudo num único envio atômico de milissegundo para o Firebase
+            const atualizacoes = {};
+            atualizacoes[`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`] = novaMaoLocal;
+            atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas/${meuUid}`] = cartaJogada;
+            atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = inimigoUid;
+            
+            await update(ref(database), atualizacoes);
+            
+        } catch(erro) {
+            console.error("Erro ao enviar jogada para a internet:", erro);
+            alert("Erro ao enviar jogada para a internet: " + erro.message);
+            state.canPlay = true; // Destrava em caso de falha de conexão
+        }
+    } else {
+        // MODO OFFLINE (O velho e perfeito Tutorial contra o Pirarucog!)
+        state.pCard = state.pHand.splice(index, 1)[0];
+        window.updateArenaUI();
+        
+        if (!state.pTurn) {
+            setTimeout(window.resolveTrick || resolveTrick, 800);
+        } else {
+            setTimeout(window.enemyPlay || enemyPlay, 1000); 
+        }
+    }
+};
                 
 
         window.startSeringalGameOnline = async function() {
