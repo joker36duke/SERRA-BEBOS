@@ -2275,76 +2275,92 @@ function confirmGuardian() {
 
         // 6. O VEREDITO: DEFINE O PATRÃO E QUEM VAI PRO SERRA
         window.finalizarSorteioMultiplayer = function(cartas, jogadores) {
-            try {
-                if (state.sorteioResolvido) return;
-                
-                const escolhidas = Object.values(cartas).filter(c => c.escolhidaPor && c.escolhidaPor !== "");
-                if (escolhidas.length < 2) return;
-                
-                state.sorteioResolvido = true;
+    try {
+        if (state.sorteioResolvido) return;
+        
+        const escolhidas = Object.values(cartas).filter(c => c.escolhidaPor && c.escolhidaPor !== "");
+        if (escolhidas.length < 2) return;
 
-                function getPower(c) {
-                    if (c.rank === 'Q' && c.suit === 'Espadas') return 100;
-                    if (c.rank === '3' && c.suit === 'Paus') return 99;
-                    if (c.rank === 'A' && c.suit === 'Paus') return 98;
-                    return c.power || 0;
-                }
+        function getPower(c) {
+            if (c.rank === 'Q' && c.suit === 'Espadas') return 100;
+            if (c.rank === '3' && c.suit === 'Paus') return 99;
+            if (c.rank === 'A' && c.suit === 'Paus') return 98;
+            return c.power || 0;
+        }
 
-                // 1. ORDENA QUEM TIROU A CARTA MAIOR (O DONO DA MESA)
-                escolhidas.sort((a, b) => getPower(b) - getPower(a)); 
-                const cartaDono = escolhidas[0];
-                const uidDono = cartaDono.escolhidaPor;
+        let p1_carta = escolhidas[0];
+        let p2_carta = escolhidas[1];
 
-                // 2. PEGA A OUTRA CARTA DA MESA (O OPONENTE QUE VAI NO SERRA)
-                const cartasInimigas = escolhidas.filter(c => c.escolhidaPor !== uidDono);
-                
-                if (cartasInimigas.length === 0) {
-                    alert("A conexão com o adversário caiu! Reiniciando a mesa...");
-                    location.reload();
-                    return;
-                }
+        // 🛡️ TRAVA DE EMPATE REAL: Se o poder matemático das duas cartas for idêntico
+        if (getPower(p1_carta) === getPower(p2_carta)) {
+            state.sorteioResolvido = false; // Permite reiniciar o sorteio
+            state.luckBusy = false;
 
-                const cartaSerra = cartasInimigas[0];
-                const uidSerra = cartaSerra.escolhidaPor;
-
-                // 3. ATRIBUI AS POSIÇÕES DE TURNO E PONTUAÇÃO
-                state.ordemTurnos = [uidSerra, uidDono];
-                state.donoDoJogo = uidDono;    
-                state.donoDaJogada = uidSerra; 
-                
-                const meuUid = auth.currentUser.uid;
-                state.isDono = (meuUid === uidDono);
-                
-                const nomeDono = (jogadores && jogadores[uidDono] && jogadores[uidDono].nome) ? jogadores[uidDono].nome : "ADVERSÁRIO";
-                const nomeSerra = (jogadores && jogadores[uidSerra] && jogadores[uidSerra].nome) ? jogadores[uidSerra].nome : "ADVERSÁRIO";
-
-                // 👉 AQUI SALVAMOS O NOME DO INIMIGO NA MEMÓRIA!
-                state.enemyName = state.isDono ? nomeSerra : nomeDono;
-
-                // 4. SISTEMA VISUAL: TEXTOS E ESTILOS CONFORME O STATUS DO JOGADOR
-                const statusText = document.getElementById('final-status-text');
-                if (state.isDono) {
-                    statusText.innerText = "VOCÊ DOMINA";
-                    statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#22c55e]";
-                } else {
-                    statusText.innerText = "VOCÊ NO SERRA";
-                    statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#ef4444]";
-                }
-
-                document.getElementById('label-dono').innerText = nomeDono;
-                document.getElementById('label-serra').innerText = nomeSerra;
-
-                setTimeout(() => {
-                    navTo('screen-luck', 'screen-result');
-                    state.luckBusy = false;
-                }, 1500);
-
-            } catch (erro) {
-                console.error(erro);
-                alert("Erro ao ler o baralho do Sorteio: " + erro.message);
-                state.luckBusy = false;
+            // Alerta os jogadores e limpa as escolhas no Firebase para reiniciar a rodada de sorteio
+            mostrarAlertaSeringal("EMPATE NO SORTEIO!", "As cartas tiveram a mesma força na mata! Escolham uma nova carta.");
+            
+            if (state.isDono) {
+                // O Criador da sala gera uma nova mesa de sorteio limpa na nuvem
+                const novasCartas = window.gerar8CartasSorteio();
+                update(ref(database, `salas/${state.salaId}`), {
+                    mesa_sorteio: novasCartas
+                });
             }
-        };
+            return; // Corta o código aqui para não avançar para a mesa
+        }
+        
+        // Se não houve empate, segue o baile ordenando a maior
+        state.sorteioResolvido = true;
+        escolhidas.sort((a, b) => getPower(b) - getPower(a)); 
+        
+        const cartaDono = escolhidas[0];
+        const uidDono = cartaDono.escolhidaPor;
+
+        const cartasInimigas = escolhidas.filter(c => c.escolhidaPor !== uidDono);
+        if (cartasInimigas.length === 0) {
+            alert("A conexão com o adversário caiu! Reiniciando a mesa...");
+            location.reload();
+            return;
+        }
+
+        const cartaSerra = cartasInimigas[0];
+        const uidSerra = cartaSerra.escolhidaPor;
+
+        state.ordemTurnos = [uidSerra, uidDono];
+        state.donoDoJogo = uidDono;    
+        state.donoDaJogada = uidSerra; 
+        
+        const meuUid = auth.currentUser.uid;
+        state.isDono = (meuUid === uidDono);
+        
+        const nomeDono = (jogadores && jogadores[uidDono] && jogadores[uidDono].nome) ? jogadores[uidDono].nome : "ADVERSÁRIO";
+        const nomeSerra = (jogadores && jogadores[uidSerra] && jogadores[uidSerra].nome) ? jogadores[uidSerra].nome : "ADVERSÁRIO";
+
+        state.enemyName = state.isDono ? nomeSerra : nomeDono;
+
+        const statusText = document.getElementById('final-status-text');
+        if (state.isDono) {
+            statusText.innerText = "VOCÊ DOMINA";
+            statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#22c55e]";
+        } else {
+            statusText.innerText = "VOCÊ NO SERRA";
+            statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#ef4444]";
+        }
+
+        document.getElementById('label-dono').innerText = nomeDono;
+        document.getElementById('label-serra').innerText = nomeSerra;
+
+        setTimeout(() => {
+            navTo('screen-luck', 'screen-result');
+            state.luckBusy = false;
+        }, 1500);
+
+    } catch (erro) {
+        console.error(erro);
+        alert("Erro ao ler o baralho do Sorteio: " + erro.message);
+        state.luckBusy = false;
+    }
+};
 
         // ========================================================
             // O CARTEADOR ONLINE E ROTEADOR DE ARENAS
