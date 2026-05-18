@@ -2107,7 +2107,7 @@ function confirmGuardian() {
                     onDisconnect(novaSalaRef).remove();
                     state.salaId = novaSalaRef.key;
                     state.isOnline = true;
-                    mostrarAlertaSeringal("Dono da Mesa", `Aguardando oponentes para ${tipoJogo}...\nSua mesa está aberta na floresta.`);
+                    mostrarAlertaSeringal("Seringalista", `Aguardando oponentes para ${tipoJogo}...\nSua mesa está aberta na floresta.`);
                 }
 
                 window.ouvirEventosSala(state.salaId);
