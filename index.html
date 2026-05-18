@@ -2627,7 +2627,7 @@ function confirmGuardian() {
         };
                 
       window.ouvirMesaJogoOnline = function() {
-      onValue(ref(database, `salas/${state.salaId}/mesa_jogo`), (snapshot) => {
+    onValue(ref(database, `salas/${state.salaId}/mesa_jogo`), (snapshot) => {
         if (!snapshot.exists()) return;
         const mesa = snapshot.val();
         const meuUid = auth.currentUser.uid;
@@ -2635,10 +2635,16 @@ function confirmGuardian() {
 
         fecharAlertaSeringal(); 
 
-        // 🛡️ CONVERSÃO RÍGIDA DE ARRAYS (Garante que a mão reponha sempre)
-        state.deck = Array.isArray(mesa.baralho) ? mesa.baralho : Object.keys(mesa.baralho || {}).map(k => mesa.baralho[k]);
-        state.pHand = Array.isArray(mesa.maos[meuUid]) ? mesa.maos[meuUid] : Object.keys(mesa.maos[meuUid] || {}).map(k => mesa.maos[meuUid][k]);
-        state.eHand = Array.isArray(mesa.maos[inimigoUid]) ? mesa.maos[inimigoUid] : Object.keys(mesa.maos[inimigoUid] || {}).map(k => mesa.maos[inimigoUid][k]);
+        // 🛡️ LEITOR SEGURO DE ARRAYS (Tira os 'fantasmas')
+        function lerArray(obj) {
+            if (!obj) return [];
+            if (Array.isArray(obj)) return obj.filter(x => x !== null);
+            return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
+        }
+
+        state.deck = lerArray(mesa.baralho);
+        state.pHand = lerArray(mesa.maos[meuUid]);
+        state.eHand = lerArray(mesa.maos[inimigoUid]);
 
         state.vira = mesa.vira;
         state.trumpSuit = mesa.trunfo;
@@ -2646,12 +2652,19 @@ function confirmGuardian() {
         state.pScore = mesa.estado.pontos[meuUid] || 0;
         state.eScore = mesa.estado.pontos[inimigoUid] || 0;
 
-        // Captura o estado das cartas do Firebase
+        // 🛡️ LÊ A BISCA DO ADVERSÁRIO
+        state.isBiscaNaRodaActive = mesa.estado.isBiscaNaRodaActive || false;
+        const bAlert = document.getElementById('bisca-alert');
+        if (state.isBiscaNaRodaActive) {
+            if(bAlert) bAlert.classList.remove('hidden');
+        } else if (!state.isFirstTrick) {
+            if(bAlert) bAlert.classList.add('hidden');
+        }
+
         const jogadas = mesa.estado.cartasJogadas || {};
         state.pCard = jogadas[meuUid] || null;
         state.eCard = jogadas[inimigoUid] || null;
 
-        // Controle de turnos e travas locais
         if (!state.pCard) {
             state.pTurn = (mesa.estado.turnoAtual === meuUid);
             state.canPlay = state.pTurn && !state.resolvendoVaza;
@@ -2659,48 +2672,26 @@ function confirmGuardian() {
             state.canPlay = false;
         }
 
-        // ==========================================
-        // 🌐 RENDERIZAÇÃO FORÇADA DAS CARTAS NO CENTRO
-        // ==========================================
         const playedP = document.getElementById('played-p');
         const playedE = document.getElementById('played-e');
 
-        // Se a minha carta existe na nuvem, ela DEVE aparecer na mesa
         if (state.pCard) {
-            playedP.innerHTML = ''; // Limpa resíduos
-            playedP.style.zIndex = "20";
-            const cUI = createCardUI(state.pCard);
-            cUI.classList.add('played-card');
-            playedP.appendChild(cUI);
-        } else if (!state.resolvendoVaza) {
-            playedP.innerHTML = '';
-        }
+            playedP.innerHTML = ''; playedP.style.zIndex = "20";
+            const cUI = (window.createCardUI || createCardUI)(state.pCard);
+            cUI.classList.add('played-card'); playedP.appendChild(cUI);
+        } else if (!state.resolvendoVaza) { playedP.innerHTML = ''; }
 
-        // Se a carta do oponente existe na nuvem, ela DEVE aparecer na mesa
         if (state.eCard) {
-            playedE.innerHTML = ''; // Limpa resíduos
-            playedE.style.zIndex = "20";
-            const cUI = createCardUI(state.eCard);
-            cUI.classList.add('played-card');
-            playedE.appendChild(cUI);
-        } else if (!state.resolvendoVaza) {
-            playedE.innerHTML = '';
-        }
+            playedE.innerHTML = ''; playedE.style.zIndex = "20";
+            const cUI = (window.createCardUI || createCardUI)(state.eCard);
+            cUI.classList.add('played-card'); playedE.appendChild(cUI);
+        } else if (!state.resolvendoVaza) { playedE.innerHTML = ''; }
 
-        // Atualiza elementos estáticos do tabuleiro
-        const countUI = document.getElementById('deck-count-ui');
-        if (countUI) countUI.innerText = state.deck.length;
-        
-        const popoRank = state.trumpSuit === 'Paus' ? '4' : '3';
-        document.getElementById('trump-indicator').innerText = `PAPÔ: ${popoRank} ${suitIcons[state.trumpSuit]}`;
-
-        // Atualiza o resto da interface (Mão, Placar de Serras, etc.)
         window.updateArenaUI();
 
-        // SE AMBOS JOGARAM, DISPARA O JUIZ ONLINE
         if (state.pCard && state.eCard && !state.resolvendoVaza) {
             state.resolvendoVaza = true;
-            state.canPlay = false; // Bloqueia cliques extras de segurança
+            state.canPlay = false; 
             setTimeout(() => window.resolveTrickOnline(mesa, meuUid, inimigoUid), 1000);
         }
     });
