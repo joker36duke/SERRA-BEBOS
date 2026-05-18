@@ -1319,32 +1319,43 @@
         };
 
         // --- MECÂNICA DE JOGO ---
-        function executarPopo() {
-            if (state.deck.length === 0 || state.pPopoUsed) return;
+window.executarPopo = async function() {
+    if (state.deck.length === 0 || state.pPopoUsed) return;
+    
+    const reqRank = state.trumpSuit === 'Paus' ? '4' : '3';
+    const reqSuit = state.trumpSuit;
+    const cardIndex = state.pHand.findIndex(c => c.rank === reqRank && c.suit === reqSuit);
+    
+    if (cardIndex !== -1) {
+        const oldVira = state.vira;
+        const newVira = state.pHand[cardIndex];
+        
+        state.pHand[cardIndex] = oldVira;
+        state.vira = newVira;
+        state.deck[0] = newVira; 
+        state.pPopoUsed = true;
+        
+        const uiVira = document.getElementById('ui-vira');
+        uiVira.innerHTML = '';
+        uiVira.appendChild((window.createCardUI || createCardUI)(state.vira));
+        
+        // 📡 ENVIA O NOVO VIRA E SUA MÃO PARA A NUVEM
+        if (state.isOnline) {
+            const meuUid = auth.currentUser.uid;
+            const atualizacoes = {};
+            atualizacoes[`salas/${state.salaId}/mesa_jogo/vira`] = newVira;
+            atualizacoes[`salas/${state.salaId}/mesa_jogo/baralho/0`] = newVira;
             
-            const reqRank = state.trumpSuit === 'Paus' ? '4' : '3';
-            const reqSuit = state.trumpSuit;
-            const cardIndex = state.pHand.findIndex(c => c.rank === reqRank && c.suit === reqSuit);
+            let maoObj = {};
+            for(let i=0; i<4; i++) maoObj[i] = state.pHand[i] || null;
+            atualizacoes[`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`] = maoObj;
             
-            if (cardIndex !== -1) {
-                // Troca a carta da mão com o Vira automaticamente
-                const oldVira = state.vira;
-                const newVira = state.pHand[cardIndex];
-                
-                state.pHand[cardIndex] = oldVira;
-                state.vira = newVira;
-                state.deck[0] = newVira; // Atualiza o fundo do baralho
-                
-                state.pPopoUsed = true;
-                
-                // Atualiza a interface do Vira
-                const uiVira = document.getElementById('ui-vira');
-                uiVira.innerHTML = '';
-                uiVira.appendChild(createCardUI(state.vira));
-                
-                updateArenaUI();
-            }
+            await update(ref(database), atualizacoes);
         }
+        
+        window.updateArenaUI();
+    }
+};
 
         function enemyPlay() {
             if (state.eHand.length === 0) return;
