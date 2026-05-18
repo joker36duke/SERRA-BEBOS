@@ -2737,72 +2737,78 @@ function confirmGuardian() {
             
             trickMsg.classList.remove('hidden');
 
-            setTimeout(async () => {
-                // LIMPEZA CIRÚRGICA DA MESA
-                document.getElementById('played-p').style = ''; 
-                document.getElementById('played-e').style = ''; 
-                document.getElementById('played-p').innerHTML = ''; 
-                document.getElementById('played-e').innerHTML = ''; 
+                    setTimeout(async () => {
+            document.getElementById('played-p').style = ''; document.getElementById('played-e').style = ''; 
+            document.getElementById('played-p').innerHTML = ''; document.getElementById('played-e').innerHTML = ''; 
 
-                trickMsg.classList.add('hidden');
-                document.getElementById('bisca-alert').classList.add('hidden');
+            trickMsg.classList.add('hidden');
+            const bAlert = document.getElementById('bisca-alert');
+            if(bAlert) bAlert.classList.add('hidden');
+            
+            state.isFirstTrick = false;
+            state.isBiscaNaRodaActive = false;
+            state.resolvendoVaza = false; 
+
+            if (state.isDono) {
+                const ganhadorDaVazaUid = (winner === 'p') ? meuUid : inimigoUid;
                 
-                state.isFirstTrick = false;
-                state.isBiscaNaRodaActive = false;
-
-                // ==========================================================
-                // 🔥 A GRANDE CORREÇÃO: Destrava a mesa ANTES da nuvem
-                // ==========================================================
-                state.resolvendoVaza = false; 
-
-                if (state.isDono) {
-                    const ganhadorDaVazaUid = (winner === 'p') ? meuUid : inimigoUid;
-                    
-                    let novoBaralho = Array.isArray(mesa.baralho) ? mesa.baralho : Object.keys(mesa.baralho || {}).map(k => mesa.baralho[k]);
-                    let maoDono = Array.isArray(mesa.maos[meuUid]) ? mesa.maos[meuUid] : Object.keys(mesa.maos[meuUid] || {}).map(k => mesa.maos[meuUid][k]);
-                    let maoSerra = Array.isArray(mesa.maos[inimigoUid]) ? mesa.maos[inimigoUid] : Object.keys(mesa.maos[inimigoUid] || {}).map(k => mesa.maos[inimigoUid][k]);
-                    
-                    let pontosDono = mesa.estado.pontos[meuUid] || 0;
-                    let pontosSerra = mesa.estado.pontos[inimigoUid] || 0;
-
-                    if (winner === 'p') pontosDono += trickPts;
-                    else pontosSerra += trickPts;
-
-                    if (novoBaralho.length > 0) {
-                        const c1 = novoBaralho.pop();
-                        const c2 = novoBaralho.length > 0 ? novoBaralho.pop() : null;
-                        if (winner === 'p') {
-                            maoDono.push(c1);
-                            if (c2) maoSerra.push(c2);
-                        } else {
-                            maoSerra.push(c1);
-                            if (c2) maoDono.push(c2);
-                        }
-                    }
-
-                    const updates = {
-                        [`salas/${state.salaId}/mesa_jogo/baralho`]: novoBaralho,
-                        [`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`]: maoDono,
-                        [`salas/${state.salaId}/mesa_jogo/maos/${inimigoUid}`]: maoSerra,
-                        [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
-                        [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
-                        [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
-                        [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
-                        [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null
-                    };
-
-                    await update(ref(database), updates);
-                } else {
-                    // Se você não for o Dono, recarrega a UI local para destravar
-                    state.canPlay = state.pTurn && !state.pCard;
-                    window.updateArenaUI();
-                }
-                
-                if (state.pHand.length === 0 && state.eHand.length === 0) {
-                    endRound(); 
+                function lerArray(obj) {
+                    if (!obj) return [];
+                    if (Array.isArray(obj)) return obj.filter(x => x !== null);
+                    return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
                 }
 
-            }, 1800);
+                let novoBaralho = lerArray(mesa.baralho);
+                let maoDono = lerArray(mesa.maos[meuUid]);
+                let maoSerra = lerArray(mesa.maos[inimigoUid]);
+                
+                let pontosDono = mesa.estado.pontos[meuUid] || 0;
+                let pontosSerra = mesa.estado.pontos[inimigoUid] || 0;
+
+                if (winner === 'p') pontosDono += trickPts;
+                else pontosSerra += trickPts;
+
+                if (novoBaralho.length > 0) {
+                    const c1 = novoBaralho.pop();
+                    const c2 = novoBaralho.length > 0 ? novoBaralho.pop() : null;
+                    if (winner === 'p') { maoDono.push(c1); if (c2) maoSerra.push(c2); } 
+                    else { maoSerra.push(c1); if (c2) maoDono.push(c2); }
+                }
+
+                // 🛡️ GARANTE QUE FIREBASE VAI DELETAR AS CARTAS VELHAS
+                let novoBaralhoObj = {};
+                for(let i=0; i<40; i++) novoBaralhoObj[i] = novoBaralho[i] || null;
+
+                let maoDonoObj = {};
+                for(let i=0; i<4; i++) maoDonoObj[i] = maoDono[i] || null;
+
+                let maoSerraObj = {};
+                for(let i=0; i<4; i++) maoSerraObj[i] = maoSerra[i] || null;
+
+                const updates = {
+                    [`salas/${state.salaId}/mesa_jogo/baralho`]: novoBaralhoObj,
+                    [`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`]: maoDonoObj,
+                    [`salas/${state.salaId}/mesa_jogo/maos/${inimigoUid}`]: maoSerraObj,
+                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
+                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
+                    [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
+                    [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
+                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
+                    [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null // Desliga a bisca na nuvem
+                };
+
+                await update(ref(database), updates);
+            } else {
+                state.canPlay = state.pTurn && !state.pCard;
+                window.updateArenaUI();
+            }
+            
+            // FIM DE JOGO SEGURO!
+            if (state.pHand.length === 0 && state.eHand.length === 0) {
+                if(window.endRound) window.endRound(); 
+            }
+
+        }, 1800);
         };
 
     </script>
