@@ -2611,7 +2611,7 @@ function confirmGuardian() {
 };
                 
 
-        window.startSeringalGameOnline = async function() {
+            window.startSeringalGameOnline = async function() {
             document.getElementById('bisca-alert').classList.add('hidden');
             document.getElementById('trick-result-msg').classList.add('hidden');
             
@@ -2637,9 +2637,10 @@ function confirmGuardian() {
                     maos: { [uidSerra]: maoSerra, [uidDono]: maoDono },
                     estado: {
                         turnoAtual: uidSerra, 
-                        liderAtual: uidSerra, // Define quem joga a primeira da rodada
+                        liderAtual: uidSerra, 
                         cartasJogadas: {}, 
-                        pontos: { [uidSerra]: 0, [uidDono]: 0 }
+                        pontos: { [uidSerra]: 0, [uidDono]: 0 },
+                        vazas: { [uidSerra]: 0, [uidDono]: 0 } // 🔥 AGORA O FIREBASE CONTA AS VAZAS
                     }
                 };
                 await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
