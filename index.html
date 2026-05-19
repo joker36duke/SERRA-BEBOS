@@ -2699,8 +2699,7 @@ function confirmGuardian() {
             }
         };
                 
-              window.ouvirMesaJogoOnline = function() {
-            // 🔥 IMPEDE O BUG DO BARALHO INVISÍVEL (Múltiplos Radares)
+           window.ouvirMesaJogoOnline = function() {
             if (state.listenerAtivo) return; 
             state.listenerAtivo = true;
 
@@ -2725,6 +2724,21 @@ function confirmGuardian() {
                 state.eHand = lerArray(maosSeguras[inimigoUid]);
 
                 const estadoSeguro = mesa.estado || {};
+                
+                // 🔥 O RADAR LÊ O PLACAR OFICIAL DA NUVEM E SINCRONIZA À FORÇA
+                if (estadoSeguro.donoDaMesa) {
+                    const uidDonoNuvem = estadoSeguro.donoDaMesa;
+                    state.isDono = (meuUid === uidDonoNuvem);
+
+                    if (estadoSeguro.placarSerras) {
+                        state.pSerraScore = estadoSeguro.placarSerras[meuUid] || 1;
+                        state.eSerraScore = estadoSeguro.placarSerras[inimigoUid] || 1;
+                    }
+                    if (estadoSeguro.ordemTurnosSegura) {
+                        state.ordemTurnos = estadoSeguro.ordemTurnosSegura;
+                    }
+                }
+
                 const pontosSeguros = estadoSeguro.pontos || {};
                 const vazasSeguras = estadoSeguro.vazas || {}; 
 
