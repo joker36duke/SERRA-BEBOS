@@ -2528,7 +2528,7 @@ function confirmGuardian() {
     const checkTrump = window.isTrumpOrBebo || isTrumpOrBebo;
 
     // Regra da Trunfada
-    if (state.deck.length === 0 && !state.pTurn && state.eCard && checkTrump(state.eCard)) {
+       if (state.deck.length === 0 && state.eCard && checkTrump(state.eCard)) {
         const hasTrumpOrBebo = state.pHand.some(checkTrump);
         if (hasTrumpOrBebo && !checkTrump(state.pHand[index])) {
             const cUI = document.getElementById('ui-hand').children[index];
