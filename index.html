@@ -2650,80 +2650,90 @@ function confirmGuardian() {
             window.ouvirMesaJogoOnline();
         };
                 
-      window.ouvirMesaJogoOnline = function() {
-    onValue(ref(database, `salas/${state.salaId}/mesa_jogo`), (snapshot) => {
-        if (!snapshot.exists()) return;
-        const mesa = snapshot.val();
-        const meuUid = auth.currentUser.uid;
-        const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
+              window.ouvirMesaJogoOnline = function() {
+            onValue(ref(database, `salas/${state.salaId}/mesa_jogo`), (snapshot) => {
+                if (!snapshot.exists()) return;
+                const mesa = snapshot.val();
+                const meuUid = auth.currentUser.uid;
+                const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
 
-        fecharAlertaSeringal(); 
+                if(typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal(); 
 
-        // 🛡️ LEITOR SEGURO DE ARRAYS (Tira os 'fantasmas')
-        function lerArray(obj) {
-            if (!obj) return [];
-            if (Array.isArray(obj)) return obj.filter(x => x !== null);
-            return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
-        }
+                function lerArray(obj) {
+                    if (!obj) return [];
+                    if (Array.isArray(obj)) return obj.filter(x => x !== null);
+                    return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
+                }
 
                 state.deck = lerArray(mesa.baralho);
-        
-        // 🛡️ A GRANDE CORREÇÃO: Evita erro fatal se a nuvem deletar as mãos vazias!
-        const maosSeguras = mesa.maos || {};
-        state.pHand = lerArray(maosSeguras[meuUid]);
-        state.eHand = lerArray(maosSeguras[inimigoUid]);
+                
+                const maosSeguras = mesa.maos || {};
+                state.pHand = lerArray(maosSeguras[meuUid]);
+                state.eHand = lerArray(maosSeguras[inimigoUid]);
 
+                const estadoSeguro = mesa.estado || {};
+                const pontosSeguros = estadoSeguro.pontos || {};
+                const vazasSeguras = estadoSeguro.vazas || {}; // 🔥 PEGA AS VAZAS DA NUVEM
 
-        state.vira = mesa.vira;
-        state.trumpSuit = mesa.trunfo;
-        state.liderAtual = mesa.estado.liderAtual;
-        state.pScore = mesa.estado.pontos[meuUid] || 0;
-        state.eScore = mesa.estado.pontos[inimigoUid] || 0;
+                state.vira = mesa.vira;
+                state.trumpSuit = mesa.trunfo;
+                state.liderAtual = estadoSeguro.liderAtual;
+                
+                state.pScore = pontosSeguros[meuUid] || 0;
+                state.eScore = pontosSeguros[inimigoUid] || 0;
+                
+                state.pTricksWon = vazasSeguras[meuUid] || 0; // 🔥 ATUALIZA SEU PLACAR
+                state.eTricksWon = vazasSeguras[inimigoUid] || 0; // 🔥 ATUALIZA O DO INIMIGO
 
-        // 🛡️ LÊ A BISCA DO ADVERSÁRIO
-        state.isBiscaNaRodaActive = mesa.estado.isBiscaNaRodaActive || false;
-        const bAlert = document.getElementById('bisca-alert');
-        if (state.isBiscaNaRodaActive) {
-            if(bAlert) bAlert.classList.remove('hidden');
-        } else if (!state.isFirstTrick) {
-            if(bAlert) bAlert.classList.add('hidden');
-        }
+                state.isBiscaNaRodaActive = estadoSeguro.isBiscaNaRodaActive || false;
+                const bAlert = document.getElementById('bisca-alert');
+                if (state.isBiscaNaRodaActive) {
+                    if(bAlert) bAlert.classList.remove('hidden');
+                } else if (!state.isFirstTrick) {
+                    if(bAlert) bAlert.classList.add('hidden');
+                }
 
-        const jogadas = mesa.estado.cartasJogadas || {};
-        state.pCard = jogadas[meuUid] || null;
-        state.eCard = jogadas[inimigoUid] || null;
+                const jogadas = estadoSeguro.cartasJogadas || {};
+                state.pCard = jogadas[meuUid] || null;
+                state.eCard = jogadas[inimigoUid] || null;
 
-        if (!state.pCard) {
-            state.pTurn = (mesa.estado.turnoAtual === meuUid);
-            state.canPlay = state.pTurn && !state.resolvendoVaza;
-        } else {
-            state.canPlay = false;
-        }
+                if (!state.pCard) {
+                    state.pTurn = (estadoSeguro.turnoAtual === meuUid);
+                    state.canPlay = state.pTurn && !state.resolvendoVaza;
+                } else {
+                    state.canPlay = false;
+                }
 
-        const playedP = document.getElementById('played-p');
-        const playedE = document.getElementById('played-e');
+                const playedP = document.getElementById('played-p');
+                const playedE = document.getElementById('played-e');
 
-        if (state.pCard) {
-            playedP.innerHTML = ''; playedP.style.zIndex = "20";
-            const cUI = (window.createCardUI || createCardUI)(state.pCard);
-            cUI.classList.add('played-card'); playedP.appendChild(cUI);
-        } else if (!state.resolvendoVaza) { playedP.innerHTML = ''; }
+                if (state.pCard) {
+                    if(playedP) {
+                        playedP.innerHTML = ''; playedP.style.zIndex = "20";
+                        const cUI = (window.createCardUI || createCardUI)(state.pCard);
+                        cUI.classList.add('played-card'); playedP.appendChild(cUI);
+                    }
+                } else if (!state.resolvendoVaza && playedP) { playedP.innerHTML = ''; }
 
-        if (state.eCard) {
-            playedE.innerHTML = ''; playedE.style.zIndex = "20";
-            const cUI = (window.createCardUI || createCardUI)(state.eCard);
-            cUI.classList.add('played-card'); playedE.appendChild(cUI);
-        } else if (!state.resolvendoVaza) { playedE.innerHTML = ''; }
+                if (state.eCard) {
+                    if(playedE) {
+                        playedE.innerHTML = ''; playedE.style.zIndex = "20";
+                        const cUI = (window.createCardUI || createCardUI)(state.eCard);
+                        cUI.classList.add('played-card'); playedE.appendChild(cUI);
+                    }
+                } else if (!state.resolvendoVaza && playedE) { playedE.innerHTML = ''; }
 
-        window.updateArenaUI();
+                if(window.updateArenaUI) window.updateArenaUI();
 
-        if (state.pCard && state.eCard && !state.resolvendoVaza) {
-            state.resolvendoVaza = true;
-            state.canPlay = false; 
-            setTimeout(() => window.resolveTrickOnline(mesa, meuUid, inimigoUid), 1000);
-        }
-    });
-};
+                if (state.pCard && state.eCard && !state.resolvendoVaza) {
+                    state.resolvendoVaza = true;
+                    state.canPlay = false; 
+                    setTimeout(() => {
+                        if(window.resolveTrickOnline) window.resolveTrickOnline(mesa, meuUid, inimigoUid);
+                    }, 1000);
+                }
+            });
+        };
 
 
         // ========================================================
