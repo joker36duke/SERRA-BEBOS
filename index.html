@@ -2678,6 +2678,10 @@ function confirmGuardian() {
         };
                 
               window.ouvirMesaJogoOnline = function() {
+            // 🔥 IMPEDE O BUG DO BARALHO INVISÍVEL (Múltiplos Radares)
+            if (state.listenerAtivo) return; 
+            state.listenerAtivo = true;
+
             onValue(ref(database, `salas/${state.salaId}/mesa_jogo`), (snapshot) => {
                 if (!snapshot.exists()) return;
                 const mesa = snapshot.val();
@@ -2700,7 +2704,7 @@ function confirmGuardian() {
 
                 const estadoSeguro = mesa.estado || {};
                 const pontosSeguros = estadoSeguro.pontos || {};
-                const vazasSeguras = estadoSeguro.vazas || {}; // 🔥 PEGA AS VAZAS DA NUVEM
+                const vazasSeguras = estadoSeguro.vazas || {}; 
 
                 state.vira = mesa.vira;
                 state.trumpSuit = mesa.trunfo;
@@ -2709,8 +2713,8 @@ function confirmGuardian() {
                 state.pScore = pontosSeguros[meuUid] || 0;
                 state.eScore = pontosSeguros[inimigoUid] || 0;
                 
-                state.pTricksWon = vazasSeguras[meuUid] || 0; // 🔥 ATUALIZA SEU PLACAR
-                state.eTricksWon = vazasSeguras[inimigoUid] || 0; // 🔥 ATUALIZA O DO INIMIGO
+                state.pTricksWon = vazasSeguras[meuUid] || 0; 
+                state.eTricksWon = vazasSeguras[inimigoUid] || 0; 
 
                 state.isBiscaNaRodaActive = estadoSeguro.isBiscaNaRodaActive || false;
                 const bAlert = document.getElementById('bisca-alert');
