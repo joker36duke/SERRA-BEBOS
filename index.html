@@ -2624,7 +2624,7 @@ function confirmGuardian() {
 };
                 
 
-            window.startSeringalGameOnline = async function() {
+         window.startSeringalGameOnline = async function() {
             document.getElementById('bisca-alert').classList.add('hidden');
             document.getElementById('trick-result-msg').classList.add('hidden');
             
@@ -2643,24 +2643,38 @@ function confirmGuardian() {
                 let cartaVira = novoBaralho.pop();
                 novoBaralho.unshift(cartaVira);
 
+                // 🛡️ BLINDAGEM MÁXIMA: Converte Arrays em Objetos puros antes de subir
+                let baralhoObj = {};
+                for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
+
+                let maoSerraObj = {};
+                for(let i=0; i<maoSerra.length; i++) maoSerraObj[i] = maoSerra[i];
+
+                let maoDonoObj = {};
+                for(let i=0; i<maoDono.length; i++) maoDonoObj[i] = maoDono[i];
+
                 const dadosMesa = {
-                    baralho: novoBaralho,
+                    baralho: baralhoObj,
                     vira: cartaVira,
                     trunfo: cartaVira.suit,
-                    maos: { [uidSerra]: maoSerra, [uidDono]: maoDono },
+                    maos: { [uidSerra]: maoSerraObj, [uidDono]: maoDonoObj },
                     estado: {
                         turnoAtual: uidSerra, 
                         liderAtual: uidSerra, 
                         cartasJogadas: {}, 
                         pontos: { [uidSerra]: 0, [uidDono]: 0 },
-                        vazas: { [uidSerra]: 0, [uidDono]: 0 } // 🔥 AGORA O FIREBASE CONTA AS VAZAS
+                        vazas: { [uidSerra]: 0, [uidDono]: 0 } 
                     }
                 };
                 await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
             } else {
                 mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
             }
-            window.ouvirMesaJogoOnline();
+            
+            // 🔥 VERIFICAÇÃO INTELIGENTE: Só liga o radar se for a primeira vez!
+            if (!state.listenerAtivo) {
+                window.ouvirMesaJogoOnline();
+            }
         };
                 
               window.ouvirMesaJogoOnline = function() {
