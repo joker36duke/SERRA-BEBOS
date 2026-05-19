@@ -2665,9 +2665,13 @@ function confirmGuardian() {
             return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
         }
 
-        state.deck = lerArray(mesa.baralho);
-        state.pHand = lerArray(mesa.maos[meuUid]);
-        state.eHand = lerArray(mesa.maos[inimigoUid]);
+                state.deck = lerArray(mesa.baralho);
+        
+        // 🛡️ A GRANDE CORREÇÃO: Evita erro fatal se a nuvem deletar as mãos vazias!
+        const maosSeguras = mesa.maos || {};
+        state.pHand = lerArray(maosSeguras[meuUid]);
+        state.eHand = lerArray(maosSeguras[inimigoUid]);
+
 
         state.vira = mesa.vira;
         state.trumpSuit = mesa.trunfo;
