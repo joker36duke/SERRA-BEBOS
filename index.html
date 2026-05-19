@@ -1547,11 +1547,17 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
             }, 1800);
         }
         
-     // --- FINALIZAÇÃO ---
-        window.endRound = function(forcedWinner = null) {
+        // --- FINALIZAÇÃO ---
+        window.endRound = function(forcedWinner = null, pFinal = null, eFinal = null, pTricks = null, eTricks = null) {
             
-            // 🛑 TRAVA DE EMPATE: Se der 60 a 60, repete sem mexer nas Serras
-            if (state.pScore === 60 && state.eScore === 60) {
+            // Aceita os pontos pré-calculados para evitar lag do Firebase
+            let pScore = pFinal !== null ? pFinal : state.pScore;
+            let eScore = eFinal !== null ? eFinal : state.eScore;
+            let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
+            let eVazas = eTricks !== null ? eTricks : state.eTricksWon;
+
+            // 🛑 TRAVA DE EMPATE
+            if (pScore === 60 && eScore === 60) {
                 showModal(
                     "EMPATE NA MESA!", 
                     "A rodada terminou em 60 a 60. No Seringal, o empate anula a vaza e as cartas devem ser redistribuídas!", 
@@ -1561,15 +1567,15 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
                 return; 
             }
 
-            let pWon = forcedWinner === 'p' ? true : state.pScore > state.eScore;
+            let pWon = forcedWinner === 'p' ? true : pScore > eScore;
             
             let nomePlayer = (typeof player_name !== 'undefined') ? player_name : "Guardião";
             let nomeOponente = state.isOnline ? (state.enemyName || "Oponente") : "Pirarucog";
 
             let title = pWon ? "Vitória de " + nomePlayer : nomeOponente + " Venceu";
             let desc = pWon 
-                ? `A experiência do Guardião falou mais alto! ${nomePlayer} faturou ${state.pScore} pontos.`
-                : `A selva engoliu a mesa. O adversário levou a rodada com ${state.eScore} pontos. El Dionysos aguarda a revanche.`;
+                ? `A experiência do Guardião falou mais alto! ${nomePlayer} faturou ${pScore} pontos.`
+                : `A selva engoliu a mesa. O adversário levou a rodada com ${eScore} pontos. El Dionysos aguarda a revanche.`;
 
             let matchOver = false;
             let matchWinnerIsPlayer = false;
@@ -1578,7 +1584,7 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
 
             if (pWon) {
                 if (state.isDono) {
-                    if (state.eSerraScore === 1 && state.eTricksWon === 0) {
+                    if (state.eSerraScore === 1 && eVazas === 0) {
                         matchOver = true;
                         matchWinnerIsPlayer = true;
                         matchEndReason = "7 SERRA!";
@@ -1600,13 +1606,19 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
                         }
                     }
                 } else {
+                    // 🔥 REVOLUÇÃO NO SERINGAL: Você estava no Serra, venceu e tirou o Dono da cadeira!
                     state.isDono = true;
                     state.eSerraScore = 1;
                     state.pSerraScore = 1;
+                    
+                    // 👉 A GRANDE CORREÇÃO: Inverter as cadeiras na nuvem!
+                    if (state.isOnline && state.ordemTurnos) {
+                        state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]];
+                    }
                 }
             } else {
                 if (!state.isDono) {
-                    if (state.pSerraScore === 1 && state.pTricksWon === 0) {
+                    if (state.pSerraScore === 1 && pVazas === 0) {
                         matchOver = true;
                         matchWinnerIsPlayer = false;
                         matchEndReason = "7 SERRA!";
@@ -1621,9 +1633,15 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
                         }
                     }
                 } else {
+                    // 🔥 QUEDA DO DONO: Você era o Dono, perdeu e foi pro Serra!
                     state.isDono = false;
                     state.eSerraScore = 1;
                     state.pSerraScore = 1;
+                    
+                    // 👉 A GRANDE CORREÇÃO: Inverter as cadeiras na nuvem!
+                    if (state.isOnline && state.ordemTurnos) {
+                        state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]];
+                    }
                 }
             }
 
@@ -1637,7 +1655,6 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
                     () => { location.reload(); }
                 );
             } else {
-                // 🔥 A CORREÇÃO FINAL: Botão agora respeita se é online ou offline
                 showModal(title, desc, "Próxima Mão", state.isOnline ? window.startSeringalGameOnline : (window.startSeringalGame || startSeringalGame));
             }
         };
