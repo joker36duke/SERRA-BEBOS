@@ -1059,10 +1059,10 @@
             return false;
         }
 
-        function isTrumpOrBebo(card) {
+        window.isTrumpOrBebo = function(card) {
             if (!card) return false;
             return card.suit === state.trumpSuit || isBebo(card, state.trumpSuit);
-        }
+        };
 
         // --- TELA DE SORTEIO ---
         function renderLuckGrid() {
