@@ -2817,7 +2817,7 @@ function confirmGuardian() {
         // ========================================================
         // O JUIZ ONLINE: RESOLVE A VAZA E ATUALIZA (CORRIGIDO)
         // ========================================================
-                window.resolveTrickOnline = async function(mesa, meuUid, inimigoUid) {
+          window.resolveTrickOnline = async function(mesa, meuUid, inimigoUid) {
             const euLiderei = (state.liderAtual === meuUid);
             
             const winner = determineTrickWinner(
@@ -2881,16 +2881,15 @@ function confirmGuardian() {
                     let pontosDono = mesa.estado.pontos[meuUid] || 0;
                     let pontosSerra = mesa.estado.pontos[inimigoUid] || 0;
                     
-                    // 🔥 LÊ AS VAZAS ATUAIS DA NUVEM
                     let vazasDono = (mesa.estado.vazas && mesa.estado.vazas[meuUid]) ? mesa.estado.vazas[meuUid] : 0;
                     let vazasSerra = (mesa.estado.vazas && mesa.estado.vazas[inimigoUid]) ? mesa.estado.vazas[inimigoUid] : 0;
 
                     if (winner === 'p') { 
                         pontosDono += trickPts; 
-                        vazasDono++; // 🔥 REGISTRA QUE FEZ VAZA
+                        vazasDono++; 
                     } else { 
                         pontosSerra += trickPts; 
-                        vazasSerra++; // 🔥 REGISTRA QUE FEZ VAZA
+                        vazasSerra++; 
                     }
 
                     if (novoBaralho.length > 0) {
@@ -2915,8 +2914,8 @@ function confirmGuardian() {
                         [`salas/${state.salaId}/mesa_jogo/maos/${inimigoUid}`]: maoSerraObj,
                         [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
                         [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
-                        [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, // 🔥 MANDA PRA NUVEM
-                        [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, // 🔥 MANDA PRA NUVEM
+                        [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
+                        [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
                         [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
                         [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
                         [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
@@ -2929,10 +2928,8 @@ function confirmGuardian() {
                     window.updateArenaUI();
                 }
                 
-                if (state.pHand.length === 0 && state.eHand.length === 0) {
-                    if(window.endRound) window.endRound(); 
-                }
-
+                // 🛑 CORREÇÃO: Removida a antiga chamada de Fim de Jogo daqui! 
+                // Quem manda nisso agora é o Firebase no bloco de cima.
             }, 1800);
         };
 
