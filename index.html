@@ -1423,12 +1423,12 @@ playedArea.style.zIndex = state.pCard ? "20" : "10";
             const b1 = isBebo(led, state.trumpSuit);
             const b2 = isBebo(followed, state.trumpSuit);
             
-            // Hierarquia absoluta dos Bebos quando ambos jogam um
+                        // Hierarquia absoluta dos Bebos quando ambos jogam um
             function getBeboPower(c) {
-                if (c.rank === '3' && c.suit === 'Paus') return 100; // Coringa
-                if (c.rank === 'Q' && c.suit === 'Espadas') return 99; // Pé de Pinto
-                if (c.rank === 'A' && c.suit === 'Paus') return 98; // Terceiro Bebo
-                if (state.trumpSuit === 'Paus' && c.rank === 'A' && c.suit === 'Espadas') return 97; // Quarto Bebo (só se trunfo for paus)
+                if (c.rank === 'Q' && c.suit === 'Espadas') return 100; // Dama Fina (Mais forte)
+                if (c.rank === '3' && c.suit === 'Paus') return 99;    // Coringa (2º mais forte)
+                if (c.rank === 'A' && c.suit === 'Paus') return 98;    // Pé de Pinto (3º mais forte)
+                if (state.trumpSuit === 'Paus' && c.rank === 'A' && c.suit === 'Espadas') return 97; // Último Bebo (apenas se trunfo for Paus)
                 return 0;
             }
 
