@@ -2247,6 +2247,142 @@ function confirmGuardian() {
                 state.luckBusy = false;
             }
         };
+                
+        // ========================================================
+        // O JUIZ SUPREMO: RESOLVE O FIM DA RODADA (OFFLINE E ONLINE)
+        // ========================================================
+        window.endRound = function(forcedWinner = null, pFinal = null, eFinal = null, pTricks = null, eTricks = null) {
+            
+            // Aceita os pontos oficiais da nuvem ou os locais
+            let pScore = pFinal !== null ? pFinal : state.pScore;
+            let eScore = eFinal !== null ? eFinal : state.eScore;
+            let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
+            let eVazas = eTricks !== null ? eTricks : state.eTricksWon;
+
+            // 🔥 REMOVIDO o bloqueio que travava a sua tela!
+            // Guardamos na memória quem era o dono antes da cadeira virar
+            const eraDonoNoInicio = state.isDono;
+
+            // 🛑 TRAVA DE EMPATE
+            if (pScore === 60 && eScore === 60) {
+                showModal(
+                    "EMPATE NA MESA!", 
+                    "A rodada terminou em 60 a 60. No Seringal, o empate anula a vaza e as cartas devem ser redistribuídas!", 
+                    "Repetir Rodada", 
+                    state.isOnline ? window.startSeringalGameOnline : (window.startSeringalGame || startSeringalGame)
+                );
+                return; 
+            }
+
+            let pWon = forcedWinner === 'p' ? true : pScore > eScore;
+            
+            let nomePlayer = (typeof player_name !== 'undefined') ? player_name : "Guardião";
+            let nomeOponente = state.isOnline ? (state.enemyName || "Oponente") : "Pirarucog";
+
+            let title = pWon ? "Vitória de " + nomePlayer : nomeOponente + " Venceu";
+            let desc = pWon 
+                ? `A experiência do Guardião falou mais alto! ${nomePlayer} faturou ${pScore} pontos.`
+                : `A selva engoliu a mesa. ${nomeOponente} levou a rodada com ${eScore} pontos. El Dionysos aguarda a revanche.`;
+
+            let matchOver = false;
+            let matchWinnerIsPlayer = false;
+            let matchEndReason = "";
+            let matchEndDesc = "";
+
+            if (pWon) {
+                if (state.isDono) {
+                    if (state.eSerraScore === 1 && eVazas === 0) {
+                        matchOver = true;
+                        matchWinnerIsPlayer = true;
+                        matchEndReason = "7 SERRA!";
+                        matchEndDesc = `Pela Regra do 7, ${nomeOponente} não fez nenhuma vaza na rodada 1/3 e sofreu derrota instantânea! O vinho é seu!`;
+                    } else {
+                        state.eSerraScore++;
+                        if (state.pSerraScore >= 3) { 
+                            matchOver = true;
+                            matchWinnerIsPlayer = false;
+                            matchEndReason = "FIM DE JOGO";
+                            matchEndDesc = `${nomePlayer} foi derrotado 3 vezes na Serra. A selva tem um novo dono.`;
+                            if(document.getElementById('btn-go-online')) document.getElementById('btn-go-online').classList.add('hidden');
+                        } else if (state.eSerraScore > 3) {
+                            matchOver = true;
+                            matchWinnerIsPlayer = true;
+                            matchEndReason = "DOMÍNIO TOTAL";
+                            matchEndDesc = `${nomeOponente} foi derrotado 3 vezes! SERRADO! O Seringal é seu!`;
+                            if(document.getElementById('btn-go-online')) document.getElementById('btn-go-online').classList.remove('hidden');
+                        }
+                    }
+                } else {
+                    // Não era dono, venceu -> Rouba a cadeira e vira Dono!
+                    state.isDono = true;
+                    state.eSerraScore = 1;
+                    state.pSerraScore = 1;
+                    if (state.isOnline && state.ordemTurnos) {
+                        state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
+                    }
+                }
+            } else {
+                if (!state.isDono) {
+                    if (state.pSerraScore === 1 && pVazas === 0) {
+                        matchOver = true;
+                        matchWinnerIsPlayer = false;
+                        matchEndReason = "7 SERRA!";
+                        matchEndDesc = "Pela Regra do 7, você não fez nenhuma vaza na rodada 1/3 e sofreu derrota instantânea!";
+                    } else {
+                        state.pSerraScore++;
+                        if (state.pSerraScore > 3) {
+                            matchOver = true;
+                            matchWinnerIsPlayer = false;
+                            matchEndReason = "FIM DE JOGO";
+                            matchEndDesc = `${nomePlayer} foi derrotado 3 vezes na Serra. A selva tem um novo dono.`;
+                        }
+                    }
+                } else {
+                    // Era dono, perdeu -> Cai pro Serra
+                    state.isDono = false;
+                    state.eSerraScore = 1;
+                    state.pSerraScore = 1;
+                    if (state.isOnline && state.ordemTurnos) {
+                        state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
+                    }
+                }
+            }
+
+            if(window.updateArenaUI) window.updateArenaUI();
+
+            if (state.isOnline) {
+                // 🔥 A CANETA FICA COM O DONO ORIGINAL: Só ele atualiza a nuvem
+                if (eraDonoNoInicio) {
+                    const meuUid = auth.currentUser.uid;
+                    const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
+                    
+                    const estadoAtualizado = {
+                        placarSerras: {
+                            [meuUid]: state.pSerraScore,
+                            [inimigoUid]: state.eSerraScore
+                        },
+                        ordemTurnosSegura: state.ordemTurnos,
+                        donoDaMesa: state.isDono ? meuUid : inimigoUid
+                    };
+
+                    update(ref(database, `salas/${state.salaId}/mesa_jogo/estado`), estadoAtualizado)
+                        .catch(err => console.error(err));
+                }
+                
+                // 🔥 O MODAL É PARA OS DOIS: Agora a sua tela não vai mais ficar em branco!
+                if (matchOver) {
+                    showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { location.reload(); });
+                } else {
+                    showModal(title, desc, "Próxima Mão", window.startSeringalGameOnline);
+                }
+            } else {
+                if (matchOver) {
+                    showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { location.reload(); });
+                } else {
+                    showModal(title, desc, "Próxima Mão", (window.startSeringalGame || startSeringalGame));
+                }
+            }
+        };
 
         // ========================================================
             // O CARTEADOR ONLINE E ROTEADOR DE ARENAS
