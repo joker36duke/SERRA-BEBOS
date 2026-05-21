@@ -2252,120 +2252,96 @@ function confirmGuardian() {
         // O JUIZ SUPREMO: RESOLVE O FIM DA RODADA (OFFLINE E ONLINE)
         // ========================================================
         window.endRound = function(forcedWinner = null, pFinal = null, eFinal = null, pTricks = null, eTricks = null) {
-            
-            // 🔥 ESCUDO DE TITÂNIO
-            if (window.pontuacaoJaContada) return;
-            window.pontuacaoJaContada = true;
-            state.roundEnded = true;
+    
+    // 🔥 ESCUDO DE TITÂNIO: Impede contagem duplicada se o Firebase disparar dois eventos
+    if (window.pontuacaoJaContada) return;
+    window.pontuacaoJaContada = true;
+    state.roundEnded = true;
 
-            let pScore = pFinal !== null ? pFinal : state.pScore;
-            let eScore = eFinal !== null ? eFinal : state.eScore;
-            let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
-            let eVazas = eTricks !== null ? eTricks : state.eTricksWon;
+    let pScore = pFinal !== null ? pFinal : state.pScore;
+    let eScore = eFinal !== null ? eFinal : state.eScore;
+    let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
+    let eVazas = eTricks !== null ? eTricks : state.eTricksWon;
 
-            const eraDonoNoInicio = state.isDono;
+    const eraDonoNoInicio = state.isDono;
+    let pWon = forcedWinner === 'p' ? true : pScore > eScore;
+    
+    let nomePlayer = (typeof player_name !== 'undefined') ? player_name : "Guardião";
+    let nomeOponente = state.isOnline ? (state.enemyName || "Oponente") : "Pirarucog";
 
-            if (pScore === 60 && eScore === 60) {
-                showModal(
-                    "EMPATE NA MESA!", 
-                    "A rodada terminou em 60 a 60. O empate anula a vaza e as cartas devem ser redistribuídas!", 
-                    "Repetir Rodada", 
-                    () => { 
-                        window.pontuacaoJaContada = false; state.roundEnded = false; 
-                        state.isOnline ? window.startSeringalGameOnline() : (window.startSeringalGame || startSeringalGame)(); 
-                    }
-                );
-                return; 
-            }
+    let title = pWon ? "Vitória de " + nomePlayer : nomeOponente + " Venceu";
+    let desc = pWon 
+        ? `A experiência do Guardião falou mais alto! ${nomePlayer} faturou ${pScore} pontos.`
+        : `A selva engoliu a mesa. ${nomeOponente} levou a rodada com ${eScore} pontos.`;
 
-            let pWon = forcedWinner === 'p' ? true : pScore > eScore;
-            
-            let nomePlayer = (typeof player_name !== 'undefined') ? player_name : "Guardião";
-            let nomeOponente = state.isOnline ? (state.enemyName || "Oponente") : "Pirarucog";
+    let matchOver = false;
+    let matchEndReason = "";
+    let matchEndDesc = "";
 
-            let title = pWon ? "Vitória de " + nomePlayer : nomeOponente + " Venceu";
-            let desc = pWon 
-                ? `A experiência do Guardião falou mais alto! ${nomePlayer} faturou ${pScore} pontos.`
-                : `A selva engoliu a mesa. ${nomeOponente} levou a rodada com ${eScore} pontos.`;
-
-            let matchOver = false;
-            let matchEndReason = "";
-            let matchEndDesc = "";
-
-            if (pWon) {
-                if (eraDonoNoInicio) {
-                    // Eu era Dono e venci. O inimigo sobe na Serra.
-                    if (state.eSerraScore === 1 && eVazas === 0) {
-                        matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, ${nomeOponente} não fez vazas e sofreu derrota instantânea!`;
-                    } else {
-                        state.eSerraScore++; 
-                        if (state.eSerraScore > 3) {
-                            state.eSerraScore = 3; 
-                            matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `${nomeOponente} foi derrotado 3 vezes! SERRADO! O Seringal é seu!`;
-                            if(document.getElementById('btn-go-online')) document.getElementById('btn-go-online').classList.remove('hidden');
-                        }
-                    }
-                } else {
-                    // Eu era Serra e venci. Roubei a cadeira! 
-                    state.isDono = true; 
-                    state.eSerraScore = 1; // Zera o Inimigo (Novo Serra)
-                    state.pSerraScore = 1; // Zera a mim (Novo Dono)
-                    if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
-                }
+    // --- LÓGICA DE PLACAR ---
+    if (pWon) {
+        if (eraDonoNoInicio) {
+            if (state.eSerraScore === 1 && eVazas === 0) {
+                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, ${nomeOponente} sofreu derrota instantânea!`;
             } else {
-                if (!eraDonoNoInicio) {
-                    // Eu era Serra e perdi. Minha contagem sobe.
-                    if (state.pSerraScore === 1 && pVazas === 0) {
-                        matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você não fez vazas na rodada 1/3 e sofreu derrota instantânea!`;
-                    } else {
-                        state.pSerraScore++; 
-                        if (state.pSerraScore > 3) {
-                            state.pSerraScore = 3; 
-                            matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `${nomePlayer} foi derrotado 3 vezes na Serra. A selva tem um novo dono.`;
-                            if(document.getElementById('btn-go-online')) document.getElementById('btn-go-online').classList.add('hidden');
-                        }
-                    }
-                } else {
-                    // Eu era Dono e perdi. Caí pra cadeira do Serra! 
-                    state.isDono = false; 
-                    state.eSerraScore = 1; // Zera o Inimigo (Novo Dono)
-                    state.pSerraScore = 1; // Zera a mim (Novo Serra)
-                    if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
+                state.eSerraScore = Math.min(state.eSerraScore + 1, 3);
+                if (state.eSerraScore >= 3) {
+                    matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `${nomeOponente} foi derrotado 3 vezes! O Seringal é seu!`;
                 }
             }
-
-            if(window.updateArenaUI) window.updateArenaUI();
-
-            if (state.isOnline) {
-                const meuUid = auth.currentUser.uid;
-                const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
-                
-                // 🔥 A GRANDE MUDANÇA: Cada jogador envia SÓ O SEU PLACAR para a nuvem!
-                // Assim o Firebase mescla os dados sem um celular atropelar o outro.
-                let atualizacoesNuvem = {};
-                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
-                
-                // Apenas quem ERA o dono no início da rodada dita quem fica com a Cadeira para evitar conflitos de turno.
-                if (eraDonoNoInicio) {
-                    atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : inimigoUid;
-                    atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
-                }
-
-                update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
-                
-                if (matchOver) {
-                    showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); });
-                } else {
-                    showModal(title, desc, "Próxima Mão", () => { window.pontuacaoJaContada = false; state.roundEnded = false; window.startSeringalGameOnline(); });
-                }
+        } else {
+            state.isDono = true; 
+            state.eSerraScore = 1; 
+            state.pSerraScore = 1; 
+            if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
+        }
+    } else {
+        if (!eraDonoNoInicio) {
+            if (state.pSerraScore === 1 && pVazas === 0) {
+                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você sofreu derrota instantânea!`;
             } else {
-                if (matchOver) {
-                    showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); });
-                } else {
-                    showModal(title, desc, "Próxima Mão", () => { window.pontuacaoJaContada = false; state.roundEnded = false; (window.startSeringalGame || startSeringalGame)(); });
+                state.pSerraScore = Math.min(state.pSerraScore + 1, 3);
+                if (state.pSerraScore >= 3) {
+                    matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `${nomePlayer} foi derrotado 3 vezes na Serra.`;
                 }
             }
-        };
+        } else {
+            state.isDono = false; 
+            state.eSerraScore = 1; 
+            state.pSerraScore = 1; 
+            if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
+        }
+    }
+
+    if(window.updateArenaUI) window.updateArenaUI();
+
+    // --- SINCRONIZAÇÃO SEGURA ONLINE ---
+    if (state.isOnline) {
+        const meuUid = auth.currentUser.uid;
+        
+        // Apenas o vencedor envia as atualizações de placar e cadeira para evitar conflito
+        if (pWon) {
+            let atualizacoesNuvem = {};
+            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
+            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : state.ordemTurnos.find(u => u !== meuUid);
+            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
+            
+            update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
+        }
+    }
+
+    // --- EXIBIÇÃO DO MODAL ---
+    if (matchOver) {
+        showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { 
+            window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); 
+        });
+    } else {
+        showModal(title, desc, "Próxima Mão", () => { 
+            window.pontuacaoJaContada = false; state.roundEnded = false; 
+            state.isOnline ? window.startSeringalGameOnline() : (window.startSeringalGame || startSeringalGame)(); 
+        });
+    }
+};
 
 
         // ========================================================
