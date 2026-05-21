@@ -2248,7 +2248,6 @@ function confirmGuardian() {
             }
         };
 
-        
         // ========================================================
         // O JUIZ SUPREMO: RESOLVE O FIM DA RODADA (OFFLINE E ONLINE)
         // ========================================================
@@ -2293,7 +2292,6 @@ function confirmGuardian() {
             let matchEndReason = "";
             let matchEndDesc = "";
 
-            // 🔥 NOVA LÓGICA DIRETA: Altera direto na raiz da memória sem variáveis temporárias
             if (pWon) {
                 if (eraDonoNoInicio) {
                     // Eu era Dono e venci. O inimigo sobe na Serra.
@@ -2308,10 +2306,10 @@ function confirmGuardian() {
                         }
                     }
                 } else {
-                    // Eu era Serra e venci. Roubei a cadeira! Zera tudo direto.
+                    // Eu era Serra e venci. Roubei a cadeira! 
                     state.isDono = true; 
-                    state.eSerraScore = 1; 
-                    state.pSerraScore = 1; 
+                    state.eSerraScore = 1; // Zera o Inimigo (Novo Serra)
+                    state.pSerraScore = 1; // Zera a mim (Novo Dono)
                     if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
                 }
             } else {
@@ -2328,10 +2326,10 @@ function confirmGuardian() {
                         }
                     }
                 } else {
-                    // Eu era Dono e perdi. Caí pra cadeira do Serra! Zera tudo direto.
+                    // Eu era Dono e perdi. Caí pra cadeira do Serra! 
                     state.isDono = false; 
-                    state.eSerraScore = 1; 
-                    state.pSerraScore = 1; 
+                    state.eSerraScore = 1; // Zera o Inimigo (Novo Dono)
+                    state.pSerraScore = 1; // Zera a mim (Novo Serra)
                     if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
                 }
             }
@@ -2339,20 +2337,21 @@ function confirmGuardian() {
             if(window.updateArenaUI) window.updateArenaUI();
 
             if (state.isOnline) {
-                // 🔥 A CANETA FICA COM O DONO ORIGINAL: Envia a ordem limpa e direta para a nuvem
+                const meuUid = auth.currentUser.uid;
+                const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
+                
+                // 🔥 A GRANDE MUDANÇA: Cada jogador envia SÓ O SEU PLACAR para a nuvem!
+                // Assim o Firebase mescla os dados sem um celular atropelar o outro.
+                let atualizacoesNuvem = {};
+                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
+                
+                // Apenas quem ERA o dono no início da rodada dita quem fica com a Cadeira para evitar conflitos de turno.
                 if (eraDonoNoInicio) {
-                    const meuUid = auth.currentUser.uid;
-                    const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
-                    
-                    update(ref(database, `salas/${state.salaId}/mesa_jogo/estado`), {
-                        placarSerras: {
-                            [meuUid]: state.pSerraScore,
-                            [inimigoUid]: state.eSerraScore
-                        },
-                        donoDaMesa: state.isDono ? meuUid : inimigoUid 
-                        // Removemos o envio da ordemTurnos daqui para evitar conflitos de espelhamento
-                    }).catch(err => console.error(err));
+                    atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : inimigoUid;
+                    atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
                 }
+
+                update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
                 
                 if (matchOver) {
                     showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); });
