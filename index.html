@@ -2656,8 +2656,9 @@ function confirmGuardian() {
     }
 };    
 
-                     window.startSeringalGameOnline = async function() {
-                // 👇 A MÁGICA DA LIMPEZA DE MEMÓRIA: Reseta TODAS as travas para a nova rodada!
+             window.startSeringalGameOnline = async function() {
+                // 👇 A MÁGICA DA LIMPEZA DE MEMÓRIA E LIBERAÇÃO DO ESCUDO!
+                window.pontuacaoJaContada = false;
                 state.roundEnded = false; 
                 state.pPopoUsed = false;
                 state.ePopoUsed = false;
