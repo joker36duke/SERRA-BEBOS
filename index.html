@@ -2800,15 +2800,7 @@ function confirmGuardian() {
                 const playedP = document.getElementById('played-p');
                 const playedE = document.getElementById('played-e');
 
-                if (state.pCard) {
-                    if(playedP) {
-                        playedP.innerHTML = ''; playedP.style.zIndex = "20";
-                        const cUI = (window.createCardUI || createCardUI)(state.pCard);
-                        cUI.classList.add('played-card'); playedP.appendChild(cUI);
-                    }
-                } else if (!state.resolvendoVaza && playedP) { playedP.innerHTML = ''; }
-
-                if (state.eCard) {
+                 if (state.eCard) {
                     if(playedE) {
                         playedE.innerHTML = ''; playedE.style.zIndex = "20";
                         const cUI = (window.createCardUI || createCardUI)(state.eCard);
@@ -2818,6 +2810,11 @@ function confirmGuardian() {
 
                 if(window.updateArenaUI) window.updateArenaUI();
 
+                // 🔥 DESBLOQUEIA A TRAVA QUANDO AS CARTAS CHEGAREM DA NUVEM
+                if (state.pHand.length > 0 || state.eHand.length > 0) {
+                    state.distribuindoCartas = false;
+                }
+
                 if (state.pCard && state.eCard && !state.resolvendoVaza) {
                     state.resolvendoVaza = true;
                     state.canPlay = false; 
@@ -2826,8 +2823,8 @@ function confirmGuardian() {
                     }, 1000);
                 }
 
-                // 🔥 O JUIZ SUPREMO BLINDADO
-                const isGameOver = (state.deck.length === 0 && state.pHand.length === 0 && state.eHand.length === 0 && !state.pCard && !state.eCard);
+                // 🔥 O JUIZ SUPREMO BLINDADO (Agora ignora a mesa vazia se estiver esperando cartas da nuvem)
+                const isGameOver = (!state.distribuindoCartas && state.deck.length === 0 && state.pHand.length === 0 && state.eHand.length === 0 && !state.pCard && !state.eCard);
                 const modal = document.getElementById('game-modal');
                 if (isGameOver && !state.resolvendoVaza && modal && modal.classList.contains('hidden') && !state.roundEnded) {
                     setTimeout(() => {
