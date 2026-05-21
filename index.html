@@ -2670,66 +2670,74 @@ function confirmGuardian() {
         if (!state.pTurn) { setTimeout(window.resolveTrick || resolveTrick, 800); } 
         else { setTimeout(window.enemyPlay || enemyPlay, 1000); }
     }
-};
+};    
+
+                     window.startSeringalGameOnline = async function() {
+                // 👇 A MÁGICA DA LIMPEZA DE MEMÓRIA: Reseta TODAS as travas para a nova rodada!
+                state.roundEnded = false; 
+                state.pPopoUsed = false;
+                state.ePopoUsed = false;
+                state.isFirstTrick = true;
+                state.isBiscaNaRodaActive = false;
+                state.resolvendoVaza = false;
+                state.pCard = null;
+                state.eCard = null;
                 
+                document.getElementById('bisca-alert').classList.add('hidden');
+                document.getElementById('trick-result-msg').classList.add('hidden');
+                
+                const meuUid = auth.currentUser.uid;
 
-         window.startSeringalGameOnline = async function() {
-            document.getElementById('bisca-alert').classList.add('hidden');
-            document.getElementById('trick-result-msg').classList.add('hidden');
-            
-            const meuUid = auth.currentUser.uid;
+                if (state.isDono) {
+                    let novoBaralho = createFullDeck();
+                    shuffle(novoBaralho);
 
-            if (state.isDono) {
-                let novoBaralho = createFullDeck();
-                shuffle(novoBaralho);
+                    const uidSerra = state.ordemTurnos[0];
+                    const uidDono = state.ordemTurnos[1];
 
-                const uidSerra = state.ordemTurnos[0];
-                const uidDono = state.ordemTurnos[1];
+                    let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
+                    let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
 
-                let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
-                let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
+                    let cartaVira = novoBaralho.pop();
+                    novoBaralho.unshift(cartaVira);
 
-                let cartaVira = novoBaralho.pop();
-                novoBaralho.unshift(cartaVira);
+                    let baralhoObj = {};
+                    for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
 
-                let baralhoObj = {};
-                for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
+                    let maoSerraObj = {};
+                    for(let i=0; i<maoSerra.length; i++) maoSerraObj[i] = maoSerra[i];
 
-                let maoSerraObj = {};
-                for(let i=0; i<maoSerra.length; i++) maoSerraObj[i] = maoSerra[i];
+                    let maoDonoObj = {};
+                    for(let i=0; i<maoDono.length; i++) maoDonoObj[i] = maoDono[i];
 
-                let maoDonoObj = {};
-                for(let i=0; i<maoDono.length; i++) maoDonoObj[i] = maoDono[i];
-
-                // 🔥 A SOLUÇÃO DEFINITIVA: O Dono impõe o Placar Oficial na nuvem!
-                const dadosMesa = {
-                    baralho: baralhoObj,
-                    vira: cartaVira,
-                    trunfo: cartaVira.suit,
-                    maos: { [uidSerra]: maoSerraObj, [uidDono]: maoDonoObj },
-                    estado: {
-                        turnoAtual: uidSerra, 
-                        liderAtual: uidSerra, 
-                        cartasJogadas: {}, 
-                        pontos: { [uidSerra]: 0, [uidDono]: 0 },
-                        vazas: { [uidSerra]: 0, [uidDono]: 0 },
-                        placarSerras: {
-                            [meuUid]: state.pSerraScore || 1,
-                            [uidSerra]: state.eSerraScore || 1
-                        },
-                        donoDaMesa: meuUid,
-                        ordemTurnosSegura: state.ordemTurnos
-                    }
-                };
-                await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
-            } else {
-                mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
-            }
-            
-            if (!state.listenerAtivo) {
-                window.ouvirMesaJogoOnline();
-            }
-        };
+                    const dadosMesa = {
+                        baralho: baralhoObj,
+                        vira: cartaVira,
+                        trunfo: cartaVira.suit,
+                        maos: { [uidSerra]: maoSerraObj, [uidDono]: maoDonoObj },
+                        estado: {
+                            turnoAtual: uidSerra, 
+                            liderAtual: uidSerra, 
+                            cartasJogadas: {}, 
+                            pontos: { [uidSerra]: 0, [uidDono]: 0 },
+                            vazas: { [uidSerra]: 0, [uidDono]: 0 },
+                            placarSerras: {
+                                [meuUid]: state.pSerraScore || 1,
+                                [uidSerra]: state.eSerraScore || 1
+                            },
+                            donoDaMesa: meuUid,
+                            ordemTurnosSegura: state.ordemTurnos
+                        }
+                    };
+                    await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
+                } else {
+                    mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
+                }
+                
+                if (!state.listenerAtivo) {
+                    window.ouvirMesaJogoOnline();
+                }
+            };
                 
              window.ouvirMesaJogoOnline = function() {
             if (state.listenerAtivo) return; 
