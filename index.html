@@ -2656,10 +2656,11 @@ function confirmGuardian() {
     }
 };    
 
-             window.startSeringalGameOnline = async function() {
-                // 👇 A MÁGICA DA LIMPEZA DE MEMÓRIA E LIBERAÇÃO DO ESCUDO!
+              window.startSeringalGameOnline = async function() {
+                // 👇 A MÁGICA DA LIMPEZA DE MEMÓRIA
                 window.pontuacaoJaContada = false;
                 state.roundEnded = false; 
+                state.distribuindoCartas = true; // 🔥 NOVA TRAVA: Avisa ao celular para esperar as cartas da internet!
                 state.pPopoUsed = false;
                 state.ePopoUsed = false;
                 state.isFirstTrick = true;
