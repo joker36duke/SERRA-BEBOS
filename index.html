@@ -2701,116 +2701,92 @@ function confirmGuardian() {
                 }
             };
                 
-            window.ouvirMesaJogoOnline = function() {
-            if (state.listenerAtivo) return; 
-            state.listenerAtivo = true;
+     window.ouvirMesaJogoOnline = function() {
+    if (state.listenerAtivo) return; 
+    state.listenerAtivo = true;
 
-            onValue(ref(database, `salas/${state.salaId}/mesa_jogo`), (snapshot) => {
-                if (!snapshot.exists()) return;
-                const mesa = snapshot.val();
-                const meuUid = auth.currentUser.uid;
-                const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
+    onValue(ref(database, `salas/${state.salaId}/mesa_jogo`), (snapshot) => {
+        if (!snapshot.exists()) return;
+        const mesa = snapshot.val();
+        const meuUid = auth.currentUser.uid;
+        const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
 
-                if(typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal(); 
+        if(typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal(); 
 
-                function lerArray(obj) {
-                    if (!obj) return [];
-                    if (Array.isArray(obj)) return obj.filter(x => x !== null);
-                    return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
+        function lerArray(obj) {
+            if (!obj) return [];
+            if (Array.isArray(obj)) return obj.filter(x => x !== null);
+            return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
+        }
+
+        state.deck = lerArray(mesa.baralho);
+        const maosSeguras = mesa.maos || {};
+        state.pHand = lerArray(maosSeguras[meuUid]);
+        state.eHand = lerArray(maosSeguras[inimigoUid]);
+        const estadoSeguro = mesa.estado || {};
+
+        // Puxamos as jogadas para o topo da função
+        const jogadas = estadoSeguro.cartasJogadas || {};
+        state.pCard = jogadas[meuUid] || null;
+        state.eCard = jogadas[inimigoUid] || null;
+
+        // 🔥 ESCUDO DE TITÂNIO: Calculamos o fim de jogo aqui em cima
+        const isGameOver = (!state.distribuindoCartas && state.deck.length === 0 && state.pHand.length === 0 && state.eHand.length === 0 && !state.pCard && !state.eCard);
+
+        if (estadoSeguro.donoDaMesa) {
+            const uidDonoNuvem = estadoSeguro.donoDaMesa;
+            
+            // Blindagem: Se o jogo acabou ou a rodada terminou, ignora mudanças de Dono vindas da nuvem
+            if (!isGameOver && !state.roundEnded) {
+                state.isDono = (meuUid === uidDonoNuvem);
+            }
+
+            // Não sobrescrever o placar se estivermos no milissegundo final da rodada
+            if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza && !isGameOver) {
+                state.pSerraScore = estadoSeguro.placarSerras[meuUid] || 1;
+                state.eSerraScore = estadoSeguro.placarSerras[inimigoUid] || 1;
+            }
+            if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza && !isGameOver) {
+                state.ordemTurnos = estadoSeguro.ordemTurnosSegura;
+            }
+        }
+
+        // ... resto da leitura de pontos e vazas permanece igual ...
+        const pontosSeguros = estadoSeguro.pontos || {};
+        const vazasSeguras = estadoSeguro.vazas || {}; 
+
+        state.vira = mesa.vira;
+        state.trumpSuit = mesa.trunfo;
+        state.liderAtual = estadoSeguro.liderAtual;
+        state.pScore = pontosSeguros[meuUid] || 0;
+        state.eScore = pontosSeguros[inimigoUid] || 0;
+        state.pTricksWon = vazasSeguras[meuUid] || 0; 
+        state.eTricksWon = vazasSeguras[inimigoUid] || 0; 
+
+        // Atualização visual
+        if(window.updateArenaUI) window.updateArenaUI();
+
+        // Travas de segurança
+        if (state.pHand.length > 0 || state.eHand.length > 0) state.distribuindoCartas = false;
+
+        // Resolução de vaza
+        if (state.pCard && state.eCard && !state.resolvendoVaza) {
+            state.resolvendoVaza = true;
+            state.canPlay = false; 
+            setTimeout(() => { if(window.resolveTrickOnline) window.resolveTrickOnline(mesa, meuUid, inimigoUid); }, 1000);
+        }
+
+        // 🔥 Disparador Final Blindado
+        const modal = document.getElementById('game-modal');
+        if (isGameOver && !state.resolvendoVaza && modal && modal.classList.contains('hidden') && !state.roundEnded) {
+            setTimeout(() => {
+                if(window.endRound && !state.roundEnded) {
+                    window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
                 }
-
-                state.deck = lerArray(mesa.baralho);
-                
-                const maosSeguras = mesa.maos || {};
-                state.pHand = lerArray(maosSeguras[meuUid]);
-                state.eHand = lerArray(maosSeguras[inimigoUid]);
-
-                const estadoSeguro = mesa.estado || {};
-                
-                if (estadoSeguro.donoDaMesa) {
-                    const uidDonoNuvem = estadoSeguro.donoDaMesa;
-                    state.isDono = (meuUid === uidDonoNuvem);
-
-                    // 🔥 ESCUDO DE REDE: Ignora a nuvem se a rodada já acabou ou está em animação!
-                    if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza) {
-                        state.pSerraScore = estadoSeguro.placarSerras[meuUid] || 1;
-                        state.eSerraScore = estadoSeguro.placarSerras[inimigoUid] || 1;
-                    }
-                    if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza) {
-                        state.ordemTurnos = estadoSeguro.ordemTurnosSegura;
-                    }
-                }
-
-                const pontosSeguros = estadoSeguro.pontos || {};
-                const vazasSeguras = estadoSeguro.vazas || {}; 
-
-                state.vira = mesa.vira;
-                state.trumpSuit = mesa.trunfo;
-                state.liderAtual = estadoSeguro.liderAtual;
-                
-                state.pScore = pontosSeguros[meuUid] || 0;
-                state.eScore = pontosSeguros[inimigoUid] || 0;
-                
-                state.pTricksWon = vazasSeguras[meuUid] || 0; 
-                state.eTricksWon = vazasSeguras[inimigoUid] || 0; 
-
-                state.isBiscaNaRodaActive = estadoSeguro.isBiscaNaRodaActive || false;
-                const bAlert = document.getElementById('bisca-alert');
-                if (state.isBiscaNaRodaActive) {
-                    if(bAlert) bAlert.classList.remove('hidden');
-                } else if (!state.isFirstTrick) {
-                    if(bAlert) bAlert.classList.add('hidden');
-                }
-
-                const jogadas = estadoSeguro.cartasJogadas || {};
-                state.pCard = jogadas[meuUid] || null;
-                state.eCard = jogadas[inimigoUid] || null;
-
-                if (!state.pCard) {
-                    state.pTurn = (estadoSeguro.turnoAtual === meuUid);
-                    state.canPlay = state.pTurn && !state.resolvendoVaza;
-                } else {
-                    state.canPlay = false;
-                }
-
-                const playedP = document.getElementById('played-p');
-                const playedE = document.getElementById('played-e');
-
-                 if (state.eCard) {
-                    if(playedE) {
-                        playedE.innerHTML = ''; playedE.style.zIndex = "20";
-                        const cUI = (window.createCardUI || createCardUI)(state.eCard);
-                        cUI.classList.add('played-card'); playedE.appendChild(cUI);
-                    }
-                } else if (!state.resolvendoVaza && playedE) { playedE.innerHTML = ''; }
-
-                if(window.updateArenaUI) window.updateArenaUI();
-
-                // 🔥 DESBLOQUEIA A TRAVA QUANDO AS CARTAS CHEGAREM DA NUVEM
-                if (state.pHand.length > 0 || state.eHand.length > 0) {
-                    state.distribuindoCartas = false;
-                }
-
-                if (state.pCard && state.eCard && !state.resolvendoVaza) {
-                    state.resolvendoVaza = true;
-                    state.canPlay = false; 
-                    setTimeout(() => {
-                        if(window.resolveTrickOnline) window.resolveTrickOnline(mesa, meuUid, inimigoUid);
-                    }, 1000);
-                }
-
-                // 🔥 O JUIZ SUPREMO BLINDADO (Agora ignora a mesa vazia se estiver esperando cartas da nuvem)
-                const isGameOver = (!state.distribuindoCartas && state.deck.length === 0 && state.pHand.length === 0 && state.eHand.length === 0 && !state.pCard && !state.eCard);
-                const modal = document.getElementById('game-modal');
-                if (isGameOver && !state.resolvendoVaza && modal && modal.classList.contains('hidden') && !state.roundEnded) {
-                    setTimeout(() => {
-                        if(window.endRound && modal.classList.contains('hidden') && !state.roundEnded) {
-                            window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                        }
-                    }, 500);
-                }
-            });
-        };
+            }, 500);
+        }
+    });
+};
                 
 
         // ========================================================
