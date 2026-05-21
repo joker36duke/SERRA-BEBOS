@@ -2724,7 +2724,7 @@ function confirmGuardian() {
                 }
             };
                 
-             window.ouvirMesaJogoOnline = function() {
+            window.ouvirMesaJogoOnline = function() {
             if (state.listenerAtivo) return; 
             state.listenerAtivo = true;
 
@@ -2754,11 +2754,12 @@ function confirmGuardian() {
                     const uidDonoNuvem = estadoSeguro.donoDaMesa;
                     state.isDono = (meuUid === uidDonoNuvem);
 
-                    if (estadoSeguro.placarSerras) {
+                    // 🔥 ESCUDO DE REDE: Ignora a nuvem se a rodada já acabou ou está em animação!
+                    if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza) {
                         state.pSerraScore = estadoSeguro.placarSerras[meuUid] || 1;
                         state.eSerraScore = estadoSeguro.placarSerras[inimigoUid] || 1;
                     }
-                    if (estadoSeguro.ordemTurnosSegura) {
+                    if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza) {
                         state.ordemTurnos = estadoSeguro.ordemTurnosSegura;
                     }
                 }
@@ -2824,13 +2825,12 @@ function confirmGuardian() {
                     }, 1000);
                 }
 
-                // 🔥 O JUIZ SUPREMO: Quando a nuvem confirma que as mãos esvaziaram, apita o fim de jogo!
+                // 🔥 O JUIZ SUPREMO BLINDADO
                 const isGameOver = (state.deck.length === 0 && state.pHand.length === 0 && state.eHand.length === 0 && !state.pCard && !state.eCard);
                 const modal = document.getElementById('game-modal');
-                if (isGameOver && !state.resolvendoVaza && modal && modal.classList.contains('hidden')) {
+                if (isGameOver && !state.resolvendoVaza && modal && modal.classList.contains('hidden') && !state.roundEnded) {
                     setTimeout(() => {
-                        if(window.endRound && modal.classList.contains('hidden')) {
-                            // Envia para o fim do jogo APENAS os números oficiais baixados do Firebase!
+                        if(window.endRound && modal.classList.contains('hidden') && !state.roundEnded) {
                             window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
                         }
                     }, 500);
