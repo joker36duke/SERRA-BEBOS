@@ -2632,7 +2632,7 @@ function confirmGuardian() {
     }
 };
 
-              window.startSeringalGameOnline = async function() {
+       window.startSeringalGameOnline = async function() {
     window.pontuacaoJaContada = false;
     state.roundEnded = false; 
     state.distribuindoCartas = true; 
@@ -2646,58 +2646,103 @@ function confirmGuardian() {
     state.resolvendoVaza = false;
     state.pCard = null;
     state.eCard = null;
+
+    // 🔥 FORÇA O PLACAR LOCAL PARA 0 IMEDIATAMENTE (Limpa a tela da rodada velha)
+    state.pScore = 0;
+    state.eScore = 0;
+    state.pTricksWon = 0;
+    state.eTricksWon = 0;
     
     document.getElementById('bisca-alert').classList.add('hidden');
     document.getElementById('trick-result-msg').classList.add('hidden');
+    document.getElementById('trunfada-ui').classList.add('hidden'); 
     
     if (window.updateArenaUI) window.updateArenaUI(); 
     
     const meuUid = auth.currentUser.uid;
 
     if (state.isDono) {
-        let novoBaralho = createFullDeck();
-        shuffle(novoBaralho);
+        try {
+            let novoBaralho = createFullDeck();
+            shuffle(novoBaralho);
 
-        const uidSerra = state.ordemTurnos[0];
-        const uidDono = state.ordemTurnos[1];
+            const uidSerra = (state.ordemTurnos && state.ordemTurnos.length === 2) ? state.ordemTurnos[0] : null;
+            const uidDono = (state.ordemTurnos && state.ordemTurnos.length === 2) ? state.ordemTurnos[1] : meuUid;
 
-        let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
-        let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
-
-        let cartaVira = novoBaralho.pop();
-        novoBaralho.unshift(cartaVira);
-
-        let baralhoObj = {};
-        for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
-
-        let maoSerraObj = {};
-        for(let i=0; i<maoSerra.length; i++) maoSerraObj[i] = maoSerra[i];
-
-        let maoDonoObj = {};
-        for(let i=0; i<maoDono.length; i++) maoDonoObj[i] = maoDono[i];
-
-        const dadosMesa = {
-            baralho: baralhoObj,
-            vira: cartaVira,
-            trunfo: cartaVira.suit,
-            maos: { [uidSerra]: maoSerraObj, [uidDono]: maoDonoObj },
-            estado: {
-                turnoAtual: uidSerra, 
-                liderAtual: uidSerra, 
-                cartasJogadas: {}, 
-                pontos: { [uidSerra]: 0, [uidDono]: 0 },
-                vazas: { [uidSerra]: 0, [uidDono]: 0 },
-                placarSerras: {
-                    [meuUid]: state.pSerraScore || 1,
-                    [uidSerra]: state.eSerraScore || 1
-                },
-                donoDaMesa: meuUid,
-                ordemTurnosSegura: state.ordemTurnos
+            if (!uidSerra) {
+                console.error("Ordem de turnos não encontrada!");
+                return;
             }
-        };
-        await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
+
+            let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
+            let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
+
+            let cartaVira = novoBaralho.pop();
+            novoBaralho.unshift(cartaVira);
+
+            let baralhoObj = {};
+            for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
+
+            let maoSerraObj = {};
+            for(let i=0; i<maoSerra.length; i++) maoSerraObj[i] = maoSerra[i];
+
+            let maoDonoObj = {};
+            for(let i=0; i<maoDono.length; i++) maoDonoObj[i] = maoDono[i];
+
+            const dadosMesa = {
+                baralho: baralhoObj,
+                vira: cartaVira,
+                trunfo: cartaVira.suit,
+                maos: { [uidSerra]: maoSerraObj, [uidDono]: maoDonoObj },
+                estado: {
+                    turnoAtual: uidSerra, 
+                    liderAtual: uidSerra, 
+                    cartasJogadas: null,
+                    isBiscaNaRodaActive: false,
+                    pontos: { [uidSerra]: 0, [uidDono]: 0 },
+                    vazas: { [uidSerra]: 0, [uidDono]: 0 },
+                    placarSerras: {
+                        [meuUid]: state.pSerraScore || 1,
+                        [uidSerra]: state.eSerraScore || 1
+                    },
+                    donoDaMesa: meuUid,
+                    ordemTurnosSegura: state.ordemTurnos
+                }
+            };
+            
+            await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
+        } catch (error) {
+            console.error("Erro ao gerar a mesa:", error);
+            alert("A floresta bloqueou o baralho. Recarregue a página.");
+        }
     } else {
         if(typeof mostrarAlertaSeringal === 'function') mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
+        
+        // 🔥 A CORREÇÃO DE OURO: PROTEÇÃO CONTRA A CORRIDA DE CLIQUES!
+        // Se o Dono foi mais rápido e o Firebase já entregou as cartas, nós forçamos o seu celular a destravar a tela na marra.
+        get(ref(database, `salas/${state.salaId}/mesa_jogo`)).then((snapshot) => {
+            if(snapshot.exists()) {
+                const mesa = snapshot.val();
+                
+                // Se "cartasJogadas" é null, é sinal verde de que a rodada nova JÁ está armada no Firebase!
+                if (!mesa.estado.cartasJogadas || Object.keys(mesa.estado.cartasJogadas).length === 0) {
+                    
+                    // Reconstrói a mão do jogador caso a memória tenha se perdido com o clique atrasado
+                    if (mesa.maos && mesa.maos[meuUid]) {
+                        state.pHand = Object.keys(mesa.maos[meuUid]).map(k => mesa.maos[meuUid][k]).filter(x => x !== null);
+                    }
+                    
+                    state.distribuindoCartas = false;
+                    state.pTurn = (mesa.estado.turnoAtual === meuUid);
+                    
+                    // Destrava o toque das cartas
+                    state.canPlay = state.pTurn;
+                    
+                    if (window.updateArenaUI) window.updateArenaUI();
+                    fecharAlertaSeringal();
+                }
+            }
+        });
     }
     
     if (!state.listenerAtivo) {
