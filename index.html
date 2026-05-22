@@ -2635,10 +2635,6 @@ function confirmGuardian() {
        window.startSeringalGameOnline = async function() {
     window.pontuacaoJaContada = false;
     state.roundEnded = false; 
-    state.distribuindoCartas = true; 
-    state.canPlay = false; // Trava imediata
-    state.pTurn = false;
-    
     state.pPopoUsed = false;
     state.ePopoUsed = false;
     state.isFirstTrick = true;
@@ -2657,11 +2653,14 @@ function confirmGuardian() {
     document.getElementById('trick-result-msg').classList.add('hidden');
     document.getElementById('trunfada-ui').classList.add('hidden'); 
     
-    if (window.updateArenaUI) window.updateArenaUI(); 
-    
     const meuUid = auth.currentUser.uid;
 
     if (state.isDono) {
+        state.distribuindoCartas = true; 
+        state.canPlay = false; 
+        state.pTurn = false;
+        if (window.updateArenaUI) window.updateArenaUI(); 
+
         try {
             let novoBaralho = createFullDeck();
             shuffle(novoBaralho);
@@ -2669,10 +2668,7 @@ function confirmGuardian() {
             const uidSerra = (state.ordemTurnos && state.ordemTurnos.length === 2) ? state.ordemTurnos[0] : null;
             const uidDono = (state.ordemTurnos && state.ordemTurnos.length === 2) ? state.ordemTurnos[1] : meuUid;
 
-            if (!uidSerra) {
-                console.error("Ordem de turnos não encontrada!");
-                return;
-            }
+            if (!uidSerra) return;
 
             let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
             let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
@@ -2716,33 +2712,20 @@ function confirmGuardian() {
             alert("A floresta bloqueou o baralho. Recarregue a página.");
         }
     } else {
-        if(typeof mostrarAlertaSeringal === 'function') mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
-        
-        // 🔥 A CORREÇÃO DE OURO: PROTEÇÃO CONTRA A CORRIDA DE CLIQUES!
-        // Se o Dono foi mais rápido e o Firebase já entregou as cartas, nós forçamos o seu celular a destravar a tela na marra.
-        get(ref(database, `salas/${state.salaId}/mesa_jogo`)).then((snapshot) => {
-            if(snapshot.exists()) {
-                const mesa = snapshot.val();
-                
-                // Se "cartasJogadas" é null, é sinal verde de que a rodada nova JÁ está armada no Firebase!
-                if (!mesa.estado.cartasJogadas || Object.keys(mesa.estado.cartasJogadas).length === 0) {
-                    
-                    // Reconstrói a mão do jogador caso a memória tenha se perdido com o clique atrasado
-                    if (mesa.maos && mesa.maos[meuUid]) {
-                        state.pHand = Object.keys(mesa.maos[meuUid]).map(k => mesa.maos[meuUid][k]).filter(x => x !== null);
-                    }
-                    
-                    state.distribuindoCartas = false;
-                    state.pTurn = (mesa.estado.turnoAtual === meuUid);
-                    
-                    // Destrava o toque das cartas
-                    state.canPlay = state.pTurn;
-                    
-                    if (window.updateArenaUI) window.updateArenaUI();
-                    fecharAlertaSeringal();
-                }
-            }
-        });
+        // 🔥 A CORREÇÃO DE OURO: Verifica se o Dono já distribuiu as cartas enquanto a sua tela de vitória estava aberta!
+        if (state.pHand && state.pHand.length === 4 && state.deck && state.deck.length > 0) {
+            // As cartas já chegaram completinhas pelo Firebase. Destrava imediatamente!
+            state.distribuindoCartas = false;
+            state.canPlay = state.pTurn && !state.resolvendoVaza;
+            if (window.updateArenaUI) window.updateArenaUI(); 
+            if (typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal();
+        } else {
+            // O Dono ainda não clicou. Tranca a mesa e mostra o aviso de "Aguarde".
+            state.distribuindoCartas = true; 
+            state.canPlay = false; 
+            if (window.updateArenaUI) window.updateArenaUI(); 
+            if (typeof mostrarAlertaSeringal === 'function') mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
+        }
     }
     
     if (!state.listenerAtivo) {
