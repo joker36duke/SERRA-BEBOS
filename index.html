@@ -2741,15 +2741,20 @@ function confirmGuardian() {
         if (!snapshot.exists()) return;
         const mesa = snapshot.val();
         const meuUid = auth.currentUser.uid;
-        const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
-
-        if(typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal(); 
-
+        
         function lerArray(obj) {
             if (!obj) return [];
             if (Array.isArray(obj)) return obj.filter(x => x !== null);
             return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
         }
+
+        // 🔥 CORREÇÃO: Garante que a ordem de turnos sempre volte a ser uma Lista!
+        let turnosSalvos = lerArray(mesa.estado?.ordemTurnosSegura || state.ordemTurnos);
+        if (turnosSalvos.length !== 2) turnosSalvos = state.ordemTurnos;
+
+        const inimigoUid = turnosSalvos.find(uid => uid !== meuUid);
+
+        if(typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal(); 
 
         state.deck = lerArray(mesa.baralho);
         const maosSeguras = mesa.maos || {};
@@ -2775,7 +2780,7 @@ function confirmGuardian() {
                 state.eSerraScore = estadoSeguro.placarSerras[inimigoUid] || 1;
             }
             if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza && !isGameOver) {
-                state.ordemTurnos = estadoSeguro.ordemTurnosSegura;
+                state.ordemTurnos = turnosSalvos; 
             }
         }
 
@@ -2795,14 +2800,11 @@ function confirmGuardian() {
         if (state.isBiscaNaRodaActive && bAlert) bAlert.classList.remove('hidden');
         else if (!state.isFirstTrick && bAlert) bAlert.classList.add('hidden');
 
-        // 🔥 CORREÇÃO: Avisa que as cartas chegaram ANTES de avaliar o turno!
         if (state.pHand.length > 0 || state.eHand.length > 0) {
             state.distribuindoCartas = false;
         }
 
         state.pTurn = (estadoSeguro.turnoAtual === meuUid);
-        
-        // Agora a trava vital vai funcionar perfeitamente:
         state.canPlay = state.pTurn && !state.resolvendoVaza && !state.pCard && !state.distribuindoCartas;
 
         if (state.eCard) {
