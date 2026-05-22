@@ -2643,7 +2643,6 @@ function confirmGuardian() {
     state.pCard = null;
     state.eCard = null;
 
-    // 🔥 FORÇA O PLACAR LOCAL PARA 0 IMEDIATAMENTE (Limpa a tela da rodada velha)
     state.pScore = 0;
     state.eScore = 0;
     state.pTricksWon = 0;
@@ -2665,10 +2664,20 @@ function confirmGuardian() {
             let novoBaralho = createFullDeck();
             shuffle(novoBaralho);
 
-            const uidSerra = (state.ordemTurnos && state.ordemTurnos.length === 2) ? state.ordemTurnos[0] : null;
-            const uidDono = (state.ordemTurnos && state.ordemTurnos.length === 2) ? state.ordemTurnos[1] : meuUid;
+            // 🔥 CORREÇÃO: Lê a ordem de turnos com segurança total!
+            let arrayTurnos = [];
+            if (state.ordemTurnos) {
+                if (Array.isArray(state.ordemTurnos)) arrayTurnos = state.ordemTurnos;
+                else arrayTurnos = Object.keys(state.ordemTurnos).map(k => state.ordemTurnos[k]);
+            }
 
-            if (!uidSerra) return;
+            const uidSerra = arrayTurnos.length === 2 ? arrayTurnos[0] : null;
+            const uidDono = arrayTurnos.length === 2 ? arrayTurnos[1] : meuUid;
+
+            if (!uidSerra) {
+                console.error("Erro Crítico: Oponentes não encontrados.");
+                return;
+            }
 
             let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
             let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
@@ -2702,7 +2711,7 @@ function confirmGuardian() {
                         [uidSerra]: state.eSerraScore || 1
                     },
                     donoDaMesa: meuUid,
-                    ordemTurnosSegura: state.ordemTurnos
+                    ordemTurnosSegura: arrayTurnos
                 }
             };
             
@@ -2712,15 +2721,12 @@ function confirmGuardian() {
             alert("A floresta bloqueou o baralho. Recarregue a página.");
         }
     } else {
-        // 🔥 A CORREÇÃO DE OURO: Verifica se o Dono já distribuiu as cartas enquanto a sua tela de vitória estava aberta!
         if (state.pHand && state.pHand.length === 4 && state.deck && state.deck.length > 0) {
-            // As cartas já chegaram completinhas pelo Firebase. Destrava imediatamente!
             state.distribuindoCartas = false;
             state.canPlay = state.pTurn && !state.resolvendoVaza;
             if (window.updateArenaUI) window.updateArenaUI(); 
             if (typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal();
         } else {
-            // O Dono ainda não clicou. Tranca a mesa e mostra o aviso de "Aguarde".
             state.distribuindoCartas = true; 
             state.canPlay = false; 
             if (window.updateArenaUI) window.updateArenaUI(); 
