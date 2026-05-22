@@ -2767,9 +2767,14 @@ function confirmGuardian() {
         if (state.isBiscaNaRodaActive && bAlert) bAlert.classList.remove('hidden');
         else if (!state.isFirstTrick && bAlert) bAlert.classList.add('hidden');
 
+        // 🔥 CORREÇÃO: Avisa que as cartas chegaram ANTES de avaliar o turno!
+        if (state.pHand.length > 0 || state.eHand.length > 0) {
+            state.distribuindoCartas = false;
+        }
+
         state.pTurn = (estadoSeguro.turnoAtual === meuUid);
         
-        // A trava vital:
+        // Agora a trava vital vai funcionar perfeitamente:
         state.canPlay = state.pTurn && !state.resolvendoVaza && !state.pCard && !state.distribuindoCartas;
 
         if (state.eCard) {
@@ -2785,8 +2790,6 @@ function confirmGuardian() {
         }
 
         if(window.updateArenaUI) window.updateArenaUI();
-
-        if (state.pHand.length > 0 || state.eHand.length > 0) state.distribuindoCartas = false;
 
         if (state.pCard && state.eCard && !state.resolvendoVaza) {
             state.resolvendoVaza = true;
