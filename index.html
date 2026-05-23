@@ -2247,7 +2247,7 @@ function confirmGuardian() {
                 state.luckBusy = false;
             }
         };
-
+                
         // ========================================================
         // O JUIZ SUPREMO: RESOLVE O FIM DA RODADA (OFFLINE E ONLINE)
         // ========================================================
@@ -2289,9 +2289,12 @@ function confirmGuardian() {
             if (state.eSerraScore === 1 && eVazas === 0) {
                 matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, ${nomeOponente} sofreu derrota instantânea!`;
             } else {
-                state.eSerraScore = Math.min(state.eSerraScore + 1, 3);
-                if (state.eSerraScore >= 3) {
+                // 🔥 CORREÇÃO: Incrementamos livremente
+                state.eSerraScore++; 
+                // 🔥 Só acaba o jogo se PASSAR de 3 (3 derrotas reais, já que começou no 1)
+                if (state.eSerraScore > 3) { 
                     matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `${nomeOponente} foi derrotado 3 vezes! O Seringal é seu!`;
+                    state.eSerraScore = 3; // Trava no 3 só para a UI não mostrar "4/3" no Veredito
                 }
             }
         } else {
@@ -2303,9 +2306,12 @@ function confirmGuardian() {
             if (state.pSerraScore === 1 && pVazas === 0) {
                 matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você sofreu derrota instantânea!`;
             } else {
-                state.pSerraScore = Math.min(state.pSerraScore + 1, 3);
-                if (state.pSerraScore >= 3) {
+                // 🔥 CORREÇÃO: Incrementamos livremente
+                state.pSerraScore++;
+                // 🔥 Só acaba o jogo se PASSAR de 3 
+                if (state.pSerraScore > 3) {
                     matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `${nomePlayer} foi derrotado 3 vezes na Serra.`;
+                    state.pSerraScore = 3; // Trava no 3 para a interface
                 }
             }
         } else {
