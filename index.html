@@ -2328,16 +2328,47 @@ function confirmGuardian() {
     }
 
     if (matchOver) {
+        const btn = document.getElementById('btn-continue');
+        if(btn) btn.classList.remove('hidden'); 
+        
         showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { 
             window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); 
         });
     } else {
-        showModal(title, desc, "Próxima Mão", () => { 
-            window.pontuacaoJaContada = false; state.roundEnded = false; 
-            state.isOnline ? window.startSeringalGameOnline() : (window.startSeringalGame || startSeringalGame)(); 
-        });
+        if (state.isOnline) {
+            const btn = document.getElementById('btn-continue');
+            
+            if (pWon) {
+                // 🔥 SOU O VENCEDOR (NOVO DONO): Eu vejo o botão de dar as cartas!
+                if(btn) {
+                    btn.classList.remove('hidden');
+                    btn.innerText = "Dar as Cartas";
+                    btn.onclick = () => {
+                        closeModal();
+                        window.pontuacaoJaContada = false; 
+                        state.roundEnded = false; 
+                        window.startSeringalGameOnline(); // Só eu crio o baralho no Firebase
+                    };
+                }
+                showModal(title, desc + `\n\nVocê é o Dono da Mesa! Quando estiver pronto, dê as cartas.`, null, null);
+            } else {
+                // 🛑 SOU O PERDEDOR (NO SERRA): Não tenho botão. Só espero.
+                if(btn) btn.classList.add('hidden');
+                showModal(title, desc + `\n\n⏳ Aguardando ${nomeOponente} dar as cartas...`, null, null);
+            }
+        } else {
+            // MODO OFFLINE: Funciona normalmente com o botão
+            const btn = document.getElementById('btn-continue');
+            if(btn) btn.classList.remove('hidden');
+            
+            showModal(title, desc, "Próxima Mão", () => { 
+                window.pontuacaoJaContada = false; state.roundEnded = false; 
+                (window.startSeringalGame || startSeringalGame)(); 
+            });
+        }
     }
 };
+
 
         // ========================================================
             // O CARTEADOR ONLINE E ROTEADOR DE ARENAS
