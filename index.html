@@ -2785,7 +2785,7 @@ function confirmGuardian() {
             return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
         }
 
-        // 🔥 CORREÇÃO: Garante que a ordem de turnos sempre volte a ser uma Lista!
+        // Garante que a ordem de turnos sempre volte a ser uma Lista!
         let turnosSalvos = lerArray(mesa.estado?.ordemTurnosSegura || state.ordemTurnos);
         if (turnosSalvos.length !== 2) turnosSalvos = state.ordemTurnos;
 
@@ -2808,15 +2808,16 @@ function confirmGuardian() {
         if (estadoSeguro.donoDaMesa) {
             const uidDonoNuvem = estadoSeguro.donoDaMesa;
             
-            if (!isGameOver && !state.roundEnded) {
+            // 🔥 A MURALHA DA FLORESTA: Ignora a foto velha se estivermos embaralhando ou finalizando a rodada
+            if (!isGameOver && !state.roundEnded && !state.distribuindoCartas) {
                 state.isDono = (meuUid === uidDonoNuvem);
             }
 
-            if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza && !isGameOver) {
+            if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza && !isGameOver && !state.distribuindoCartas) {
                 state.pSerraScore = estadoSeguro.placarSerras[meuUid] || 1;
                 state.eSerraScore = estadoSeguro.placarSerras[inimigoUid] || 1;
             }
-            if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza && !isGameOver) {
+            if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza && !isGameOver && !state.distribuindoCartas) {
                 state.ordemTurnos = turnosSalvos; 
             }
         }
@@ -2837,8 +2838,17 @@ function confirmGuardian() {
         if (state.isBiscaNaRodaActive && bAlert) bAlert.classList.remove('hidden');
         else if (!state.isFirstTrick && bAlert) bAlert.classList.add('hidden');
 
+        // 🔥 O ESCUDO CAI quando o Firebase envia cartas reais na mão do jogador!
         if (state.pHand.length > 0 || state.eHand.length > 0) {
             state.distribuindoCartas = false;
+            
+            // 🛑 SEGREDO DO MULTIPLAYER: Se eu estava na tela de Veredito esperando o Dono dar as cartas,
+            // e as cartas chegaram, eu fecho o Modal automaticamente e começo a jogar!
+            if (state.roundEnded) {
+                window.pontuacaoJaContada = false;
+                state.roundEnded = false;
+                if(typeof closeModal === 'function') closeModal();
+            }
         }
 
         state.pTurn = (estadoSeguro.turnoAtual === meuUid);
