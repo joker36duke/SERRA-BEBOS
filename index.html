@@ -2931,7 +2931,7 @@ function confirmGuardian() {
     
     if(trickMsg) trickMsg.classList.remove('hidden');
 
-    setTimeout(async () => {
+        setTimeout(async () => {
         const pP = document.getElementById('played-p');
         const pE = document.getElementById('played-e');
         if(pP) { pP.style = ''; pP.innerHTML = ''; }
@@ -2943,6 +2943,9 @@ function confirmGuardian() {
         state.isFirstTrick = false;
         state.isBiscaNaRodaActive = false;
         state.resolvendoVaza = false; 
+
+        // 🔥 A TRAVA QUE FALTOU: Verifica se é a última vaza do jogo!
+        const isLastTrick = (state.pHand.length === 0 && state.eHand.length === 0 && state.deck.length === 0);
 
         if (state.isDono) {
             const ganhadorDaVazaUid = (winner === 'p') ? meuUid : inimigoUid;
@@ -2979,24 +2982,50 @@ function confirmGuardian() {
             let maoSerraObj = {};
             for(let i=0; i<4; i++) maoSerraObj[i] = maoSerra[i] || null;
 
-            const updates = {
-                [`salas/${state.salaId}/mesa_jogo/baralho`]: novoBaralhoObj,
-                [`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`]: maoDonoObj,
-                [`salas/${state.salaId}/mesa_jogo/maos/${inimigoUid}`]: maoSerraObj,
-                [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
-                [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
-                [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
-                [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
-                [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
-                [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
-                [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
-                [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null
-            };
-            await update(ref(database), updates);
+            if (!isLastTrick) {
+                // O jogo continua! Envia tudo normalmente.
+                const updates = {
+                    [`salas/${state.salaId}/mesa_jogo/baralho`]: novoBaralhoObj,
+                    [`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`]: maoDonoObj,
+                    [`salas/${state.salaId}/mesa_jogo/maos/${inimigoUid}`]: maoSerraObj,
+                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
+                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
+                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
+                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
+                    [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
+                    [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
+                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
+                    [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null
+                };
+                await update(ref(database), updates);
+            } else {
+                // FIM DE JOGO! O antigo dono SÓ atualiza os pontos, NÃO envia as mãos vazias!
+                state.pScore = pontosDono; 
+                state.eScore = pontosSerra;
+                state.pTricksWon = vazasDono;
+                state.eTricksWon = vazasSerra;
+                if(window.updateArenaUI) window.updateArenaUI();
+
+                const updates = {
+                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
+                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
+                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
+                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
+                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null
+                };
+                await update(ref(database), updates);
+            }
+
         } else {
             state.canPlay = state.pTurn && !state.pCard;
             if(window.updateArenaUI) window.updateArenaUI();
         }
+
+        // 🔥 CHAMADA UNIVERSAL DO VEREDITO (Roda nos dois aparelhos sem depender do Firebase)
+        if (isLastTrick && !state.roundEnded) {
+            if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+        }
+
     }, 1800);
 };
 
