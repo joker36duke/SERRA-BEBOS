@@ -2701,7 +2701,6 @@ function confirmGuardian() {
             let novoBaralho = createFullDeck();
             shuffle(novoBaralho);
 
-            // 🔥 CORREÇÃO: Lê a ordem de turnos com segurança total!
             let arrayTurnos = [];
             if (state.ordemTurnos) {
                 if (Array.isArray(state.ordemTurnos)) arrayTurnos = state.ordemTurnos;
@@ -2741,6 +2740,9 @@ function confirmGuardian() {
                     liderAtual: uidSerra, 
                     cartasJogadas: null,
                     isBiscaNaRodaActive: false,
+                    // 🔥 A MAGIA AQUI: O FIREBASE COMANDA A BISCA E O PAPÔ
+                    isFirstTrickNuvem: true, 
+                    popoUsado: { [uidSerra]: false, [uidDono]: false },
                     pontos: { [uidSerra]: 0, [uidDono]: 0 },
                     vazas: { [uidSerra]: 0, [uidDono]: 0 },
                     placarSerras: {
