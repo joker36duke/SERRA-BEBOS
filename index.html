@@ -2793,8 +2793,14 @@ function confirmGuardian() {
             return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
         }
 
-        // Garante que a ordem de turnos sempre volte a ser uma Lista!
-        let turnosSalvos = lerArray(mesa.estado?.ordemTurnosSegura || state.ordemTurnos);
+        const estadoSeguro = mesa.estado || {};
+
+        // 🔥 LEITURA DIRETA DO FIREBASE: O Fim das falhas de botão!
+        state.isFirstTrick = estadoSeguro.isFirstTrickNuvem !== undefined ? estadoSeguro.isFirstTrickNuvem : true;
+        state.pPopoUsed = estadoSeguro.popoUsado ? estadoSeguro.popoUsado[meuUid] : false;
+        state.ePopoUsed = estadoSeguro.popoUsado ? estadoSeguro.popoUsado[inimigoUid] : false;
+
+        let turnosSalvos = lerArray(estadoSeguro.ordemTurnosSegura || state.ordemTurnos);
         if (turnosSalvos.length !== 2) turnosSalvos = state.ordemTurnos;
 
         const inimigoUid = turnosSalvos.find(uid => uid !== meuUid);
@@ -2806,17 +2812,26 @@ function confirmGuardian() {
         state.pHand = lerArray(maosSeguras[meuUid]);
         state.eHand = lerArray(maosSeguras[inimigoUid]);
         
-        const estadoSeguro = mesa.estado || {};
         const jogadas = estadoSeguro.cartasJogadas || {};
         state.pCard = jogadas[meuUid] || null;
         state.eCard = jogadas[inimigoUid] || null;
 
         const isGameOver = (!state.distribuindoCartas && state.deck.length === 0 && state.pHand.length === 0 && state.eHand.length === 0 && !state.pCard && !state.eCard);
 
+        if (state.pHand.length > 0 || state.eHand.length > 0) {
+            state.distribuindoCartas = false;
+            
+            if (state.roundEnded) {
+                window.pontuacaoJaContada = false;
+                state.roundEnded = false;
+                state.resolvendoVaza = false;
+                if(typeof closeModal === 'function') closeModal();
+            }
+        }
+
         if (estadoSeguro.donoDaMesa) {
             const uidDonoNuvem = estadoSeguro.donoDaMesa;
             
-            // 🔥 A MURALHA DA FLORESTA: Ignora a foto velha se estivermos embaralhando ou finalizando a rodada
             if (!isGameOver && !state.roundEnded && !state.distribuindoCartas) {
                 state.isDono = (meuUid === uidDonoNuvem);
             }
@@ -2845,19 +2860,6 @@ function confirmGuardian() {
         const bAlert = document.getElementById('bisca-alert');
         if (state.isBiscaNaRodaActive && bAlert) bAlert.classList.remove('hidden');
         else if (!state.isFirstTrick && bAlert) bAlert.classList.add('hidden');
-
-        // 🔥 O ESCUDO CAI quando o Firebase envia cartas reais na mão do jogador!
-        if (state.pHand.length > 0 || state.eHand.length > 0) {
-            state.distribuindoCartas = false;
-            
-            // 🛑 SEGREDO DO MULTIPLAYER: Se eu estava na tela de Veredito esperando o Dono dar as cartas,
-            // e as cartas chegaram, eu fecho o Modal automaticamente e começo a jogar!
-            if (state.roundEnded) {
-                window.pontuacaoJaContada = false;
-                state.roundEnded = false;
-                if(typeof closeModal === 'function') closeModal();
-            }
-        }
 
         state.pTurn = (estadoSeguro.turnoAtual === meuUid);
         state.canPlay = state.pTurn && !state.resolvendoVaza && !state.pCard && !state.distribuindoCartas;
