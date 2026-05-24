@@ -2896,13 +2896,13 @@ function confirmGuardian() {
             }, 500);
         }
     });
-};
-                
+};        
 
-        // ========================================================
-        // O JUIZ ONLINE: RESOLVE A VAZA E ATUALIZA (CORRIGIDO)
-        // ========================================================
-          window.resolveTrickOnline = async function(mesa, meuUid, inimigoUid) {
+
+// ========================================================
+// O JUIZ ONLINE: RESOLVE A VAZA E ATUALIZA (CORRIGIDO)
+// ========================================================
+        window.resolveTrickOnline = async function(mesa, meuUid, inimigoUid) {
     if (state.resolvendoVaza && !state.pCard) return; 
     state.resolvendoVaza = true;
 
@@ -3010,7 +3010,9 @@ function confirmGuardian() {
                     [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
                     [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
                     [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
-                    [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null
+                    [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null,
+                    // 🔥 DESLIGA A PRIMEIRA VAZA NO FIREBASE PARA NINGUÉM MAIS USAR A BISCA!
+                    [`salas/${state.salaId}/mesa_jogo/estado/isFirstTrickNuvem`]: false 
                 };
                 await update(ref(database), updates);
             } else {
