@@ -2526,52 +2526,55 @@ function confirmGuardian() {
         // TROCA DO VIRA (PAPÔ) - AGORA NO MÓDULO!
         // ==========================================
         window.executarPopo = async function() {
-            if (state.deck.length === 0 || state.pPopoUsed) return;
-            
-            const reqRank = state.trumpSuit === 'Paus' ? '4' : '3';
-            const reqSuit = state.trumpSuit;
-            const cardIndex = state.pHand.findIndex(c => c.rank === reqRank && c.suit === reqSuit);
-            
-            if (cardIndex !== -1) {
-                const oldVira = state.vira;
-                const newVira = state.pHand[cardIndex];
+    if (state.deck.length === 0 || state.pPopoUsed) return;
+    
+    const reqRank = state.trumpSuit === 'Paus' ? '4' : '3';
+    const reqSuit = state.trumpSuit;
+    const cardIndex = state.pHand.findIndex(c => c.rank === reqRank && c.suit === reqSuit);
+    
+    if (cardIndex !== -1) {
+        const oldVira = state.vira;
+        const newVira = state.pHand[cardIndex];
+        
+        state.pHand[cardIndex] = oldVira;
+        state.vira = newVira;
+        state.deck[0] = newVira; 
+        state.pPopoUsed = true;
+        
+        const uiVira = document.getElementById('ui-vira');
+        if(uiVira) {
+            uiVira.classList.remove('hidden');
+            uiVira.innerHTML = '';
+            uiVira.appendChild((window.createCardUI || createCardUI)(state.vira));
+        }
+        
+        // 📡 ENVIA O PAPÔ PARA A NUVEM
+        if (state.isOnline) {
+            try {
+                const meuUid = auth.currentUser.uid;
+                const atualizacoes = {};
+                atualizacoes[`salas/${state.salaId}/mesa_jogo/vira`] = newVira;
                 
-                state.pHand[cardIndex] = oldVira;
-                state.vira = newVira;
-                state.deck[0] = newVira; 
-                state.pPopoUsed = true;
+                // 🔥 AQUI ESTÁ A CHAVE: Avisa o Firebase que você usou o Papô!
+                atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/popoUsado/${meuUid}`] = true;
                 
-                const uiVira = document.getElementById('ui-vira');
-                if(uiVira) {
-                    uiVira.classList.remove('hidden');
-                    uiVira.innerHTML = '';
-                    uiVira.appendChild((window.createCardUI || createCardUI)(state.vira));
-                }
+                let baralhoObj = {};
+                for(let i=0; i<state.deck.length; i++) baralhoObj[i] = state.deck[i] || null;
+                atualizacoes[`salas/${state.salaId}/mesa_jogo/baralho`] = baralhoObj;
                 
-                // 📡 ENVIA O NOVO VIRA, BARALHO E MÃO COMPLETOS PARA A NUVEM
-                if (state.isOnline) {
-                    try {
-                        const meuUid = auth.currentUser.uid;
-                        const atualizacoes = {};
-                        atualizacoes[`salas/${state.salaId}/mesa_jogo/vira`] = newVira;
-                        
-                        let baralhoObj = {};
-                        for(let i=0; i<state.deck.length; i++) baralhoObj[i] = state.deck[i] || null;
-                        atualizacoes[`salas/${state.salaId}/mesa_jogo/baralho`] = baralhoObj;
-                        
-                        let maoObj = {};
-                        for(let i=0; i<4; i++) maoObj[i] = state.pHand[i] || null;
-                        atualizacoes[`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`] = maoObj;
-                        
-                        await update(ref(database), atualizacoes);
-                    } catch(erro) {
-                        console.error("Erro no envio do Papô:", erro);
-                    }
-                }
+                let maoObj = {};
+                for(let i=0; i<4; i++) maoObj[i] = state.pHand[i] || null;
+                atualizacoes[`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`] = maoObj;
                 
-                window.updateArenaUI();
+                await update(ref(database), atualizacoes);
+            } catch(erro) {
+                console.error("Erro no envio do Papô:", erro);
             }
-        };
+        }
+        
+        window.updateArenaUI();
+    }
+};
                 
     // ==========================================
     // JOGAR A CARTA (O ELO QUE FALTAVA PRO ONLINE)
