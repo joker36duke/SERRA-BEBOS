@@ -2798,26 +2798,28 @@ function confirmGuardian() {
 
         const estadoSeguro = mesa.estado || {};
 
-        // 🔥 LEITURA DIRETA DO FIREBASE: O Fim das falhas de botão!
-        state.isFirstTrick = estadoSeguro.isFirstTrickNuvem !== undefined ? estadoSeguro.isFirstTrickNuvem : true;
-        state.pPopoUsed = estadoSeguro.popoUsado ? estadoSeguro.popoUsado[meuUid] : false;
-        state.ePopoUsed = estadoSeguro.popoUsado ? estadoSeguro.popoUsado[inimigoUid] : false;
-
+        // 1º DESCOBRE OS TURNOS
         let turnosSalvos = lerArray(estadoSeguro.ordemTurnosSegura || state.ordemTurnos);
         if (turnosSalvos.length !== 2) turnosSalvos = state.ordemTurnos;
 
+        // 2º DESCOBRE O INIMIGO ANTES DE LER OS DADOS DELE
         const inimigoUid = turnosSalvos.find(uid => uid !== meuUid);
+
+        // 3º LÊ OS DADOS COM O INIMIGO JÁ RECONHECIDO (BLINDADO)
+        state.isFirstTrick = estadoSeguro.isFirstTrickNuvem !== undefined ? estadoSeguro.isFirstTrickNuvem : true;
+        state.pPopoUsed = estadoSeguro.popoUsado ? estadoSeguro.popoUsado[meuUid] : false;
+        state.ePopoUsed = (estadoSeguro.popoUsado && inimigoUid) ? estadoSeguro.popoUsado[inimigoUid] : false;
 
         if(typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal(); 
 
         state.deck = lerArray(mesa.baralho);
         const maosSeguras = mesa.maos || {};
         state.pHand = lerArray(maosSeguras[meuUid]);
-        state.eHand = lerArray(maosSeguras[inimigoUid]);
+        state.eHand = inimigoUid ? lerArray(maosSeguras[inimigoUid]) : [];
         
         const jogadas = estadoSeguro.cartasJogadas || {};
         state.pCard = jogadas[meuUid] || null;
-        state.eCard = jogadas[inimigoUid] || null;
+        state.eCard = inimigoUid ? jogadas[inimigoUid] : null;
 
         const isGameOver = (!state.distribuindoCartas && state.deck.length === 0 && state.pHand.length === 0 && state.eHand.length === 0 && !state.pCard && !state.eCard);
 
@@ -2841,7 +2843,7 @@ function confirmGuardian() {
 
             if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza && !isGameOver && !state.distribuindoCartas) {
                 state.pSerraScore = estadoSeguro.placarSerras[meuUid] || 1;
-                state.eSerraScore = estadoSeguro.placarSerras[inimigoUid] || 1;
+                state.eSerraScore = inimigoUid ? (estadoSeguro.placarSerras[inimigoUid] || 1) : 1;
             }
             if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza && !isGameOver && !state.distribuindoCartas) {
                 state.ordemTurnos = turnosSalvos; 
@@ -2855,9 +2857,9 @@ function confirmGuardian() {
         state.trumpSuit = mesa.trunfo;
         state.liderAtual = estadoSeguro.liderAtual;
         state.pScore = pontosSeguros[meuUid] || 0;
-        state.eScore = pontosSeguros[inimigoUid] || 0;
+        state.eScore = inimigoUid ? (pontosSeguros[inimigoUid] || 0) : 0;
         state.pTricksWon = vazasSeguras[meuUid] || 0; 
-        state.eTricksWon = vazasSeguras[inimigoUid] || 0; 
+        state.eTricksWon = inimigoUid ? (vazasSeguras[inimigoUid] || 0) : 0; 
 
         state.isBiscaNaRodaActive = estadoSeguro.isBiscaNaRodaActive || false;
         const bAlert = document.getElementById('bisca-alert');
@@ -2896,7 +2898,7 @@ function confirmGuardian() {
             }, 500);
         }
     });
-};        
+};
 
 
 // ========================================================
