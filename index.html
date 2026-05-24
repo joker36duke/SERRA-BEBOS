@@ -2901,150 +2901,195 @@ function confirmGuardian() {
 };
 
 
-// ========================================================
-// O JUIZ ONLINE: RESOLVE A VAZA E ATUALIZA (CORRIGIDO)
-// ========================================================
+        // ========================================================
+        // O JUIZ ONLINE BLINDADO: À PROVA DE FANTASMAS DE REDE
+        // ========================================================
         window.resolveTrickOnline = async function(mesa, meuUid, inimigoUid) {
-    if (state.resolvendoVaza && !state.pCard) return; 
-    state.resolvendoVaza = true;
-
-    // 🔥 A CAPTURA DO FANTASMA: Tiramos a "foto" da mesa AGORA, antes do tempo passar!
-    // Assim, mesmo que o Novo Dono mande cartas pelo Firebase na velocidade da luz, 
-    // o Antigo Dono já sabe que esta era a última vaza.
-    const isLastTrickLocal = (state.pHand.length === 0 && state.eHand.length === 0 && state.deck.length === 0);
-
-    const euLiderei = (state.liderAtual === meuUid);
-    const winner = determineTrickWinner(euLiderei ? state.pCard : state.eCard, euLiderei ? state.eCard : state.pCard, euLiderei);
-    const trickPts = state.pCard.pts + state.eCard.pts;
-    
-    const wArea = document.getElementById(`played-${winner}`);
-    const lArea = document.getElementById(`played-${winner === 'p' ? 'e' : 'p'}`);
-    const trickMsg = document.getElementById('trick-result-msg');
-
-    if (wArea && lArea) {
-        wArea.style.zIndex = "50";
-        lArea.style.zIndex = "10";
-        wArea.firstChild.classList.add('card-winner-glow');
-    }
-
-    if (winner === 'p') {
-        if(wArea && lArea) {
-            wArea.style.transform = "scale(1.1) translateY(-20px)";
-            lArea.style.transform = "scale(0.85) translateY(20px)";
-            lArea.style.opacity = "0.6";
-        }
-        if(trickMsg) {
-            trickMsg.innerText = trickPts > 0 ? `VOCÊ LEVOU +${trickPts} PONTOS!` : `SUA VAZA!`;
-            trickMsg.className = "absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] text-[#22c55e] texto-vencedor-brilho font-cinzel font-black text-[16px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110";
-        }
-    } else {
-        if(wArea && lArea) {
-            wArea.style.transform = "scale(1.1) translateY(20px)";
-            lArea.style.transform = "scale(0.85) translateY(-20px)";
-            lArea.style.opacity = "0.6";
-        }
-        if(trickMsg) {
-            trickMsg.innerText = trickPts > 0 ? `${state.enemyName.toUpperCase()} LEVOU +${trickPts}` : `${state.enemyName.toUpperCase()} LEVOU`;
-            trickMsg.className = "absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] text-[#ef4444] texto-vencedor-brilho font-cinzel font-black text-[16px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110";
-        }
-    }
-    
-    if(trickMsg) trickMsg.classList.remove('hidden');
-
-    setTimeout(async () => {
-        const pP = document.getElementById('played-p');
-        const pE = document.getElementById('played-e');
-        if(pP) { pP.style = ''; pP.innerHTML = ''; }
-        if(pE) { pE.style = ''; pE.innerHTML = ''; }
-        if(trickMsg) trickMsg.classList.add('hidden');
-        const bAlert = document.getElementById('bisca-alert');
-        if(bAlert) bAlert.classList.add('hidden');
-        
-        state.isFirstTrick = false;
-        state.isBiscaNaRodaActive = false;
-        state.resolvendoVaza = false; 
-
-        if (state.isDono) {
-            const ganhadorDaVazaUid = (winner === 'p') ? meuUid : inimigoUid;
+            // 🛡️ PROTOCOLO DE AUTO-RECUPERAÇÃO (O BUG DO FANTASMA)
+            // Se a internet juntou duas jogadas numa só, a mesa perde a sincronia.
+            if (state.resolvendoVaza && (!state.pCard || !state.eCard)) {
+                state.resolvendoVaza = false;
+                
+                // Varre as cartas fantasmas da tela forçadamente
+                if (!state.pCard) { const pP = document.getElementById('played-p'); if(pP) { pP.style = ''; pP.innerHTML = ''; } }
+                if (!state.eCard) { const pE = document.getElementById('played-e'); if(pE) { pE.style = ''; pE.innerHTML = ''; } }
+                
+                // Destrava as cartas da mão do jogador
+                state.canPlay = state.pTurn && !state.pCard && !state.distribuindoCartas;
+                if (window.updateArenaUI) window.updateArenaUI();
+                return; 
+            }
             
-            function lerArray(obj) {
-                if (!obj) return [];
-                if (Array.isArray(obj)) return obj.filter(x => x !== null);
-                return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
+            state.resolvendoVaza = true;
+
+            try {
+                const isLastTrickLocal = (state.pHand.length === 0 && state.eHand.length === 0 && state.deck.length === 0);
+                const euLiderei = (state.liderAtual === meuUid);
+                
+                const ledCard = euLiderei ? state.pCard : state.eCard;
+                const followedCard = euLiderei ? state.eCard : state.pCard;
+                
+                if (!ledCard || !followedCard) {
+                    state.resolvendoVaza = false;
+                    return;
+                }
+
+                const winner = determineTrickWinner(ledCard, followedCard, euLiderei);
+                const trickPts = (state.pCard.pts || 0) + (state.eCard.pts || 0);
+                
+                const wArea = document.getElementById(`played-${winner}`);
+                const lArea = document.getElementById(`played-${winner === 'p' ? 'e' : 'p'}`);
+                const trickMsg = document.getElementById('trick-result-msg');
+
+                if (wArea && lArea) {
+                    wArea.style.zIndex = "50";
+                    lArea.style.zIndex = "10";
+                    if (wArea.firstChild) wArea.firstChild.classList.add('card-winner-glow');
+
+                    if (winner === 'p') {
+                        wArea.style.transform = "scale(1.1) translateY(-20px)";
+                        lArea.style.transform = "scale(0.85) translateY(20px)";
+                        lArea.style.opacity = "0.6";
+                        if(trickMsg) {
+                            trickMsg.innerText = trickPts > 0 ? `VOCÊ LEVOU +${trickPts} PONTOS!` : `SUA VAZA!`;
+                            trickMsg.className = "absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] text-[#22c55e] texto-vencedor-brilho font-cinzel font-black text-[16px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110";
+                        }
+                    } else {
+                        wArea.style.transform = "scale(1.1) translateY(20px)";
+                        lArea.style.transform = "scale(0.85) translateY(-20px)";
+                        lArea.style.opacity = "0.6";
+                        if(trickMsg) {
+                            const enemyNameUI = state.enemyName || "ADVERSÁRIO";
+                            trickMsg.innerText = trickPts > 0 ? `${enemyNameUI.toUpperCase()} LEVOU +${trickPts}` : `${enemyNameUI.toUpperCase()} LEVOU`;
+                            trickMsg.className = "absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] text-[#ef4444] texto-vencedor-brilho font-cinzel font-black text-[16px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110";
+                        }
+                    }
+                }
+                
+                if(trickMsg) trickMsg.classList.remove('hidden');
+
+                setTimeout(async () => {
+                    try {
+                        const pP = document.getElementById('played-p');
+                        const pE = document.getElementById('played-e');
+                        if(pP) { pP.style = ''; pP.innerHTML = ''; }
+                        if(pE) { pE.style = ''; pE.innerHTML = ''; }
+                        if(trickMsg) trickMsg.classList.add('hidden');
+                        const bAlert = document.getElementById('bisca-alert');
+                        if(bAlert) bAlert.classList.add('hidden');
+                        
+                        state.isFirstTrick = false;
+                        state.isBiscaNaRodaActive = false;
+                        state.resolvendoVaza = false; 
+
+                        if (state.isDono) {
+                            const ganhadorDaVazaUid = (winner === 'p') ? meuUid : inimigoUid;
+                            
+                            function lerArray(obj) {
+                                if (!obj) return [];
+                                if (Array.isArray(obj)) return obj.filter(x => x !== null);
+                                return Object.keys(obj).map(k => obj[k]).filter(x => x !== null);
+                            }
+
+                            let novoBaralho = lerArray(mesa.baralho);
+                            let maoDono = lerArray(mesa.maos ? mesa.maos[meuUid] : []);
+                            let maoSerra = lerArray(mesa.maos ? mesa.maos[inimigoUid] : []);
+                            
+                            let pontosDono = 0, pontosSerra = 0;
+                            let vazasDono = 0, vazasSerra = 0;
+                            
+                            if (mesa.estado) {
+                                if (mesa.estado.pontos) {
+                                    pontosDono = parseInt(mesa.estado.pontos[meuUid]) || 0;
+                                    pontosSerra = parseInt(mesa.estado.pontos[inimigoUid]) || 0;
+                                }
+                                if (mesa.estado.vazas) {
+                                    vazasDono = parseInt(mesa.estado.vazas[meuUid]) || 0;
+                                    vazasSerra = parseInt(mesa.estado.vazas[inimigoUid]) || 0;
+                                }
+                            }
+
+                            if (winner === 'p') { pontosDono += trickPts; vazasDono++; } 
+                            else { pontosSerra += trickPts; vazasSerra++; }
+
+                            if (novoBaralho.length > 0) {
+                                const c1 = novoBaralho.pop();
+                                const c2 = novoBaralho.length > 0 ? novoBaralho.pop() : null;
+                                if (winner === 'p') { maoDono.push(c1); if (c2) maoSerra.push(c2); } 
+                                else { maoSerra.push(c1); if (c2) maoDono.push(c2); }
+                            }
+
+                            let novoBaralhoObj = {};
+                            for(let i=0; i<40; i++) novoBaralhoObj[i] = novoBaralho[i] || null;
+                            let maoDonoObj = {};
+                            for(let i=0; i<4; i++) maoDonoObj[i] = maoDono[i] || null;
+                            let maoSerraObj = {};
+                            for(let i=0; i<4; i++) maoSerraObj[i] = maoSerra[i] || null;
+
+                            if (!isLastTrickLocal) {
+                                const updates = {
+                                    [`salas/${state.salaId}/mesa_jogo/baralho`]: novoBaralhoObj,
+                                    [`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`]: maoDonoObj,
+                                    [`salas/${state.salaId}/mesa_jogo/maos/${inimigoUid}`]: maoSerraObj,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
+                                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
+                                    [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/isFirstTrickNuvem`]: false 
+                                };
+                                await update(ref(database), updates);
+                            } else {
+                                state.pScore = pontosDono; 
+                                state.eScore = pontosSerra;
+                                state.pTricksWon = vazasDono;
+                                state.eTricksWon = vazasSerra;
+                                if(window.updateArenaUI) window.updateArenaUI();
+
+                                const updates = {
+                                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
+                                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
+                                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null
+                                };
+                                await update(ref(database), updates);
+                            }
+
+                        } else {
+                            state.canPlay = state.pTurn && !state.pCard;
+                            if(window.updateArenaUI) window.updateArenaUI();
+                        }
+
+                        if (isLastTrickLocal && !state.roundEnded) {
+                            if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                        }
+
+                    } catch (err) {
+                        console.error("A Floresta tentou travar o jogo (setTimeout):", err);
+                        state.resolvendoVaza = false; 
+                        
+                        // DESTRAVA FORÇADO EM CASO DE ERRO
+                        if (!state.pCard) { const pP = document.getElementById('played-p'); if (pP) { pP.innerHTML = ''; pP.style = ''; } }
+                        if (!state.eCard) { const pE = document.getElementById('played-e'); if (pE) { pE.innerHTML = ''; pE.style = ''; } }
+                        state.canPlay = state.pTurn && !state.pCard && !state.distribuindoCartas;
+                        if (window.updateArenaUI) window.updateArenaUI();
+                    }
+                }, 1800);
+            } catch (err) {
+                console.error("A Floresta tentou travar o jogo (Exterior):", err);
+                state.resolvendoVaza = false; 
+                
+                // DESTRAVA FORÇADO EM CASO DE ERRO
+                if (!state.pCard) { const pP = document.getElementById('played-p'); if (pP) { pP.innerHTML = ''; pP.style = ''; } }
+                if (!state.eCard) { const pE = document.getElementById('played-e'); if (pE) { pE.innerHTML = ''; pE.style = ''; } }
+                state.canPlay = state.pTurn && !state.pCard && !state.distribuindoCartas;
+                if (window.updateArenaUI) window.updateArenaUI();
             }
-
-            let novoBaralho = lerArray(mesa.baralho);
-            let maoDono = lerArray(mesa.maos ? mesa.maos[meuUid] : []);
-            let maoSerra = lerArray(mesa.maos ? mesa.maos[inimigoUid] : []);
-            
-            let pontosDono = mesa.estado.pontos[meuUid] || 0;
-            let pontosSerra = mesa.estado.pontos[inimigoUid] || 0;
-            let vazasDono = (mesa.estado.vazas && mesa.estado.vazas[meuUid]) ? mesa.estado.vazas[meuUid] : 0;
-            let vazasSerra = (mesa.estado.vazas && mesa.estado.vazas[inimigoUid]) ? mesa.estado.vazas[inimigoUid] : 0;
-
-            if (winner === 'p') { pontosDono += trickPts; vazasDono++; } 
-            else { pontosSerra += trickPts; vazasSerra++; }
-
-            if (novoBaralho.length > 0) {
-                const c1 = novoBaralho.pop();
-                const c2 = novoBaralho.length > 0 ? novoBaralho.pop() : null;
-                if (winner === 'p') { maoDono.push(c1); if (c2) maoSerra.push(c2); } 
-                else { maoSerra.push(c1); if (c2) maoDono.push(c2); }
-            }
-
-            let novoBaralhoObj = {};
-            for(let i=0; i<40; i++) novoBaralhoObj[i] = novoBaralho[i] || null;
-            let maoDonoObj = {};
-            for(let i=0; i<4; i++) maoDonoObj[i] = maoDono[i] || null;
-            let maoSerraObj = {};
-            for(let i=0; i<4; i++) maoSerraObj[i] = maoSerra[i] || null;
-
-            // 🔥 Usamos a variável segura que capturamos lá em cima!
-            if (!isLastTrickLocal) {
-                const updates = {
-                    [`salas/${state.salaId}/mesa_jogo/baralho`]: novoBaralhoObj,
-                    [`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`]: maoDonoObj,
-                    [`salas/${state.salaId}/mesa_jogo/maos/${inimigoUid}`]: maoSerraObj,
-                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
-                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
-                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
-                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
-                    [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
-                    [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
-                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
-                    [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null,
-                    // 🔥 DESLIGA A PRIMEIRA VAZA NO FIREBASE PARA NINGUÉM MAIS USAR A BISCA!
-                    [`salas/${state.salaId}/mesa_jogo/estado/isFirstTrickNuvem`]: false 
-                };
-                await update(ref(database), updates);
-            } else {
-                state.pScore = pontosDono; 
-                state.eScore = pontosSerra;
-                state.pTricksWon = vazasDono;
-                state.eTricksWon = vazasSerra;
-                if(window.updateArenaUI) window.updateArenaUI();
-
-                const updates = {
-                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${meuUid}`]: pontosDono,
-                    [`salas/${state.salaId}/mesa_jogo/estado/pontos/${inimigoUid}`]: pontosSerra,
-                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${meuUid}`]: vazasDono, 
-                    [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
-                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null
-                };
-                await update(ref(database), updates);
-            }
-
-        } else {
-            state.canPlay = state.pTurn && !state.pCard;
-            if(window.updateArenaUI) window.updateArenaUI();
-        }
-
-        // 🔥 O VEREDITO IMPECÁVEL! Usa a foto tirada antes do Firebase se intrometer.
-        if (isLastTrickLocal && !state.roundEnded) {
-            if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-        }
-    }, 1800);
-};
+        };
 
 
     </script>
