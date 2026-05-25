@@ -2080,171 +2080,114 @@ function confirmGuardian() {
             });
         };
 
+        // ========================================================
+        // TELA DE SORTEIO BLINDADA E COM ANIMAÇÕES SUAVES
+        // ========================================================
         window.renderizarMesaSorteioOnline = function(cartasFirebase) {
             const grid = document.getElementById('luck-grid');
-            if (!grid) return;
-            grid.innerHTML = '';
+            if (!grid || !cartasFirebase) return;
+
+            // Limpa a mesa apenas se for um sorteio NOVO (todas as cartas viradas para baixo)
+            // ou se a mesa ainda não foi construída na tela.
+            const isReset = Object.values(cartasFirebase).every(c => c && !c.virada);
+            
+            if (isReset || grid.children.length !== 8) {
+                state.sorteioLocalLock = false; // 🔥 Destrava para um novo sorteio!
+                grid.innerHTML = '';
+                for (let i = 0; i < 8; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'luck-card';
+                    c.innerHTML = `
+                        <div class="luck-card-inner">
+                            <div class="luck-card-back card-back-style overflow-hidden"></div>
+                            <div class="luck-card-front"></div>
+                        </div>
+                    `;
+                    c.onclick = () => window.escolherCartaSorteio(i);
+                    grid.appendChild(c);
+                }
+            }
+
+            // Animação Suave: Apenas vira as cartas escolhidas, sem recriar o HTML e piscar a tela
             for (let i = 0; i < 8; i++) {
                 const cartaDb = cartasFirebase[i];
-                const c = document.createElement('div');
-                c.className = 'luck-card';
-                c.innerHTML = `
-                    <div class="luck-card-inner ${cartaDb.virada ? 'flipped' : ''}">
-                        <div class="luck-card-back card-back-style overflow-hidden"></div>
-                        <div class="luck-card-front"></div>
-                    </div>
-                `;
-                if (cartaDb.virada) {
+                if (!cartaDb) continue;
+
+                const c = grid.children[i];
+                if (!c) continue;
+                const inner = c.querySelector('.luck-card-inner');
+
+                // Se a carta foi virada na nuvem, mas ainda não virou na sua tela
+                if (cartaDb.virada && !inner.classList.contains('flipped')) {
                     const front = c.querySelector('.luck-card-front');
                     front.innerHTML = '';
-                    front.appendChild(createCardUI(cartaDb));
-                } else {
-                    c.onclick = () => window.escolherCartaSorteio(i);
+                    front.appendChild((window.createCardUI || createCardUI)(cartaDb));
+                    inner.classList.add('flipped');
+                    c.onclick = null; // Desativa o clique apenas nesta carta que já virou
                 }
-                grid.appendChild(c);
             }
         };
 
-                // 5. TRAVA E CLIQUE: GARANTE 1 CARTA POR JOGADOR NO FIREBASE
         window.escolherCartaSorteio = async function(indice) {
-            // Trava imediata local para evitar cliques duplos rápidos
-            if (!state.salaId || state.luckBusy) return;
-            state.luckBusy = true; 
+            // Trava local instantânea: clicou uma vez, o sistema ignora toques duplos
+            if (!state.salaId || state.sorteioLocalLock) return;
+            state.sorteioLocalLock = true; 
             
             try {
-                const meuUid = auth.currentUser.uid;
+                // Garante que estamos pegando a identidade correta do jogador no aparelho
+                const meuUid = auth.currentUser ? auth.currentUser.uid : null;
+                if (!meuUid) {
+                    console.error("Identidade do jogador não encontrada!");
+                    state.sorteioLocalLock = false;
+                    return;
+                }
+
                 const snapshot = await get(ref(database, `salas/${state.salaId}/mesa_sorteio`));
                 
                 if (snapshot.exists()) {
                     const cartasAtuais = snapshot.val();
-                    const jaEscolhi = Object.values(cartasAtuais).some(c => c.escolhidaPor === meuUid);
+                    
+                    // 1. SILÊNCIO PARA O CLIQUE FANTASMA
+                    // Se a nuvem já diz que você pegou uma carta, significa que o seu primeiro clique 
+                    // funcionou perfeitamente e este é apenas um toque duplo. Ignoramos em silêncio!
+                    const jaEscolhi = Object.values(cartasAtuais).some(c => c && c.escolhidaPor === meuUid);
                     if (jaEscolhi) {
-                        mostrarAlertaSeringal("Segure a emoção!", "Você já tirou a sua carta da sorte. Aguarde os outros.");
-                        state.luckBusy = false;
-                        return; 
+                        return; // Retorna e MANTÉM a tela travada
+                    }
+
+                    // 2. AVISO DE REFLEXO LENTO
+                    // Se você tentou clicar exatamente na carta que o adversário acabou de roubar
+                    if (cartasAtuais[indice] && cartasAtuais[indice].escolhidaPor) {
+                        mostrarAlertaSeringal("Reflexo Lento!", "O adversário puxou essa carta um segundo antes! Escolha outra.");
+                        state.sorteioLocalLock = false; // Destrava para você poder tentar outra carta
+                        return;
                     }
                 }
 
+                // 3. A CORRIDA NA NUVEM (A TRANSAÇÃO)
                 const cartaRef = ref(database, `salas/${state.salaId}/mesa_sorteio/${indice}`);
-                await runTransaction(cartaRef, (carta) => {
+                const resultado = await runTransaction(cartaRef, (carta) => {
                     if (carta && !carta.escolhidaPor) {
                         carta.escolhidaPor = meuUid;
                         carta.virada = true;
                         return carta;
                     }
-                    return;
+                    return; // Aborta a transação se alguém pegou no mesmo milissegundo
                 });
-            } catch (erro) {
-                alert("Erro ao puxar a carta na mata: " + erro.message);
-            } finally {
-                state.luckBusy = false; 
-            }
-        };
 
-        // FUNÇÃO NOVA: DESCOBRE QUAL IMAGEM CARREGAR BASEADO NO NOME DO INIMIGO
-        function getImagemArena(nomeInimigo) {
-            if (!nomeInimigo) return 'arena.png';
-            const n = nomeInimigo.toLowerCase();
-            
-            // Procura o nome do avatar na string do jogador e retorna a imagem correspondente
-            if (n.includes('testúrion') || n.includes('testurion')) return 'arena_testurion.png';
-            if (n.includes('lentorion')) return 'arena_lentorion.png';
-            if (n.includes('caimã') || n.includes('caima')) return 'arena_caimakay.png';
-            if (n.includes('bigode')) return 'arena_zebigode.png';
-            if (n.includes('baccarena')) return 'arena_baccarena.png';
-            if (n.includes('aethernox')) return 'arena_aethernox.png';
-            if (n.includes('yara')) return 'arena_yara.png';
-            
-            return 'arena.png'; // Fundo de segurança
-        }
-
-        // 6. O VEREDITO: DEFINE O PATRÃO E QUEM VAI PRO SERRA
-                window.finalizarSorteioMultiplayer = function(cartas, jogadores) {
-            try {
-                if (state.sorteioResolvido) return;
-                
-                const escolhidas = Object.values(cartas).filter(c => c.escolhidaPor && c.escolhidaPor !== "");
-                if (escolhidas.length < 2) return;
-
-                function getPower(c) {
-                    if (c.rank === 'Q' && c.suit === 'Espadas') return 100;
-                    if (c.rank === '3' && c.suit === 'Paus') return 99;
-                    if (c.rank === 'A' && c.suit === 'Paus') return 98;
-                    return c.power || 0;
-                }
-
-                let p1_carta = escolhidas[0];
-                let p2_carta = escolhidas[1];
-
-                // 🛡️ TRAVA DE EMPATE REAL
-                if (getPower(p1_carta) === getPower(p2_carta)) {
-                    state.sorteioResolvido = false; 
-                    state.luckBusy = false;
-
-                    mostrarAlertaSeringal("EMPATE NO SORTEIO!", "As cartas tiveram a mesma força na mata! Escolham uma nova carta.");
-                    
-                    // 🔥 CORREÇÃO: Como ainda não há Dono, definimos o primeiro jogador da sala para limpar a mesa
-                    const meuUid = auth.currentUser.uid;
-                    const uids = Object.keys(jogadores).sort();
-                    
-                    if (meuUid === uids[0]) {
-                        const novasCartas = window.gerar8CartasSorteio();
-                        update(ref(database, `salas/${state.salaId}`), {
-                            mesa_sorteio: novasCartas
-                        });
-                    }
-                    return; 
-                }
-                
-                state.sorteioResolvido = true;
-                escolhidas.sort((a, b) => getPower(b) - getPower(a)); 
-                
-                const cartaDono = escolhidas[0];
-                const uidDono = cartaDono.escolhidaPor;
-
-                const cartasInimigas = escolhidas.filter(c => c.escolhidaPor !== uidDono);
-                if (cartasInimigas.length === 0) {
-                    alert("A conexão com o adversário caiu! Reiniciando a mesa...");
-                    location.reload();
-                    return;
-                }
-
-                const cartaSerra = cartasInimigas[0];
-                const uidSerra = cartaSerra.escolhidaPor;
-
-                state.ordemTurnos = [uidSerra, uidDono];
-                state.donoDoJogo = uidDono;    
-                state.donoDaJogada = uidSerra; 
-                
-                const meuUid = auth.currentUser.uid;
-                state.isDono = (meuUid === uidDono);
-                
-                const nomeDono = (jogadores && jogadores[uidDono] && jogadores[uidDono].nome) ? jogadores[uidDono].nome : "ADVERSÁRIO";
-                const nomeSerra = (jogadores && jogadores[uidSerra] && jogadores[uidSerra].nome) ? jogadores[uidSerra].nome : "ADVERSÁRIO";
-
-                state.enemyName = state.isDono ? nomeSerra : nomeDono;
-
-                const statusText = document.getElementById('final-status-text');
-                if (state.isDono) {
-                    statusText.innerText = "VOCÊ DOMINA";
-                    statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#22c55e]";
+                if (resultado.committed) {
+                    // SUCESSO ABSOLUTO!
+                    // NÃO destravamos o state.sorteioLocalLock. Ele fica true para você 
+                    // descansar o dedo enquanto o Firebase calcula o resultado e muda a tela.
                 } else {
-                    statusText.innerText = "VOCÊ NO SERRA";
-                    statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#ef4444]";
+                    // EMPATE DE DEDOS: O adversário clicou na mesma carta no mesmo milissegundo.
+                    mostrarAlertaSeringal("Aviso", "A carta fugiu da sua mão! Tente outra.");
+                    state.sorteioLocalLock = false; // Destrava para você tentar outra carta
                 }
 
-                document.getElementById('label-dono').innerText = nomeDono;
-                document.getElementById('label-serra').innerText = nomeSerra;
-
-                setTimeout(() => {
-                    navTo('screen-luck', 'screen-result');
-                    state.luckBusy = false;
-                }, 1500);
-
             } catch (erro) {
-                console.error(erro);
-                alert("Erro ao ler o baralho do Sorteio: " + erro.message);
-                state.luckBusy = false;
+                console.error("Erro no sorteio na mata:", erro);
+                state.sorteioLocalLock = false; // Destrava a tela em caso de falha de conexão
             }
         };
                 
