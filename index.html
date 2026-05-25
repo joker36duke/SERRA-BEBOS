@@ -2058,7 +2058,6 @@ function confirmGuardian() {
                 const sala = snapshot.val();
                 const status = sala.config.status;
                 
-                // Trava de segurança para caso as cartas não carreguem a tempo
                 const cartas = sala.mesa_sorteio || {};
                 
                 if (status === 'sorteio' && document.getElementById('screen-luck').classList.contains('hidden')) {
@@ -2069,12 +2068,21 @@ function confirmGuardian() {
                 if (status === 'sorteio') {
                     window.renderizarMesaSorteioOnline(cartas);
                     
-                    // O SEGREDO ESTÁ AQUI: Object.keys garante 100% de compatibilidade em celulares
                     const arrayCartas = Object.keys(cartas).map(key => cartas[key]);
                     const escolhidas = arrayCartas.filter(c => c && c.escolhidaPor && c.escolhidaPor !== "");
                     
+                    // Se as duas cartas foram escolhidas, inicia a contagem APENAS UMA VEZ
                     if (escolhidas.length === sala.config.maxJogadores) {
-                        setTimeout(() => window.finalizarSorteioMultiplayer(cartas, sala.jogadores), 1800);
+                        if (!state.timeoutSorteioIniciado) {
+                            state.timeoutSorteioIniciado = true; // Trava o relógio contra disparos duplos
+                            
+                            setTimeout(() => {
+                                window.finalizarSorteioMultiplayer(cartas, sala.jogadores);
+                            }, 1800);
+                        }
+                    } else {
+                        // Se alguém caiu ou a mesa reiniciou por empate, zera o cronômetro
+                        state.timeoutSorteioIniciado = false;
                     }
                 }
             });
