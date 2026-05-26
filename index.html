@@ -2332,28 +2332,32 @@ function confirmGuardian() {
         // =========================================================
 
         window.irParaMesa = function() {
-            const mesaMadeira = document.querySelector('.wood-table');
-            const battleMsg = document.getElementById('battle-msg'); 
-            
-            fecharAlertaSeringal(); 
+    const mesaMadeira = document.querySelector('.wood-table');
+    const battleMsg = document.getElementById('battle-msg'); 
+    
+    fecharAlertaSeringal(); 
 
-            // ROTEADOR: Qual imagem de mesa puxar?
-            if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
-                mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
-                if (battleMsg) battleMsg.classList.add('hidden'); // Esconde o logo para caber as caixas
-            } else {
-                // Puxa a imagem do adversário usando o nome dele!
-                const imagemAdversario = getImagemArena(state.enemyName);
-                mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
-                if (battleMsg) battleMsg.classList.remove('hidden');
-            }
+    // ROTEADOR: Qual imagem de mesa puxar?
+    if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
+        mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
+        if (battleMsg) battleMsg.classList.add('hidden'); // Esconde o logo para caber as caixas
+    } else {
+        // CORREÇÃO: Definindo um fallback seguro para a imagem da arena
+        let imagemAdversario = 'arena.png'; 
+        if (typeof getImagemArena === 'function') {
+            imagemAdversario = getImagemArena(state.enemyName);
+        }
+        
+        mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
+        if (battleMsg) battleMsg.classList.remove('hidden');
+    }
 
-            if (state.isOnline) {
-                navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
-            } else {
-                navTo('screen-result', 'screen-battle', startSeringalGame); 
-            }
-        };
+    if (state.isOnline) {
+        navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
+    } else {
+        navTo('screen-result', 'screen-battle', startSeringalGame); 
+    }
+};
 
            // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
             window.updateArenaUI = function() {
