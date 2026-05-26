@@ -2198,6 +2198,111 @@ function confirmGuardian() {
                 state.sorteioLocalLock = false; // Destrava a tela em caso de falha de conexão
             }
         };
+
+// ========================================================
+// JUIZ DO SORTEIO ONLINE (Quem tira a maior carta domina)
+// ========================================================
+window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
+    try {
+        // 1. Filtra as cartas para achar as duas que foram escolhidas
+        const cartasEscolhidas = Object.values(cartasFirebase).filter(c => c && c.escolhidaPor);
+        
+        // Proteção: Se por algum motivo de rede não tiver 2 cartas, aborta
+        if (cartasEscolhidas.length < 2) return;
+
+        const carta1 = cartasEscolhidas[0];
+        const carta2 = cartasEscolhidas[1];
+
+        // 2. Hierarquia do Sorteio (Incluindo os Bebos!)
+        function getSorteioPower(c) {
+            if (c.rank === 'Q' && c.suit === 'Espadas') return 100;
+            if (c.rank === '3' && c.suit === 'Paus') return 99;
+            if (c.rank === 'A' && c.suit === 'Paus') return 98;
+            return c.power;
+        }
+
+        const poder1 = getSorteioPower(carta1);
+        const poder2 = getSorteioPower(carta2);
+
+        // 3. EMPATE: Baralha e dá de novo!
+        if (poder1 === poder2) {
+            const luckTitle = document.querySelector('#screen-luck p');
+            if (luckTitle) {
+                luckTitle.innerText = "EMPATE! NOVO SORTEIO";
+                luckTitle.classList.replace('text-luxury-gold', 'text-amazon');
+                
+                setTimeout(async () => {
+                    luckTitle.innerText = "Escolha uma carta para o sorteio";
+                    luckTitle.classList.replace('text-amazon', 'text-luxury-gold');
+                    
+                    // Apenas UM dos jogadores (o dono da sala) envia as novas cartas para não duplicar
+                    const meuUid = auth.currentUser.uid;
+                    const salaRef = ref(database, `salas/${state.salaId}`);
+                    const snap = await get(salaRef);
+                    if (snap.exists() && snap.val().config.criador === meuUid) {
+                        const novasCartas = window.gerar8CartasSorteio();
+                        await update(salaRef, { mesa_sorteio: novasCartas });
+                    }
+                }, 2000);
+            }
+            return;
+        }
+
+        // 4. TEMOS UM VENCEDOR
+        const vencedorUid = poder1 > poder2 ? carta1.escolhidaPor : carta2.escolhidaPor;
+        const perdedorUid = poder1 > poder2 ? carta2.escolhidaPor : carta1.escolhidaPor;
+        
+        const meuUid = auth.currentUser.uid;
+        
+        // Define quem é Dono e quem vai pro Serra
+        state.isDono = (meuUid === vencedorUid);
+        state.pSerraScore = 1;
+        state.eSerraScore = 1;
+        
+        // No SerraBebos, quem está "No Serra" (perdedor do sorteio) sempre joga a primeira carta
+        state.ordemTurnos = [perdedorUid, vencedorUid]; 
+
+        // Puxa os nomes dos jogadores
+        const nomeVencedor = jogadores[vencedorUid].nome.toUpperCase();
+        const nomePerdedor = jogadores[perdedorUid].nome.toUpperCase();
+        
+        // Salva o nome do adversário para usar na mesa de jogo depois
+        state.enemyName = (meuUid === vencedorUid) ? nomePerdedor : nomeVencedor;
+
+        // 5. ATUALIZA A TELA DE RESULTADOS
+        const statusText = document.getElementById('final-status-text');
+        const isMeVencedor = (meuUid === vencedorUid);
+        
+        statusText.innerText = isMeVencedor ? `${nomeVencedor} DOMINA` : `${nomeVencedor} DOMINA`;
+        statusText.className = `text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase ${isMeVencedor ? 'text-[#22c55e]' : 'text-[#ef4444]'}`;
+        
+        document.getElementById('label-dono').innerText = nomeVencedor;
+        document.getElementById('label-serra').innerText = nomePerdedor;
+        
+        // Imagem de fundo (Puxa a glória se você ganhar, ou a derrota)
+        const bgResultado = document.getElementById('bg-resultado-sorteio');
+        if (bgResultado) {
+            if (isMeVencedor) {
+                // Aqui idealmente usaria a vitória do seu Guardião, mas para não falhar usa a padrão:
+                bgResultado.style.backgroundImage = "url('vitoria_testurion.png')"; 
+            } else {
+                bgResultado.style.backgroundImage = "url('fundo_adversario.png')";
+            }
+        }
+
+        // 6. LIBERA A TRANSIÇÃO E MUDA STATUS DA SALA (Apenas o criador faz a chamada do Firebase)
+        const snap = await get(ref(database, `salas/${state.salaId}`));
+        if (snap.exists() && snap.val().config.criador === meuUid) {
+            await update(ref(database, `salas/${state.salaId}/config`), { status: 'jogando' });
+        }
+
+        navTo('screen-luck', 'screen-result');
+
+    } catch (e) {
+        console.error("Ocorreu um erro no juiz do sorteio online:", e);
+    }
+};
+
                 
         // ========================================================
         // O JUIZ SUPREMO: RESOLVE O FIM DA RODADA (OFFLINE E ONLINE)
