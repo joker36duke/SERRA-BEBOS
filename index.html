@@ -3086,7 +3086,7 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
                             let maoSerraObj = {};
                             for(let i=0; i<4; i++) maoSerraObj[i] = maoSerra[i] || null;
 
-                            if (!isLastTrickLocal) {
+                         if (!isLastTrickLocal) {
                                 const updates = {
                                     [`salas/${state.salaId}/mesa_jogo/baralho`]: novoBaralhoObj,
                                     [`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`]: maoDonoObj,
@@ -3097,11 +3097,16 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
                                     [`salas/${state.salaId}/mesa_jogo/estado/vazas/${inimigoUid}`]: vazasSerra, 
                                     [`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`]: ganhadorDaVazaUid,
                                     [`salas/${state.salaId}/mesa_jogo/estado/liderAtual`]: ganhadorDaVazaUid,
-                                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null,
+                                    
+                                    // AQUI ESTÁ A NOSSA BLINDAGEM ANTI-FANTASMA:
+                                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas/${meuUid}`]: null,
+                                    [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas/${inimigoUid}`]: null,
+                                    
                                     [`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`]: null,
                                     [`salas/${state.salaId}/mesa_jogo/estado/isFirstTrickNuvem`]: false 
                                 };
                                 await update(ref(database), updates);
+
                             } else {
                                 state.pScore = pontosDono; 
                                 state.eScore = pontosSerra;
