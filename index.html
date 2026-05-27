@@ -2695,6 +2695,7 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
     playedArea.appendChild(cUI);
 
     if (state.isOnline) {
+        if (state.isOnline) {
         try {
             const meuUid = auth.currentUser.uid;
             
@@ -2720,8 +2721,17 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
             await update(ref(database), atualizacoes);
             
         } catch(erro) {
-            alert("Erro ao enviar jogada: " + erro.message);
-            state.canPlay = true; 
+            console.error("Erro na rede:", erro);
+            // ROLLBACK: Se a internet falhar e o Firebase não receber a carta, ela volta pra mão!
+            state.pHand.splice(index, 0, cartaJogada); // Devolve a carta pra matriz
+            state.canPlay = true; // Destrava a mão
+            
+            // Limpa a carta fantasma da mesa
+            const playedArea = document.getElementById('played-p');
+            if (playedArea) playedArea.innerHTML = ''; 
+            
+            window.updateArenaUI(); // Atualiza a tela pra mostrar a carta de volta na mão
+            mostrarAlertaSeringal("Sinal Fraco na Mata", "A carta não chegou ao servidor. Tente jogar novamente!");
         }
     } else {
         // 🔥 MODO OFFLINE MANTIDO INTACTO
