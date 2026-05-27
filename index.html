@@ -2269,7 +2269,7 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
         // Salva o nome do adversário para usar na mesa de jogo depois
         state.enemyName = (meuUid === vencedorUid) ? nomePerdedor : nomeVencedor;
 
-        // 5. ATUALIZA A TELA DE RESULTADOS
+                // 5. ATUALIZA A TELA DE RESULTADOS
         const statusText = document.getElementById('final-status-text');
         const isMeVencedor = (meuUid === vencedorUid);
         
@@ -2279,15 +2279,23 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
         document.getElementById('label-dono').innerText = nomeVencedor;
         document.getElementById('label-serra').innerText = nomePerdedor;
         
-        // Imagem de fundo (Puxa a glória se você ganhar, ou a derrota)
+        // 🔥 A CORREÇÃO DA IMAGEM: Puxa o Guardião exato de quem venceu para as duas telas!
         const bgResultado = document.getElementById('bg-resultado-sorteio');
         if (bgResultado) {
-            if (isMeVencedor) {
-                // Aqui idealmente usaria a vitória do seu Guardião, mas para não falhar usa a padrão:
-                bgResultado.style.backgroundImage = "url('vitoria_testurion.png')"; 
-            } else {
-                bgResultado.style.backgroundImage = "url('fundo_adversario.png')";
+            let imagemDoVencedor = 'vitoria_testurion.png'; // Fallback seguro
+            
+            // Procura na sua lista de Guardiões qual bate com o nome do Vencedor (Ex: MARIA YARA)
+            if (typeof amazoniaGuardians !== 'undefined') {
+                const guardiaoEncontrado = amazoniaGuardians.find(g => 
+                    nomeVencedor.includes(g.name.toUpperCase())
+                );
+                if (guardiaoEncontrado && guardiaoEncontrado.vitoriaImg) {
+                    imagemDoVencedor = guardiaoEncontrado.vitoriaImg;
+                }
             }
+            
+            // Aplica a imagem do Guardião vencedor tanto para quem ganhou quanto para quem perdeu
+            bgResultado.style.backgroundImage = `url('${imagemDoVencedor}')`;
         }
 
         // 6. LIBERA A TRANSIÇÃO E MUDA STATUS DA SALA (Apenas o criador faz a chamada do Firebase)
