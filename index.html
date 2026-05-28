@@ -2397,14 +2397,25 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
         }
     }
 
-    if (matchOver) {
-        const btn = document.getElementById('btn-continue');
-        if(btn) btn.classList.remove('hidden'); 
+        if (matchOver) {
+        const btnContinue = document.getElementById('btn-continue');
+        const btnGoOnline = document.getElementById('btn-go-online');
+
+        // Se você VENCEU e NÃO ESTÁ ONLINE (Ou seja, derrotou o Pirarucog no Tutorial)
+        if (pWon && !state.isOnline) {
+            if (btnGoOnline) btnGoOnline.classList.remove('hidden'); // Revela o botão de Cadastro
+            if (btnContinue) btnContinue.classList.add('hidden'); // Esconde o "Voltar ao Início"
+        } else {
+            // Se perdeu para o Pirarucog ou o jogo multiplayer acabou
+            if (btnContinue) btnContinue.classList.remove('hidden');
+            if (btnGoOnline) btnGoOnline.classList.add('hidden');
+        }
         
         showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { 
             window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); 
         });
     } else {
+            
         if (state.isOnline) {
             const btn = document.getElementById('btn-continue');
             
