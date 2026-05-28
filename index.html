@@ -1790,11 +1790,12 @@ function confirmGuardian() {
         input.value = v;
     }   
 
-        // Abrir tela e capturar o clã do display correto
+            // Abrir tela e capturar o clã do display correto
     function openRegistrationScreen() {
+        state.roundEndCallback = null; // <-- ADICIONE ESTA LINHA! (Ela cancela o recarregamento)
         closeModal();
         let clã = "Seringueiro"; // Padrão caso dê erro
-        
+
         // O SEGREDO ESTÁ AQUI: Puxamos o Guardião direto da memória do jogo (player_name)
         if (typeof player_name !== 'undefined' && player_name !== "") {
             clã = player_name;
