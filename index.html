@@ -2486,7 +2486,62 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
         }
     }
 };
-                // ========================================================
+                
+       // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (COM SÍMBOLOS E LUZ DE TURNO)
+        window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid) {
+            const grid = document.getElementById('multiplayer-players-grid');
+            if (!grid) return;
+            
+            grid.innerHTML = ''; // Limpa a mesa
+            
+            // Ajusta o tamanho da grade (2 colunas para 2x2, mais apertado para 3x3)
+            grid.className = `grid grid-cols-2 gap-1.5 px-2 mt-1 ${state.tipoJogo === '3v3' ? 'text-[8px]' : 'text-[9px]'}`;
+
+            jogadoresMesa.forEach(jogador => {
+                const isTurno = (jogador.uid === turnoAtualUid);
+                const isEu = (auth.currentUser && jogador.uid === auth.currentUser.uid);
+                
+                // Identifica a equipe para definir a cor e o símbolo correto
+                const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
+                const simbolo = isCarpinteiro ? '🪚' : '⛏️';
+                const corEquipe = isCarpinteiro ? 'text-[#22c55e]' : 'text-[#ef4444]';
+                
+                // A LUZ DE TURNO
+                const luzClasse = isTurno 
+                    ? 'bg-[#22c55e] shadow-[0_0_12px_#22c55e] animate-pulse' 
+                    : 'bg-black border border-gray-700 shadow-inner';
+                
+                // Bordas brilham se for a sua própria caixa
+                const bordaCaixa = isEu ? 'border-[#d4af37]' : 'border-gray-800';
+                
+                // Define o papel do jogador em relação a você
+                const papel = isEu ? 'VOCÊ' : (jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR');
+
+                grid.innerHTML += `
+                    <div class="relative bg-black/70 border ${bordaCaixa} rounded p-2 flex flex-col justify-center shadow-inner backdrop-blur-sm">
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="font-cinzel text-white uppercase tracking-widest font-black truncate max-w-[80%]">
+                                ${jogador.nome}
+                            </span>
+                            <div class="w-3 h-3 rounded-full ${luzClasse} transition-all duration-300"></div>
+                        </div>
+                        
+                        <div class="flex justify-between items-end mt-1">
+                            <span class="font-cinzel ${corEquipe} font-bold tracking-widest uppercase opacity-90 flex items-center gap-1">
+                                <span class="text-xs">${simbolo}</span> ${papel}
+                            </span>
+                            <span class="font-inter text-gray-400 text-[8px] uppercase">
+                                ${jogador.cartasNaMao} cartas
+                            </span>
+                        </div>
+                        
+                    </div>
+                `;
+            });
+        };
+
+         // ========================================================
         // O CARTEADOR ONLINE E ROTEADOR DE ARENAS (FUSÃO SEGURA)
         // =========================================================
         window.irParaMesa = function() {
