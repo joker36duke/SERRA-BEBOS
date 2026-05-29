@@ -1914,11 +1914,17 @@ function confirmGuardian() {
                 
                 mostrarAlertaSeringal("Registrando...", "O Bebo-Mor do Seringal está levando seus selos aos anciões...");
 
-                createUserWithEmailAndPassword(auth, email, password)
+                                createUserWithEmailAndPassword(auth, email, password)
                 .then((userCredential) => {
                     updateProfile(userCredential.user, { displayName: nomeGuerra }).then(() => {
                         sendEmailVerification(userCredential.user).then(() => {
-                            mostrarAlertaSeringal("Lenda Registrada!", "Bem-vindo, " + nomeGuerra + "!\n\nConfirme seu e-mail na caixa de entrada para jogar!");
+                            
+                            // NOVA MENSAGEM COM AVISO DE SPAM AQUI:
+                            mostrarAlertaSeringal(
+                                "Lenda Registrada!", 
+                                "Bem-vindo, " + nomeGuerra + "!\n\nO Bebo-Mor enviou o seu pergaminho de acesso.\n\nCheque sua caixa de entrada e os cantos escuros do Spam para confirmar seu e-mail!"
+                            );
+                            
                             formRegister.reset();
                             document.getElementById('screen-registration').classList.add('hidden');
                             document.getElementById('screen-login').classList.remove('hidden');
