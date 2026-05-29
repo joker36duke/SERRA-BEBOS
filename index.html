@@ -2486,39 +2486,46 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
         }
     }
 };
-
-
-        // ========================================================
-            // O CARTEADOR ONLINE E ROTEADOR DE ARENAS
+                // ========================================================
+        // O CARTEADOR ONLINE E ROTEADOR DE ARENAS (FUSÃO SEGURA)
         // =========================================================
-
         window.irParaMesa = function() {
-    const mesaMadeira = document.querySelector('.wood-table');
-    const battleMsg = document.getElementById('battle-msg'); 
-    
-    fecharAlertaSeringal(); 
+            const mesaMadeira = document.querySelector('.wood-table');
+            const battleMsg = document.getElementById('battle-msg'); 
+            const painel1x1 = document.querySelector('.score-ui');
+            const painelMultiplayer = document.getElementById('multiplayer-ui');
+            
+            fecharAlertaSeringal(); 
 
-    // ROTEADOR: Qual imagem de mesa puxar?
-    if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
-        mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
-        if (battleMsg) battleMsg.classList.add('hidden'); // Esconde o logo para caber as caixas
-    } else {
-        // CORREÇÃO: Definindo um fallback seguro para a imagem da arena
-        let imagemAdversario = 'arena.png'; 
-        if (typeof getImagemArena === 'function') {
-            imagemAdversario = getImagemArena(state.enemyName);
-        }
-        
-        mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
-        if (battleMsg) battleMsg.classList.remove('hidden');
-    }
+            // ROTEADOR: Qual imagem e qual painel de mesa puxar?
+            if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
+                // Caminho exclusivo do 2x2 e 3x3
+                mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
+                if (battleMsg) battleMsg.classList.add('hidden'); 
+                
+                // Ativa o placar das novas equipes e esconde o antigo
+                if (painel1x1) painel1x1.classList.add('hidden');
+                if (painelMultiplayer) painelMultiplayer.classList.remove('hidden');
+            } else {
+                // 🚧 SEU CÓDIGO DO 1x1 BLINDADO 100% INTOCADO 🚧
+                let imagemAdversario = 'arena.png'; 
+                if (typeof getImagemArena === 'function') {
+                    imagemAdversario = getImagemArena(state.enemyName);
+                }
+                mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
+                if (battleMsg) battleMsg.classList.remove('hidden');
+                
+                // Garante que no 1x1 o painel clássico permaneça visível
+                if (painel1x1) painel1x1.classList.remove('hidden');
+                if (painelMultiplayer) painelMultiplayer.classList.add('hidden');
+            }
 
-    if (state.isOnline) {
-        navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
-    } else {
-        navTo('screen-result', 'screen-battle', startSeringalGame); 
-    }
-};
+            if (state.isOnline) {
+                navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
+            } else {
+                navTo('screen-result', 'screen-battle', startSeringalGame); 
+            }
+        };
 
            // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
             window.updateArenaUI = function() {
