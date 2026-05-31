@@ -1758,29 +1758,81 @@ function confirmGuardian() {
             `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />`;
     }
 
-                // --- SISTEMA DE TELA CHEIA (FULLSCREEN) ---
-        function toggleFullscreen() {
+     // --- SISTEMA DE TELA CHEIA E TRAVAS DE APLICATIVO ---
+        let wakeLock = null; // Variável para segurar a luz da tela
+
+        // Função para ativar as travas de Rotação e Luz
+        async function travarComoApp() {
+            // 1. Travar Orientação (Em pé / Portrait)
+            try {
+                if (screen.orientation && screen.orientation.lock) {
+                    await screen.orientation.lock('portrait');
+                }
+            } catch (err) {
+                console.log("Trava de rotação ignorada pelo navegador:", err);
+            }
+
+            // 2. Impedir a tela de apagar (Wake Lock)
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log("Trava de luz da tela falhou:", err);
+            }
+        }
+
+        // Função para soltar as travas quando sair da tela cheia
+        async function destravarApp() {
+            // 1. Destravar Orientação
+            try {
+                if (screen.orientation && screen.orientation.unlock) {
+                    screen.orientation.unlock();
+                }
+            } catch (err) {}
+
+            // 2. Liberar a luz da tela
+            if (wakeLock !== null) {
+                await wakeLock.release();
+                wakeLock = null;
+            }
+        }
+
+        // Função principal do botão
+        async function toggleFullscreen() {
             let elem = document.documentElement;
 
             // Se NÃO estiver em tela cheia, entra
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen().catch(err => console.log(err));
-                } else if (elem.webkitRequestFullscreen) { /* Safari / iOS */
-                    elem.webkitRequestFullscreen();
+                try {
+                    if (elem.requestFullscreen) {
+                        await elem.requestFullscreen();
+                    } else if (elem.webkitRequestFullscreen) { /* Safari / iOS */
+                        await elem.webkitRequestFullscreen();
+                    }
+                    // Assim que entrar em tela cheia, ativa o "Modo App"
+                    await travarComoApp();
+                } catch (err) {
+                    console.log("Erro ao maximizar:", err);
                 }
             } 
             // Se JÁ ESTIVER em tela cheia, sai
             else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) { /* Safari / iOS */
-                    document.webkitExitFullscreen();
+                try {
+                    if (document.exitFullscreen) {
+                        await document.exitFullscreen();
+                    } else if (document.webkitExitFullscreen) { /* Safari / iOS */
+                        await document.webkitExitFullscreen();
+                    }
+                    // Assim que sair da tela cheia, desativa o "Modo App"
+                    await destravarApp();
+                } catch (err) {
+                    console.log(err);
                 }
             }
         }
 
-        // Fica de olho para trocar o ícone se o status da tela mudar
+        // Ouve mudanças de tela cheia para trocar o ícone
         document.addEventListener('fullscreenchange', updateFullscreenIcon);
         document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
@@ -1789,15 +1841,25 @@ function confirmGuardian() {
             const iconCompress = document.getElementById('icon-compress');
             
             if (document.fullscreenElement || document.webkitFullscreenElement) {
-                // Está em tela cheia: mostra o ícone de comprimir
                 iconExpand.classList.add('hidden');
                 iconCompress.classList.remove('hidden');
             } else {
-                // Tela normal: mostra o ícone de expandir
                 iconCompress.classList.add('hidden');
                 iconExpand.classList.remove('hidden');
             }
         }
+
+        // Proteção extra: Se o jogador minimizar o navegador e voltar, o Wake Lock cai. 
+        // Isso reativa a luz da tela automaticamente quando ele volta pro jogo.
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                try {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                } catch (err) {
+                    console.log("Erro ao reativar Wake Lock:", err);
+                }
+            }
+        });
 
     // Novo Olhinho para o Confirmar Senha
     function toggleConfirmPasswordVisibility() {
