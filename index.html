@@ -2582,6 +2582,44 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
             }
         };
 
+ // =========================================================
+// ROTEADOR DE ARENAS 1x1 (DOMÍNIO DO ADVERSÁRIO)
+// =========================================================
+window.getImagemArena = function(enemyName) {
+    // Se não tiver nome (ex: erro de rede), volta para a arena padrão
+    if (!enemyName) return 'arena.png';
+    
+    // Converte para maiúsculo para facilitar a busca, ignorando acentos onde possível
+    const nomeAdversario = enemyName.toUpperCase();
+    
+    // Verifica qual Guardião está no nome do adversário e puxa a arena dele
+    if (nomeAdversario.includes("TESTÚRION") || nomeAdversario.includes("TESTURION")) {
+        return "arena_testurion.png";
+    }
+    if (nomeAdversario.includes("LENTORION")) {
+        return "arena_lentorion.png";
+    }
+    if (nomeAdversario.includes("CAIMÃ-KAY") || nomeAdversario.includes("CAIMA-KAY")) {
+        return "arena_caimakay.png";
+    }
+    if (nomeAdversario.includes("ZÉ BIGODE") || nomeAdversario.includes("ZE BIGODE")) {
+        return "arena_zebigode.png";
+    }
+    if (nomeAdversario.includes("BACCARENA")) {
+        return "arena_baccarena.png";
+    }
+    if (nomeAdversario.includes("AETHERNOX")) {
+        return "arena_aethernox.png";
+    }
+    if (nomeAdversario.includes("YARA")) {
+        return "arena_yara.png";
+    }
+    
+    // Fallback: Se for o Pirarucog (offline) ou algum nome que não deu match
+    return 'arena.png';
+};
+                
+
            // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
             window.updateArenaUI = function() {
             // Pontuações
