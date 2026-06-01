@@ -2468,8 +2468,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         // Luz de vez
         const luzClasse = isTurno ? 'bg-[#22c55e] animate-pulse shadow-[0_0_10px_#22c55e]' : 'bg-black/40';
         
-        // Rótulo Dinâmico para a Mesa (Alinha com a sua imagem 1000004541.png)
-        // Se for 3x3, a ordem segue: Aliado, Adversário, Aliado...
+        // Rótulo Dinâmico para a Mesa (Alinha com a sua imagem)
         const labels = state.tipoJogo === '3v3' 
             ? ["ALIADO 1", "ADVERSÁRIO 1", "ALIADO 2", "ADVERSÁRIO 2", "ALIADO 3", "ADVERSÁRIO 3"]
             : ["ALIADO 1", "ADVERSÁRIO 1", "ALIADO 2", "ADVERSÁRIO 2"];
