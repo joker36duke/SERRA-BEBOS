@@ -2410,6 +2410,86 @@ window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
     }
 };
 
+                /** 
+ * MOTOR DE EQUIPES E RENDERIZAÇÃO DE MESA 
+ * 1. O Juiz (Processa o resultado do sorteio)
+ * 2. O Artista (Desenha as caixas na tela na ordem correta)
+ */
+
+// 1. O JUIZ: Define Pedreiros, Carpinteiros, Dono e No Serra
+window.processarEquipesMultiplayer = function(jogadores, mesaSorteio) {
+    // Transforma o Firebase em uma lista organizada
+    const lista = Object.keys(jogadores).map(uid => {
+        // Encontra a carta que o jogador escolheu
+        const carta = Object.values(mesaSorteio).find(c => c.escolhidaPor === uid);
+        return {
+            uid: uid,
+            nome: jogadores[uid].nome,
+            power: carta ? carta.power : 0
+        };
+    });
+
+    // Ordenar do maior para o menor (Quem tirou maior carta fica no topo)
+    lista.sort((a, b) => b.power - a.power);
+
+    // Atribui papéis e equipes
+    return lista.map((jogador, index) => {
+        const total = lista.length;
+        const equipe = (index < total / 2) ? 'Pedreiros' : 'Carpinteiros';
+        let papel = 'Membro';
+        
+        if (index === 0) papel = 'Dono';
+        else if (index === total - 1) papel = 'NoSerra';
+
+        return { ...jogador, equipe, papel };
+    });
+};
+
+// 2. O ARTISTA: Desenha as caixas na ordem da direita (3x3 ou 2x2)
+window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid) {
+    const grid = document.getElementById('multiplayer-players-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = ''; 
+    
+    // Grid de 3 colunas para o 3x3, ou 2 para 2x2
+    const colunas = state.tipoJogo === '3v3' ? 'grid-cols-3' : 'grid-cols-2';
+    grid.className = `grid ${colunas} gap-2 px-1 mt-1`;
+
+    jogadoresOrdenados.forEach((jogador, index) => {
+        const isTurno = (jogador.uid === turnoAtualUid);
+        const isEu = (auth.currentUser && jogador.uid === auth.currentUser.uid);
+        
+        // Define o símbolo e cor
+        const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
+        const simbolo = isCarpinteiro ? '🪚' : '⛏️';
+        const corEquipe = isCarpinteiro ? 'text-[#22c55e]' : 'text-[#ef4444]';
+        
+        // Luz de vez
+        const luzClasse = isTurno ? 'bg-[#22c55e] animate-pulse shadow-[0_0_10px_#22c55e]' : 'bg-black/40';
+        
+        // Rótulo Dinâmico para a Mesa (Alinha com a sua imagem 1000004541.png)
+        // Se for 3x3, a ordem segue: Aliado, Adversário, Aliado...
+        const labels = state.tipoJogo === '3v3' 
+            ? ["ALIADO 1", "ADVERSÁRIO 1", "ALIADO 2", "ADVERSÁRIO 2", "ALIADO 3", "ADVERSÁRIO 3"]
+            : ["ALIADO 1", "ADVERSÁRIO 1", "ALIADO 2", "ADVERSÁRIO 2"];
+        
+        const meuLabel = labels[index] || "JOGADOR";
+        
+        grid.innerHTML += `
+            <div class="flex flex-col items-center">
+                <div class="w-full bg-[#1a0f0a] border border-[#d4af37]/60 rounded-md p-1.5 flex flex-col items-center shadow-md">
+                    <span class="text-[8px] font-cinzel text-[#d4af37] tracking-widest uppercase">${meuLabel}</span>
+                    <span class="text-[10px] font-black text-white truncate w-full text-center">${jogador.nome}</span>
+                    <div class="w-2 h-2 rounded-full mt-1 ${luzClasse}"></div>
+                </div>
+                <span class="text-[8px] font-bold mt-0.5 ${corEquipe}">${simbolo} ${jogador.equipe === state.minhaEquipe ? 'AMIGO' : 'INVASOR'}</span>
+            </div>
+        `;
+    });
+};
+                
+
                 
         // ========================================================
         // O JUIZ SUPREMO: RESOLVE O FIM DA RODADA (OFFLINE E ONLINE)
