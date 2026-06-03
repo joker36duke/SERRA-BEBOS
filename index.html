@@ -3088,114 +3088,101 @@ window.getImagemArena = function(enemyName) {
     }
 };
 
-       window.startSeringalGameOnline = async function() {
-    window.pontuacaoJaContada = false;
-    state.roundEnded = false; 
-    state.pPopoUsed = false;
-    state.ePopoUsed = false;
-    state.isFirstTrick = true;
-    state.isBiscaNaRodaActive = false;
-    state.resolvendoVaza = false;
-    state.pCard = null;
-    state.eCard = null;
-
-    state.pScore = 0;
-    state.eScore = 0;
-    state.pTricksWon = 0;
-    state.eTricksWon = 0;
-    
-    document.getElementById('bisca-alert').classList.add('hidden');
-    document.getElementById('trick-result-msg').classList.add('hidden');
-    document.getElementById('trunfada-ui').classList.add('hidden'); 
-    
-    const meuUid = auth.currentUser.uid;
-
-    if (state.isDono) {
-        state.distribuindoCartas = true; 
-        state.canPlay = false; 
-        state.pTurn = false;
-        if (window.updateArenaUI) window.updateArenaUI(); 
-
-        try {
-            let novoBaralho = createFullDeck();
-            shuffle(novoBaralho);
-
-            let arrayTurnos = [];
-            if (state.ordemTurnos) {
-                if (Array.isArray(state.ordemTurnos)) arrayTurnos = state.ordemTurnos;
-                else arrayTurnos = Object.keys(state.ordemTurnos).map(k => state.ordemTurnos[k]);
-            }
-
-            const uidSerra = arrayTurnos.length === 2 ? arrayTurnos[0] : null;
-            const uidDono = arrayTurnos.length === 2 ? arrayTurnos[1] : meuUid;
-
-            if (!uidSerra) {
-                console.error("Erro Crítico: Oponentes não encontrados.");
-                return;
-            }
-
-            let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
-            let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
-
-            let cartaVira = novoBaralho.pop();
-            novoBaralho.unshift(cartaVira);
-
-            let baralhoObj = {};
-            for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
-
-            let maoSerraObj = {};
-            for(let i=0; i<maoSerra.length; i++) maoSerraObj[i] = maoSerra[i];
-
-            let maoDonoObj = {};
-            for(let i=0; i<maoDono.length; i++) maoDonoObj[i] = maoDono[i];
-
-            const dadosMesa = {
-                baralho: baralhoObj,
-                vira: cartaVira,
-                trunfo: cartaVira.suit,
-                maos: { [uidSerra]: maoSerraObj, [uidDono]: maoDonoObj },
-                estado: {
-                    turnoAtual: uidSerra, 
-                    liderAtual: uidSerra, 
-                    cartasJogadas: null,
-                    isBiscaNaRodaActive: false,
-                    // 🔥 A MAGIA AQUI: O FIREBASE COMANDA A BISCA E O PAPÔ
-                    isFirstTrickNuvem: true, 
-                    popoUsado: { [uidSerra]: false, [uidDono]: false },
-                    pontos: { [uidSerra]: 0, [uidDono]: 0 },
-                    vazas: { [uidSerra]: 0, [uidDono]: 0 },
-                    placarSerras: {
-                        [meuUid]: state.pSerraScore || 1,
-                        [uidSerra]: state.eSerraScore || 1
-                    },
-                    donoDaMesa: meuUid,
-                    ordemTurnosSegura: arrayTurnos
-                }
-            };
+         // ========================================================
+        // O CARTEADOR DA NUVEM (PREPARADO PARA MULTIPLAYER)
+        // ========================================================
+        window.startSeringalGameOnline = async function() {
+            window.pontuacaoJaContada = false;
+            state.roundEnded = false; 
+            state.pPopoUsed = false; state.ePopoUsed = false;
+            state.isFirstTrick = true; state.isBiscaNaRodaActive = false;
+            state.resolvendoVaza = false; state.pCard = null; state.eCard = null;
+            state.pScore = 0; state.eScore = 0;
+            state.pTricksWon = 0; state.eTricksWon = 0;
             
-            await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
-        } catch (error) {
-            console.error("Erro ao gerar a mesa:", error);
-            alert("A floresta bloqueou o baralho. Recarregue a página.");
-        }
-    } else {
-        if (state.pHand && state.pHand.length === 4 && state.deck && state.deck.length > 0) {
-            state.distribuindoCartas = false;
-            state.canPlay = state.pTurn && !state.resolvendoVaza;
-            if (window.updateArenaUI) window.updateArenaUI(); 
-            if (typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal();
-        } else {
-            state.distribuindoCartas = true; 
-            state.canPlay = false; 
-            if (window.updateArenaUI) window.updateArenaUI(); 
-            if (typeof mostrarAlertaSeringal === 'function') mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
-        }
-    }
-    
-    if (!state.listenerAtivo) {
-        window.ouvirMesaJogoOnline();
-    }
-};
+            document.getElementById('bisca-alert').classList.add('hidden');
+            document.getElementById('trick-result-msg').classList.add('hidden');
+            document.getElementById('trunfada-ui').classList.add('hidden'); 
+            
+            const meuUid = auth.currentUser.uid;
+
+            if (state.isDono) {
+                state.distribuindoCartas = true; 
+                state.canPlay = false; state.pTurn = false;
+                if (window.updateArenaUI) window.updateArenaUI(); 
+
+                try {
+                    let novoBaralho = createFullDeck();
+                    shuffle(novoBaralho);
+
+                    // Puxa a lista de UIDs que definimos no Sorteio
+                    let arrayTurnos = state.ordemTurnos || [meuUid]; 
+                    let maosDistribuidas = {};
+                    
+                    // Dá 4 cartas para CADA jogador na mesa (Funciona no 1x1, 2x2 e 3x3!)
+                    arrayTurnos.forEach(uid => {
+                        let mao = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
+                        let maoObj = {};
+                        for(let i=0; i<mao.length; i++) maoObj[i] = mao[i];
+                        maosDistribuidas[uid] = maoObj;
+                    });
+
+                    // O Vira é a próxima carta
+                    let cartaVira = novoBaralho.pop();
+                    novoBaralho.unshift(cartaVira); // Vai pro fundo
+
+                    let baralhoObj = {};
+                    for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
+
+                    // Quem joga primeiro? No SerraBebos, é sempre o No Serra (O 2º da lista)
+                    const uidPrimeiroAJogar = arrayTurnos.length > 1 ? arrayTurnos[1] : meuUid;
+
+                    // Inicia o rastreamento de Papô, Vazas e Pontos para todos da sala
+                    let popoIncial = {}, pontosIniciais = {}, vazasIniciais = {};
+                    arrayTurnos.forEach(uid => {
+                        popoIncial[uid] = false;
+                        pontosIniciais[uid] = 0;
+                        vazasIniciais[uid] = 0;
+                    });
+
+                    const dadosMesa = {
+                        baralho: baralhoObj,
+                        vira: cartaVira,
+                        trunfo: cartaVira.suit,
+                        maos: maosDistribuidas,
+                        estado: {
+                            turnoAtual: uidPrimeiroAJogar, 
+                            liderAtual: uidPrimeiroAJogar, 
+                            cartasJogadas: null,
+                            isBiscaNaRodaActive: false,
+                            isFirstTrickNuvem: true, 
+                            popoUsado: popoIncial,
+                            pontos: pontosIniciais,
+                            vazas: vazasIniciais,
+                            placarSerras: {
+                                [meuUid]: state.pSerraScore || 1, // Dono
+                                [uidPrimeiroAJogar]: state.eSerraScore || 1 // No Serra
+                            },
+                            donoDaMesa: meuUid,
+                            ordemTurnosSegura: arrayTurnos
+                        }
+                    };
+                    
+                    await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
+                } catch (error) {
+                    console.error("Erro ao gerar a mesa:", error);
+                }
+            } else {
+                state.distribuindoCartas = true; state.canPlay = false; 
+                if (window.updateArenaUI) window.updateArenaUI(); 
+                if (typeof mostrarAlertaSeringal === 'function') mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
+            }
+            
+            if (!state.listenerAtivo) {
+                window.ouvirMesaJogoOnline();
+            }
+        };
+
                 
     window.ouvirMesaJogoOnline = function() {
     if (state.listenerAtivo) return; 
