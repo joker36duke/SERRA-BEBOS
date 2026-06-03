@@ -124,9 +124,26 @@
         .score-ui { width: 100%; padding: 20px; display: flex; justify-content: space-between; z-index: 100; }
         .player-name-luxury { font-family: 'Cinzel', serif; font-weight: 900; font-size: 0.7rem; letter-spacing: 2px; color: var(--luxury-blue); }
 
-        .serra-badge { background: var(--wine); color: var(--luxury-gold); padding: 2px 10px; font-size: 9px; font-weight: 900; letter-spacing: 2px; border: 1px solid var(--luxury-gold); font-family: 'Cinzel', serif; text-transform: uppercase; }
+                .serra-badge { 
+            background: var(--wine); 
+            color: var(--luxury-gold); 
+            padding: 4px 14px; /* Mais "gordinho" */
+            font-size: 13px; /* Aumentado de 9px para 13px! */
+            font-weight: 900; 
+            letter-spacing: 2px; 
+            border: 1px solid var(--luxury-gold); 
+            font-family: 'Cinzel', serif; 
+            text-transform: uppercase; 
+            border-radius: 4px; /* Suavizando as bordas */
+        }
 
-        .deck-vaza-area { position: absolute; left: 15px; top: 60%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; z-index: 20; }
+        .deck-vaza-area { 
+            position: absolute; left: 15px; 
+            top: 70%; /* Estava 60%, agora desceu para a altura da mesa */
+            transform: translateY(-50%); 
+            display: flex; flex-direction: column; align-items: center; z-index: 20; 
+        }
+
         .stack-container { position: relative; width: 130px; height: 140px; }
         
         .vira-pos { position: absolute; bottom: 5px; left: -15px; transform: rotate(90deg); z-index: 5; opacity: 0.9; }
