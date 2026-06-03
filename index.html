@@ -3310,6 +3310,8 @@ window.getImagemArena = function(enemyName) {
         }
         // ==========================================
 
+        if(window.updateArenaUI) window.updateArenaUI();
+        
         if (state.pCard && state.eCard && !state.resolvendoVaza) {
             state.resolvendoVaza = true;
             state.canPlay = false; 
