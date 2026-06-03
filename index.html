@@ -2400,10 +2400,18 @@ function confirmGuardian() {
                 // 4. MONTA A RODA DA MESA (Intercalando Pedreiros e Carpinteiros)
                 let ordemMesa = [];
                 if (state.tipoJogo === '3v3') {
-                    // [Dono(A), NoSerra(B), Aliado1(A), Invasor1(B), Aliado2(A), Invasor2(B)]
-                    ordemMesa = [listaEquipes[0], listaEquipes[5], listaEquipes[1], listaEquipes[3], listaEquipes[2], listaEquipes[4]];
+                    // [Dono(Eq A), NoSerra(Eq B), Aliado1(Eq A), Invasor1(Eq B), Aliado2(Eq A), Invasor2(Eq B)]
+                    // A equipe A tem os índices 0, 1, 2. A equipe B tem 3, 4, 5 (sendo o 5 o menor de todos).
+                    ordemMesa = [
+                        listaEquipes[0], // Dono da Mesa
+                        listaEquipes[5], // No Serra
+                        listaEquipes[1], // Aliado 1 
+                        listaEquipes[3], // Invasor 1 
+                        listaEquipes[2], // Aliado 2 
+                        listaEquipes[4]  // Invasor 2 
+                    ];
                 } else if (state.tipoJogo === '2v2') {
-                    // [Dono(A), NoSerra(B), ParceiroDono(A), ParceiroSerra(B)]
+                    // [Dono(Eq A), NoSerra(Eq B), ParceiroDono(Eq A), ParceiroSerra(Eq B)]
                     ordemMesa = [listaEquipes[0], listaEquipes[3], listaEquipes[1], listaEquipes[2]];
                 } else {
                     // 1x1 Clássico
