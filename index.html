@@ -3284,7 +3284,31 @@ window.getImagemArena = function(enemyName) {
             if(playedE) playedE.innerHTML = '';
         }
 
-        if(window.updateArenaUI) window.updateArenaUI();
+        // ==========================================
+        // 🔥 INJETANDO ENERGIA NAS CAIXINHAS MULTIPLAYER
+        // ==========================================
+        if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
+            if (state.jogadoresDefinidos) {
+                const turnoDaNuvem = estadoSeguro.turnoAtual;
+                
+                const listaParaUI = state.jogadoresDefinidos.map(j => {
+                    // Conta quantas cartas cada jogador tem na mão olhando a nuvem
+                    let qtd = 0;
+                    if (j.uid === meuUid) {
+                        qtd = state.pHand.length; // Minha mão
+                    } else if (maosSeguras[j.uid]) {
+                        qtd = Object.keys(maosSeguras[j.uid]).filter(k => maosSeguras[j.uid][k] !== null).length; // Mão dos outros
+                    }
+                    return { ...j, cartasNaMao: qtd };
+                });
+
+                // Chama o Artista para desenhar a grade acesa!
+                if (window.renderizarCaixasMultiplayer) {
+                    window.renderizarCaixasMultiplayer(listaParaUI, turnoDaNuvem);
+                }
+            }
+        }
+        // ==========================================
 
         if (state.pCard && state.eCard && !state.resolvendoVaza) {
             state.resolvendoVaza = true;
