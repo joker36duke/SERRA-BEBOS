@@ -1067,22 +1067,55 @@
             }
         }
 
+         // --- LÓGICA DO BARALHO E DESENHO DAS CARTAS ---
         function createCardUI(card, hidden = false, onClick = null) {
             const div = document.createElement('div');
             div.className = `card-mesa ${hidden ? 'card-back-style' : (card.suit === 'Copas' || card.suit === 'Ouros' ? 'card-red' : 'card-black')}`;
-                                    if (hidden) {
+            
+            if (hidden) {
                 div.classList.add('overflow-hidden', 'card-back-style');
                 div.innerHTML = '';
- 
             } else {
                 const icon = suitIcons[card.suit];
-                 div.innerHTML = `
+                
+                // --- INTELIGÊNCIA DOS BEBOS ---
+                let beboName = "";
+                // Bebos Fixos
+                if (card.rank === 'Q' && card.suit === 'Espadas') beboName = "Dama Fina";
+                else if (card.rank === '3' && card.suit === 'Paus') beboName = "Coringa";
+                else if (card.rank === 'A' && card.suit === 'Paus') beboName = "Pé de Pinto";
+                // Bebo Condicional (Só recebe o nome se o Trunfo atual da mesa for Paus)
+                else if (card.rank === 'A' && card.suit === 'Espadas' && state.trumpSuit === 'Paus') beboName = "Condicional";
+
+                let beboHTML = '';
+                if (beboName !== "") {
+                    beboHTML = `
+                        <!-- Canto Superior Direito (L Invertido) -->
+                        <div class="absolute top-1 right-1 flex flex-col items-end pointer-events-none opacity-90 z-10">
+                            <span class="text-[5px] font-black uppercase font-cinzel text-[#722f1b] tracking-wider leading-none">${beboName}</span>
+                            <div class="flex justify-end w-full mt-[1px]">
+                                <span class="text-[7px] font-black uppercase font-cinzel text-[#b08d21] tracking-widest leading-none" style="writing-mode: vertical-rl;">BEBO</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Canto Inferior Esquerdo (Rodado 180 para acompanhar a simetria da carta) -->
+                        <div class="absolute bottom-1 left-1 flex flex-col items-end pointer-events-none opacity-90 rotate-180 z-10">
+                            <span class="text-[5px] font-black uppercase font-cinzel text-[#722f1b] tracking-wider leading-none">${beboName}</span>
+                            <div class="flex justify-end w-full mt-[1px]">
+                                <span class="text-[7px] font-black uppercase font-cinzel text-[#b08d21] tracking-widest leading-none" style="writing-mode: vertical-rl;">BEBO</span>
+                            </div>
+                        </div>
+                    `;
+                }
+                // ----------------------------------------
+
+                div.innerHTML = `
                     <div class="absolute top-1 left-1 flex flex-col items-center leading-none">
                         <span class="text-lg font-black">${card.rank}</span>
                         <span class="text-sm">${icon}</span>
                     </div>
                     
-                    <div class="flex items-center justify-center w-full h-full">
+                    <div class="flex items-center justify-center w-full h-full relative z-0">
                         <span class="text-4xl drop-shadow-md">${icon}</span>
                     </div>
                     
@@ -1090,8 +1123,9 @@
                         <span class="text-lg font-black">${card.rank}</span>
                         <span class="text-sm">${icon}</span>
                     </div>
+                    
+                    ${beboHTML}
                 `;
-
             }
             if (onClick) div.onclick = onClick;
             return div;
