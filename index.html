@@ -3733,11 +3733,18 @@ if (qtdJaJogada + 1 < maxJogadores) {
                         }
                     }
                     
-                } else {
+                 } else {
                     // Quem não é o dono só destrava a própria mão localmente
                     state.canPlay = state.pTurn && !state.pCard;
                     if(window.updateArenaUI) window.updateArenaUI();
+                    
+                    // 👉 BLINDAGEM EXTRA PARA O 2x2 e 3x3 AQUI:
+                    const isLastTrickMulti = (state.pHand.length === 0 && state.deck.length === 0);
+                    if (isLastTrickMulti && !state.roundEnded) {
+                        if (window.endRound) window.endRound(null, null, null, null, null);
+                    }
                 }
+
             }, 1800);
         } catch (err) {
             console.error("Erro no multi:", err);
