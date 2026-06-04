@@ -3571,12 +3571,17 @@ if (qtdJaJogada + 1 < maxJogadores) {
                             if(window.updateArenaUI) window.updateArenaUI();
                         }
 
-                             if (isLastTrickLocal && !state.roundEnded) {
-                            // Se for online e eu NÃO for o dono, eu espero os pontos chegarem da nuvem!
-                            if (!state.isOnline || state.isDono) {
-                                if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                                    if (isLastTrickLocal && !state.roundEnded) {
+                                // Se for online e eu NÃO for o dono, eu espero os pontos chegarem da nuvem!
+                                if (!state.isOnline || state.isDono) {
+                                    if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                                } else {
+                                    // 👉 BLINDAGEM EXTRA (PASSO 2): Se eu não sou o dono (ex: a Yara) e a mesa limpou, chama o Veredito!
+                                    if (!state.pCard && !state.eCard) {
+                                        if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                                    }
+                                }
                             }
-                        }
 
                     } catch (err) {
                         console.error("A Floresta tentou travar o jogo (setTimeout):", err);
