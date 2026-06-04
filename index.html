@@ -3377,13 +3377,27 @@ if (qtdJaJogada + 1 < maxJogadores) {
             setTimeout(() => { if(window.resolveTrickOnline) window.resolveTrickOnline(mesa, meuUid, inimigoUid); }, 1000);
         }
 
-        const modal = document.getElementById('game-modal');
-        if (isGameOver && !state.resolvendoVaza && modal && modal.classList.contains('hidden') && !state.roundEnded) {
-            setTimeout(() => {
-                if(window.endRound && !state.roundEnded) {
-                    window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                }
-            }, 500);
+                const modal = document.getElementById('game-modal');
+        if (isGameOver && modal && modal.classList.contains('hidden') && !state.roundEnded) {
+            
+            // Se o celular ainda estiver tocando a animação da vaza, ele espera!
+            if (state.resolvendoVaza) {
+                const vigiaAnimacao = setInterval(() => {
+                    if (!state.resolvendoVaza) {
+                        clearInterval(vigiaAnimacao);
+                        if (!state.roundEnded && window.endRound) {
+                            window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                        }
+                    }
+                }, 200);
+            } else {
+                // Se já acabou a animação, chama o veredito normalmente
+                setTimeout(() => {
+                    if(window.endRound && !state.roundEnded) {
+                        window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                    }
+                }, 500);
+            }
         }
     });
 };
