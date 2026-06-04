@@ -2436,14 +2436,22 @@ function confirmGuardian() {
                 state.enemyName = liderAdversario ? liderAdversario.nome.toUpperCase() : "ADVERSÁRIO";
 
                 // 6. ATUALIZA A TELA DE RESULTADO (Veredito do Baralho)
-                const statusText = document.getElementById('final-status-text');
                 const nomeDono = listaEquipes[0].nome.toUpperCase();
                 const nomeSerra = listaEquipes[listaEquipes.length - 1].nome.toUpperCase();
                 
-                const isMinhaEquipeVencedora = (state.minhaEquipe === 'Pedreiros'); 
+                // --- AJUSTE INTELIGENTE DO TÍTULO ---
+                const statusText = document.getElementById('final-status-text');
                 
-                statusText.innerText = isMinhaEquipeVencedora ? `SUA EQUIPE DOMINA` : `ADVERSÁRIOS DOMINAM`;
-                statusText.className = `text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase ${isMinhaEquipeVencedora ? 'text-[#22c55e]' : 'text-[#ef4444]'}`;
+                if (state.tipoJogo === '1v1') {
+                    // Estilo Clássico 1x1: Foca nos nomes dos jogadores
+                    statusText.innerText = `${nomeDono} DOMINA`;
+                    statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#d4af37]"; 
+                } else {
+                    // Estilo Multiplayer Novo: Foca nas equipes
+                    const isMinhaEquipeVencedora = (state.minhaEquipe === 'Pedreiros'); 
+                    statusText.innerText = isMinhaEquipeVencedora ? `SUA EQUIPE DOMINA` : `ADVERSÁRIOS DOMINAM`;
+                    statusText.className = `text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase ${isMinhaEquipeVencedora ? 'text-[#22c55e]' : 'text-[#ef4444]'}`;
+                }
                 
                 document.getElementById('label-dono').innerText = nomeDono;
                 document.getElementById('label-serra').innerText = nomeSerra;
