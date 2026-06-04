@@ -3579,6 +3579,147 @@ if (qtdJaJogada + 1 < maxJogadores) {
             }
         };
 
+     window.resolverVazaMultiplayer = async function(mesa, meuUid) {
+        state.resolvendoVaza = true;
+        try {
+            const estadoSeguro = mesa.estado || {};
+            const jogadas = estadoSeguro.cartasJogadas || {};
+            const turnosSalvos = estadoSeguro.ordemTurnosSegura || state.ordemTurnos;
+            const maxJogadores = turnosSalvos.length;
+            const liderAtual = estadoSeguro.liderAtual;
+
+            let liderIndex = turnosSalvos.indexOf(liderAtual);
+            let jogadasOrdenadas = [];
+            for(let i=0; i < maxJogadores; i++) {
+                let uid = turnosSalvos[(liderIndex + i) % maxJogadores];
+                if(jogadas[uid]) jogadasOrdenadas.push({uid: uid, card: jogadas[uid]});
+            }
+            
+            // Só resolve se todo mundo da mesa jogou
+            if (jogadasOrdenadas.length !== maxJogadores) { state.resolvendoVaza = false; return; }
+
+            let winningCard = jogadasOrdenadas[0].card;
+            let winnerUid = jogadasOrdenadas[0].uid;
+            let trickPts = winningCard.pts || 0;
+            
+            // Compara todas as cartas para achar o vencedor real
+            for(let i=1; i < maxJogadores; i++) {
+                let currentCard = jogadasOrdenadas[i].card;
+                trickPts += currentCard.pts || 0;
+                let res = determineTrickWinner(winningCard, currentCard, true);
+                if (res === 'e') {
+                    winningCard = currentCard;
+                    winnerUid = jogadasOrdenadas[i].uid;
+                }
+            }
+
+            const winnerInfo = state.jogadoresDefinidos ? state.jogadoresDefinidos.find(j => j.uid === winnerUid) : null;
+            const wIsMinhaEquipe = winnerInfo ? (winnerInfo.equipe === state.minhaEquipe) : false;
+            
+            const wArea = document.getElementById(wIsMinhaEquipe ? 'played-p' : 'played-e');
+            const lArea = document.getElementById(wIsMinhaEquipe ? 'played-e' : 'played-p');
+            const trickMsg = document.getElementById('trick-result-msg');
+
+            // Animação da vaza
+            if (wArea && lArea) {
+                wArea.style.zIndex = "50"; lArea.style.zIndex = "10";
+                wArea.style.transform = "scale(1.1) translateY(-20px)";
+                lArea.style.transform = "scale(0.85) translateY(20px)";
+                wArea.style.opacity = "1"; lArea.style.opacity = "0.6";
+                
+                if(trickMsg) {
+                    const msgTxt = trickPts > 0 ? `+${trickPts} PONTOS!` : `VAZA DA EQUIPE!`;
+                    trickMsg.innerText = wIsMinhaEquipe ? `SUA EQUIPE: ${msgTxt}` : `INVASORES: ${msgTxt}`;
+                    trickMsg.className = `absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] ${wIsMinhaEquipe ? 'text-[#22c55e]' : 'text-[#ef4444]'} texto-vencedor-brilho font-cinzel font-black text-[16px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110`;
+                    trickMsg.classList.remove('hidden');
+                }
+            }
+
+            setTimeout(async () => {
+                const pP = document.getElementById('played-p');
+                const pE = document.getElementById('played-e');
+                if(pP) { pP.style = ''; pP.innerHTML = ''; }
+                if(pE) { pE.style = ''; pE.innerHTML = ''; }
+                if(trickMsg) trickMsg.classList.add('hidden');
+                
+                state.isFirstTrick = false;
+                state.resolvendoVaza = false; 
+
+                // O Dono da sala cuida da matemática no Firebase
+                if (state.isDono) {
+                    let novoBaralho = mesa.baralho ? Object.keys(mesa.baralho).map(k=>mesa.baralho[k]).filter(x=>x!==null) : [];
+                    let maosDistribuidas = {};
+                    turnosSalvos.forEach(uid => {
+                        maosDistribuidas[uid] = mesa.maos && mesa.maos[uid] ? Object.keys(mesa.maos[uid]).map(k=>mesa.maos[uid][k]).filter(x=>x!==null) : [];
+                    });
+                    
+                    let ptsAtual = estadoSeguro.pontos || {};
+                    let vzsAtual = estadoSeguro.vazas || {};
+                    ptsAtual[winnerUid] = (ptsAtual[winnerUid] || 0) + trickPts;
+                    vzsAtual[winnerUid] = (vzsAtual[winnerUid] || 0) + 1;
+
+                    // Distribui as cartas começando pelo vencedor da vaza
+                    if (novoBaralho.length > 0) {
+                        let winIndex = turnosSalvos.indexOf(winnerUid);
+                        for(let i=0; i<maxJogadores; i++) {
+                            let currUid = turnosSalvos[(winIndex + i) % maxJogadores];
+                            if (novoBaralho.length > 0) maosDistribuidas[currUid].push(novoBaralho.pop());
+                        }
+                    }
+
+                    let novoBaralhoObj = {};
+                    for(let i=0; i<novoBaralho.length; i++) novoBaralhoObj[i] = novoBaralho[i];
+                    
+                    let maosEnvio = {};
+                    turnosSalvos.forEach(uid => {
+                        let mObj = {};
+                        for(let i=0; i<maosDistribuidas[uid].length; i++) mObj[i] = maosDistribuidas[uid][i];
+                        maosEnvio[uid] = mObj;
+                    });
+
+                    // Verifica se o jogo acabou
+                    const isLastTrick = (novoBaralho.length === 0 && Object.values(maosDistribuidas).every(mao => mao.length === 0));
+
+                    const updates = {
+                        [`salas/${state.salaId}/mesa_jogo/estado/pontos`]: ptsAtual,
+                        [`salas/${state.salaId}/mesa_jogo/estado/vazas`]: vzsAtual,
+                        [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null
+                    };
+
+                    if (!isLastTrick) {
+                        // Se o jogo continua, atualiza baralho e passa o turno
+                        updates[`salas/${state.salaId}/mesa_jogo/baralho`] = novoBaralhoObj;
+                        updates[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = winnerUid;
+                        updates[`salas/${state.salaId}/mesa_jogo/estado/liderAtual`] = winnerUid;
+                        updates[`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`] = null;
+                        updates[`salas/${state.salaId}/mesa_jogo/estado/isFirstTrickNuvem`] = false;
+                        turnosSalvos.forEach(uid => updates[`salas/${state.salaId}/mesa_jogo/maos/${uid}`] = maosEnvio[uid]);
+                        
+                        await update(ref(database), updates);
+                    } else {
+                        // Se o jogo acabou, apenas envia os pontos finais
+                        await update(ref(database), updates);
+                        
+                        // E chama o veredito (O Juiz Supremo)
+                        if (!state.roundEnded) {
+                            if (window.endRound) window.endRound(null, null, null, null, null);
+                        }
+                    }
+                    
+                } else {
+                    // Quem não é o dono só destrava a própria mão localmente
+                    state.canPlay = state.pTurn && !state.pCard;
+                    if(window.updateArenaUI) window.updateArenaUI();
+                }
+            }, 1800);
+        } catch (err) {
+            console.error("Erro no multi:", err);
+            state.resolvendoVaza = false;
+            state.canPlay = state.pTurn && !state.pCard && !state.distribuindoCartas;
+            if (window.updateArenaUI) window.updateArenaUI();
+        }
+    };
+
 
     </script>
 
