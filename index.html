@@ -3094,11 +3094,21 @@ window.getImagemArena = function(enemyName) {
             atualizacoes[`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`] = maoParaEnvio;
             atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas/${meuUid}`] = cartaJogada;
             
-            // 🔥 A CORREÇÃO DE TURNO AQUI: Só passa a vez se o inimigo ainda não tiver jogado!
-            if (!state.eCard) {
-                const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
-                atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = inimigoUid;
-            }
+// 🔥 CORREÇÃO DE TURNO MULTIPLAYER E 1x1: Passa a vez na roda ou encerra a vaza
+if (!state.todasCartasJogadasNuvem) state.todasCartasJogadasNuvem = {};
+const jogadasAtuais = state.todasCartasJogadasNuvem;
+const qtdJaJogada = Object.keys(jogadasAtuais).length;
+const maxJogadores = state.ordemTurnos.length;
+
+// Só passa o turno se ainda faltam pessoas para jogar nesta vaza
+if (qtdJaJogada + 1 < maxJogadores) {
+    const meuIndex = state.ordemTurnos.indexOf(meuUid);
+    const proximoUid = state.ordemTurnos[(meuIndex + 1) % maxJogadores];
+    atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = proximoUid;
+} else {
+    // Todo mundo jogou! A vaza vai ser resolvida, ninguém ganha o turno agora.
+    atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = "resolvendo";
+}
             
             // Avisa o adversário que a Bisca tá na roda!
             if (isBiscaAtivadaAgora) {
