@@ -2935,6 +2935,38 @@ window.getImagemArena = function(enemyName) {
                     btnPopo.style.display = 'none';
                 }
             }
+                
+            // --- CÁLCULO DE PLACAR PARA MULTIPLAYER 2x2 e 3x3 ---
+            if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) {
+                let ptsCarpinteiros = 0, ptsPedreiros = 0;
+                let serrasCarpinteiros = 0, serrasPedreiros = 0;
+                
+                if (state.jogadoresDefinidos) {
+                    state.jogadoresDefinidos.forEach(j => {
+                        const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
+                        if (j.equipe === 'Carpinteiros') ptsCarpinteiros += pts;
+                        else ptsPedreiros += pts;
+                        
+                        // Captura as serras do Dono ou NoSerra de cada equipe
+                        if (j.papel === 'Dono' || j.papel === 'NoSerra') {
+                            const ss = (state.serrasGlobais && state.serrasGlobais[j.uid]) ? state.serrasGlobais[j.uid] : 1;
+                            if (j.equipe === 'Carpinteiros') serrasCarpinteiros = ss;
+                            else serrasPedreiros = ss;
+                        }
+                    });
+                }
+                
+                // Aplica nos painéis do HTML
+                const elScoreCarp = document.getElementById('score-carpinteiros');
+                const elScorePed = document.getElementById('score-pedreiros');
+                if (elScoreCarp) elScoreCarp.innerText = ptsCarpinteiros;
+                if (elScorePed) elScorePed.innerText = ptsPedreiros;
+                
+                const elSerrasCarp = document.getElementById('serras-carpinteiros');
+                const elSerrasPed = document.getElementById('serras-pedreiros');
+                if (elSerrasCarp) elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
+                if (elSerrasPed) elSerrasPed.innerText = `${serrasPedreiros}/3`;
+            }
         };
 
         // ==========================================
