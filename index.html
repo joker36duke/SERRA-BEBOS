@@ -3277,6 +3277,43 @@ if (qtdJaJogada + 1 < maxJogadores) {
             }
         };
 
+     window.verificarFimDeJogoNuvem = function() {
+    // 1. Guarda-costas: Se já finalizamos, não faz nada.
+    if (state.roundEnded) return;
+
+    // 2. Inspetor de Oportunidade: Só verifica se a distribuição acabou 
+    // e se o Firebase realmente zerou as cartas da mesa e da mão.
+    const isGameOver = (!state.distribuindoCartas && 
+                        state.deck.length === 0 && 
+                        state.pHand.length === 0 && 
+                        state.eHand.length === 0 && 
+                        !state.pCard && 
+                        !state.eCard);
+
+    const modal = document.getElementById('game-modal');
+
+    // 3. Checagem de segurança antes de abrir o modal
+    if (isGameOver && modal && modal.classList.contains('hidden')) {
+        
+        // 4. Se já temos um vigia trabalhando, aborta o novo para não clonar.
+        if (window.vigiaAtivo) return; 
+        window.vigiaAtivo = true;
+        
+        // 5. O Vigia espera a animação acabar para não encerrar no meio do movimento.
+        const vigiaAnima = setInterval(() => {
+            if (!state.resolvendoVaza) {
+                clearInterval(vigiaAnima);
+                window.vigiaAtivo = false;
+                
+                // 6. Juiz Supremo: Chama o fim sem medo.
+                if (!state.roundEnded && window.endRound) {
+                    window.endRound(null, null, null, null, null);
+                }
+            }
+        }, 300);
+    }
+};  
+
                 
     window.ouvirMesaJogoOnline = function() {
     if (state.listenerAtivo) return; 
