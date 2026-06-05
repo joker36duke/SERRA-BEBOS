@@ -3564,7 +3564,10 @@ if (qtdJaJogada + 1 < maxJogadores) {
                                 };
                                 await update(ref(database), updates);
                             }
-
+            state.pCard = null;
+            state.eCard = null;
+            state.resolvendoVaza = false;
+                            
                         } else {
                             state.canPlay = state.pTurn && !state.pCard;
                             if(window.updateArenaUI) window.updateArenaUI();
