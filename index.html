@@ -124,26 +124,9 @@
         .score-ui { width: 100%; padding: 20px; display: flex; justify-content: space-between; z-index: 100; }
         .player-name-luxury { font-family: 'Cinzel', serif; font-weight: 900; font-size: 0.7rem; letter-spacing: 2px; color: var(--luxury-blue); }
 
-                .serra-badge { 
-            background: var(--wine); 
-            color: var(--luxury-gold); 
-            padding: 4px 14px; /* Mais "gordinho" */
-            font-size: 13px; /* Aumentado de 9px para 13px! */
-            font-weight: 900; 
-            letter-spacing: 2px; 
-            border: 1px solid var(--luxury-gold); 
-            font-family: 'Cinzel', serif; 
-            text-transform: uppercase; 
-            border-radius: 4px; /* Suavizando as bordas */
-        }
+        .serra-badge { background: var(--wine); color: var(--luxury-gold); padding: 2px 10px; font-size: 9px; font-weight: 900; letter-spacing: 2px; border: 1px solid var(--luxury-gold); font-family: 'Cinzel', serif; text-transform: uppercase; }
 
-        .deck-vaza-area { 
-            position: absolute; left: 15px; 
-            top: 70%; /* Estava 60%, agora desceu para a altura da mesa */
-            transform: translateY(-50%); 
-            display: flex; flex-direction: column; align-items: center; z-index: 20; 
-        }
-
+        .deck-vaza-area { position: absolute; left: 15px; top: 60%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; z-index: 20; }
         .stack-container { position: relative; width: 130px; height: 140px; }
         
         .vira-pos { position: absolute; bottom: 5px; left: -15px; transform: rotate(90deg); z-index: 5; opacity: 0.9; }
@@ -661,52 +644,25 @@
                 
             </div>
             
-             <div class="score-ui">
-                <div class="flex flex-col bg-black/80 border-2 border-[#d4af37]/60 rounded-lg px-4 py-2 shadow-[0_4px_10px_rgba(0,0,0,0.5)] backdrop-blur-sm">
-                    <span id="ui-role-p" class="font-cinzel font-black text-[11px] tracking-[2px] text-[#d4af37] uppercase"></span>
+            <div class="score-ui">
+                <div class="flex flex-col bg-black/70 border border-[#d4af37]/50 rounded-lg px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.5)] backdrop-blur-sm">
+                    <span id="ui-role-p" class="font-cinzel font-black text-[9px] tracking-[2px] text-[#d4af37] uppercase"></span>
                     <div class="flex items-baseline gap-2 mt-1">
-                        <span id="ui-player-name" class="font-cinzel text-[13px] font-black text-white">DAMIÃO:</span>
-                        <span id="score-p" class="text-3xl text-[#22c55e] font-black font-cinzel drop-shadow-md">0</span>
+                        <span id="ui-player-name" class="font-cinzel text-[10px] font-black text-white">DAMIÃO:</span>
+                        <span id="score-p" class="text-2xl text-[#22c55e] font-black font-cinzel drop-shadow-md">0</span>
                     </div>
-                    <div id="serras-container-p" class="hidden mt-2"><span id="serras-p" class="serra-badge shadow-md">0/3</span></div>
+                    <div id="serras-container-p" class="hidden mt-1"><span id="serras-p" class="serra-badge">0/3</span></div>
                 </div>
 
-                <div class="flex flex-col items-end text-right bg-black/80 border-2 border-[#d4af37]/60 rounded-lg px-4 py-2 shadow-[0_4px_10px_rgba(0,0,0,0.5)] backdrop-blur-sm">
-                    <span id="ui-role-e" class="font-cinzel font-black text-[11px] tracking-[2px] text-[#d4af37] uppercase"></span>
+                <div class="flex flex-col items-end text-right bg-black/70 border border-[#d4af37]/50 rounded-lg px-3 py-1.5 shadow-[0_4px_10px_rgba(0,0,0,0.5)] backdrop-blur-sm">
+                    <span id="ui-role-e" class="font-cinzel font-black text-[9px] tracking-[2px] text-[#d4af37] uppercase"></span>
                     <div class="flex items-baseline gap-2 mt-1">
-                        <span id="score-e" class="text-3xl text-[#ef4444] font-black font-cinzel drop-shadow-md">0</span>
-                        <span class="font-cinzel text-[13px] font-black text-white">PIRARUCOG:</span>
+                        <span id="score-e" class="text-2xl text-[#ef4444] font-black font-cinzel drop-shadow-md">0</span>
+                        <span class="font-cinzel text-[10px] font-black text-white">PIRARUCOG:</span>
                     </div>
-                    <div id="serras-container-e" class="hidden mt-2"><span id="serras-e" class="serra-badge shadow-md">0/3</span></div>
+                    <div id="serras-container-e" class="hidden mt-1"><span id="serras-e" class="serra-badge">0/3</span></div>
                 </div>
             </div>
-                       
-            <div id="multiplayer-ui" class="hidden w-full px-2 pt-2 flex flex-col gap-2 z-[100] absolute top-2 left-0">
-                
-                <div class="flex justify-between w-full gap-2 px-2">
-                    
-                    <div class="flex flex-col bg-black/80 border-2 border-[#a67c52] rounded-lg px-2 py-1 shadow-md w-1/2 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-r from-[#22c55e]/20 to-transparent"></div>
-                        <span class="font-cinzel font-black text-[9px] tracking-[1px] text-[#a67c52] uppercase relative z-10">🪚 Carpinteiros</span>
-                        <div class="flex items-baseline gap-2 mt-0.5 relative z-10">
-                            <span id="score-carpinteiros" class="text-xl text-[#22c55e] font-black font-cinzel drop-shadow-md">0</span>
-                            <span id="serras-carpinteiros" class="serra-badge bg-[#22c55e]/20 text-[#22c55e] border-[#22c55e]">1/3</span>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-end text-right bg-black/80 border-2 border-[#a67c52] rounded-lg px-2 py-1 shadow-md w-1/2 relative overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-l from-[#ef4444]/20 to-transparent"></div>
-                        <span class="font-cinzel font-black text-[9px] tracking-[1px] text-[#a67c52] uppercase relative z-10">⛏️ Pedreiros</span>
-                        <div class="flex items-baseline gap-2 mt-0.5 flex-row-reverse relative z-10">
-                            <span id="score-pedreiros" class="text-xl text-[#ef4444] font-black font-cinzel drop-shadow-md">0</span>
-                            <span id="serras-pedreiros" class="serra-badge bg-[#ef4444]/20 text-[#ef4444] border-[#ef4444]">1/3</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="multiplayer-players-grid" class="grid grid-cols-2 gap-1.5 px-2 mt-1">
-                    </div>
-                        </div>
             
             <div id="enemy-hand-table" class="absolute top-[33%] left-1/2 -translate-x-1/2 flex gap-2 scale-[0.85] origin-top pointer-events-none"></div>
 
@@ -735,7 +691,7 @@
                 
                 <div id="trick-result-msg" class="hidden"></div>
 
-                 <div class="flex justify-center items-center -space-x-10 z-10 mt-[38%]">
+                <div class="flex justify-center items-center -space-x-10 z-10 mt-[28%]">
                     <div id="played-e" class="relative h-[120px] w-[85px] flex items-center justify-center pointer-events-auto transition-all duration-300 -rotate-12 mt-4" style="z-index: 10;"></div>
                     
                     <div id="played-p" class="relative h-[120px] w-[85px] flex items-center justify-center pointer-events-auto transition-all duration-300 rotate-6" style="z-index: 10;"></div>
@@ -1067,56 +1023,22 @@
             }
         }
 
-         // --- LÓGICA DO BARALHO E DESENHO DAS CARTAS ---
         function createCardUI(card, hidden = false, onClick = null) {
             const div = document.createElement('div');
             div.className = `card-mesa ${hidden ? 'card-back-style' : (card.suit === 'Copas' || card.suit === 'Ouros' ? 'card-red' : 'card-black')}`;
-            
-            if (hidden) {
+                                    if (hidden) {
                 div.classList.add('overflow-hidden', 'card-back-style');
                 div.innerHTML = '';
+ 
             } else {
                 const icon = suitIcons[card.suit];
-                
-                // --- INTELIGÊNCIA DOS BEBOS ---
-                let beboName = "";
-                // Bebos Fixos
-                if (card.rank === 'Q' && card.suit === 'Espadas') beboName = "Dama Fina";
-                else if (card.rank === '3' && card.suit === 'Paus') beboName = "Coringa";
-                else if (card.rank === 'A' && card.suit === 'Paus') beboName = "Pé de Pinto";
-                // Bebo Condicional (Só recebe o nome se o Trunfo atual da mesa for Paus)
-                else if (card.rank === 'A' && card.suit === 'Espadas' && state.trumpSuit === 'Paus') beboName = "Condicional";
-
-                let beboHTML = '';
-                if (beboName !== "") {
-                    beboHTML = `
-                        <!-- Canto Superior Direito -->
-                        <div class="absolute top-1 right-1 flex flex-col items-end pointer-events-none opacity-100 z-10 drop-shadow-sm">
-                            <span class="text-[9px] font-black uppercase font-cinzel text-[#FF0000] tracking-wider leading-none">${beboName}</span>
-                            <div class="flex justify-end w-full mt-[2px]">
-                                <span class="text-[12px] font-black uppercase font-cinzel text-[#0000FF] tracking-widest leading-none" style="writing-mode: vertical-rl;">BEBO</span>
-                            </div>
-                        </div>
-                        
-                        <!-- Canto Inferior Esquerdo (Rodado 180) -->
-                        <div class="absolute bottom-1 left-1 flex flex-col items-end pointer-events-none opacity-100 rotate-180 z-10 drop-shadow-sm">
-                            <span class="text-[9px] font-black uppercase font-cinzel text-[#FF0000] tracking-wider leading-none">${beboName}</span>
-                            <div class="flex justify-end w-full mt-[2px]">
-                                <span class="text-[12px] font-black uppercase font-cinzel text-[#0000FF] tracking-widest leading-none" style="writing-mode: vertical-rl;">BEBO</span>
-                            </div>
-                        </div>
-                    `;
-                }
-
-                // ----------------------------------------
-
-                div.innerHTML = `
+                 div.innerHTML = `
                     <div class="absolute top-1 left-1 flex flex-col items-center leading-none">
                         <span class="text-lg font-black">${card.rank}</span>
                         <span class="text-sm">${icon}</span>
                     </div>
                     
-                    <div class="flex items-center justify-center w-full h-full relative z-0">
+                    <div class="flex items-center justify-center w-full h-full">
                         <span class="text-4xl drop-shadow-md">${icon}</span>
                     </div>
                     
@@ -1124,9 +1046,8 @@
                         <span class="text-lg font-black">${card.rank}</span>
                         <span class="text-sm">${icon}</span>
                     </div>
-                    
-                    ${beboHTML}
                 `;
+
             }
             if (onClick) div.onclick = onClick;
             return div;
@@ -1811,81 +1732,29 @@ function confirmGuardian() {
             `<path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />`;
     }
 
-     // --- SISTEMA DE TELA CHEIA E TRAVAS DE APLICATIVO ---
-        let wakeLock = null; // Variável para segurar a luz da tela
-
-        // Função para ativar as travas de Rotação e Luz
-        async function travarComoApp() {
-            // 1. Travar Orientação (Em pé / Portrait)
-            try {
-                if (screen.orientation && screen.orientation.lock) {
-                    await screen.orientation.lock('portrait');
-                }
-            } catch (err) {
-                console.log("Trava de rotação ignorada pelo navegador:", err);
-            }
-
-            // 2. Impedir a tela de apagar (Wake Lock)
-            try {
-                if ('wakeLock' in navigator) {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                }
-            } catch (err) {
-                console.log("Trava de luz da tela falhou:", err);
-            }
-        }
-
-        // Função para soltar as travas quando sair da tela cheia
-        async function destravarApp() {
-            // 1. Destravar Orientação
-            try {
-                if (screen.orientation && screen.orientation.unlock) {
-                    screen.orientation.unlock();
-                }
-            } catch (err) {}
-
-            // 2. Liberar a luz da tela
-            if (wakeLock !== null) {
-                await wakeLock.release();
-                wakeLock = null;
-            }
-        }
-
-        // Função principal do botão
-        async function toggleFullscreen() {
+                // --- SISTEMA DE TELA CHEIA (FULLSCREEN) ---
+        function toggleFullscreen() {
             let elem = document.documentElement;
 
             // Se NÃO estiver em tela cheia, entra
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                try {
-                    if (elem.requestFullscreen) {
-                        await elem.requestFullscreen();
-                    } else if (elem.webkitRequestFullscreen) { /* Safari / iOS */
-                        await elem.webkitRequestFullscreen();
-                    }
-                    // Assim que entrar em tela cheia, ativa o "Modo App"
-                    await travarComoApp();
-                } catch (err) {
-                    console.log("Erro ao maximizar:", err);
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen().catch(err => console.log(err));
+                } else if (elem.webkitRequestFullscreen) { /* Safari / iOS */
+                    elem.webkitRequestFullscreen();
                 }
             } 
             // Se JÁ ESTIVER em tela cheia, sai
             else {
-                try {
-                    if (document.exitFullscreen) {
-                        await document.exitFullscreen();
-                    } else if (document.webkitExitFullscreen) { /* Safari / iOS */
-                        await document.webkitExitFullscreen();
-                    }
-                    // Assim que sair da tela cheia, desativa o "Modo App"
-                    await destravarApp();
-                } catch (err) {
-                    console.log(err);
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) { /* Safari / iOS */
+                    document.webkitExitFullscreen();
                 }
             }
         }
 
-        // Ouve mudanças de tela cheia para trocar o ícone
+        // Fica de olho para trocar o ícone se o status da tela mudar
         document.addEventListener('fullscreenchange', updateFullscreenIcon);
         document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
@@ -1894,25 +1763,15 @@ function confirmGuardian() {
             const iconCompress = document.getElementById('icon-compress');
             
             if (document.fullscreenElement || document.webkitFullscreenElement) {
+                // Está em tela cheia: mostra o ícone de comprimir
                 iconExpand.classList.add('hidden');
                 iconCompress.classList.remove('hidden');
             } else {
+                // Tela normal: mostra o ícone de expandir
                 iconCompress.classList.add('hidden');
                 iconExpand.classList.remove('hidden');
             }
         }
-
-        // Proteção extra: Se o jogador minimizar o navegador e voltar, o Wake Lock cai. 
-        // Isso reativa a luz da tela automaticamente quando ele volta pro jogo.
-        document.addEventListener('visibilitychange', async () => {
-            if (wakeLock !== null && document.visibilityState === 'visible') {
-                try {
-                    wakeLock = await navigator.wakeLock.request('screen');
-                } catch (err) {
-                    console.log("Erro ao reativar Wake Lock:", err);
-                }
-            }
-        });
 
     // Novo Olhinho para o Confirmar Senha
     function toggleConfirmPasswordVisibility() {
@@ -2288,273 +2147,180 @@ function confirmGuardian() {
             }
         };
 
-        // ========================================================
-        // ESCOLHA DE CARTA BLINDADA (ANTI-TRAVAMENTO E ANTI-FANTASMA)
-        // ========================================================
         window.escolherCartaSorteio = async function(indice) {
-            // Trava local para evitar que o jogador clique em duas cartas ao mesmo tempo
+            // Trava local instantânea: clicou uma vez, o sistema ignora toques duplos
             if (!state.salaId || state.sorteioLocalLock) return;
-
-            const meuUid = auth.currentUser ? auth.currentUser.uid : null;
-            if (!meuUid) return;
-
-            // 1. TRAVA A TELA IMEDIATAMENTE
             state.sorteioLocalLock = true; 
-
-            // 2. A VÁLVULA DE ESCAPE (O SEGREDO ANTI-CONGELAMENTO)
-            // Se o Firebase não responder em 3 segundos (por queda de internet), a tela destrava sozinha!
-            const travaDeSeguranca = setTimeout(() => {
-                state.sorteioLocalLock = false;
-                console.log("Aviso: Tempo de resposta excedido. Tela destravada.");
-            }, 3000);
-
+            
             try {
-                // Consulta rápida para ver como está a mesa agora
+                // Garante que estamos pegando a identidade correta do jogador no aparelho
+                const meuUid = auth.currentUser ? auth.currentUser.uid : null;
+                if (!meuUid) {
+                    console.error("Identidade do jogador não encontrada!");
+                    state.sorteioLocalLock = false;
+                    return;
+                }
+
                 const snapshot = await get(ref(database, `salas/${state.salaId}/mesa_sorteio`));
                 
                 if (snapshot.exists()) {
                     const cartasAtuais = snapshot.val();
                     
-                    // ANTI-FANTASMA: Eu já escolhi uma carta antes e o celular gaguejou?
+                    // 1. SILÊNCIO PARA O CLIQUE FANTASMA
+                    // Se a nuvem já diz que você pegou uma carta, significa que o seu primeiro clique 
+                    // funcionou perfeitamente e este é apenas um toque duplo. Ignoramos em silêncio!
                     const jaEscolhi = Object.values(cartasAtuais).some(c => c && c.escolhidaPor === meuUid);
                     if (jaEscolhi) {
-                        clearTimeout(travaDeSeguranca);
-                        return; // Mantém a tela travada e apenas espera o sorteio acabar.
+                        return; // Retorna e MANTÉM a tela travada
                     }
 
-                    // REFLEXO LENTO: Alguém já pegou ESSA carta específica enquanto eu clicava?
+                    // 2. AVISO DE REFLEXO LENTO
+                    // Se você tentou clicar exatamente na carta que o adversário acabou de roubar
                     if (cartasAtuais[indice] && cartasAtuais[indice].escolhidaPor) {
-                        mostrarAlertaSeringal("Reflexo Lento!", "Alguém foi mais rápido e pegou essa carta. Escolha outra!");
-                        clearTimeout(travaDeSeguranca);
-                        state.sorteioLocalLock = false; // Destrava IMEDIATAMENTE para tentar outra
+                        mostrarAlertaSeringal("Reflexo Lento!", "O adversário puxou essa carta um segundo antes! Escolha outra.");
+                        state.sorteioLocalLock = false; // Destrava para você poder tentar outra carta
                         return;
                     }
                 }
 
-                // 3. A CORRIDA NO SERVIDOR (TRANSAÇÃO RIGOROSA)
+                // 3. A CORRIDA NA NUVEM (A TRANSAÇÃO)
                 const cartaRef = ref(database, `salas/${state.salaId}/mesa_sorteio/${indice}`);
                 const resultado = await runTransaction(cartaRef, (carta) => {
-                    // Só deixa eu pegar se a carta existir e ninguém tiver pego ainda
                     if (carta && !carta.escolhidaPor) {
                         carta.escolhidaPor = meuUid;
                         carta.virada = true;
                         return carta;
                     }
-                    return; // Aborta se alguém pegou no mesmo milissegundo exato
+                    return; // Aborta a transação se alguém pegou no mesmo milissegundo
                 });
 
-                // O Firebase respondeu! Cancela a válvula de escape de 3 segundos
-                clearTimeout(travaDeSeguranca); 
-
-                if (!resultado.committed) {
-                    // Empate de dedos! O adversário ganhou por milissegundos na nuvem.
-                    mostrarAlertaSeringal("Escapou!", "A carta fugiu da sua mão! Tente outra rapidamente.");
-                    state.sorteioLocalLock = false; // Destrava a tela para ele escolher outra
-                } 
-                // Se resultado.committed for TRUE, a state.sorteioLocalLock CONTINUA TRUE.
-                // O jogador descansa o dedo e espera os outros terminarem.
+                if (resultado.committed) {
+                    // SUCESSO ABSOLUTO!
+                    // NÃO destravamos o state.sorteioLocalLock. Ele fica true para você 
+                    // descansar o dedo enquanto o Firebase calcula o resultado e muda a tela.
+                } else {
+                    // EMPATE DE DEDOS: O adversário clicou na mesma carta no mesmo milissegundo.
+                    mostrarAlertaSeringal("Aviso", "A carta fugiu da sua mão! Tente outra.");
+                    state.sorteioLocalLock = false; // Destrava para você tentar outra carta
+                }
 
             } catch (erro) {
-                console.error("Erro de conexão na mata:", erro);
-                clearTimeout(travaDeSeguranca);
-                state.sorteioLocalLock = false; // Caiu a internet no meio? Destrava para tentar de novo.
+                console.error("Erro no sorteio na mata:", erro);
+                state.sorteioLocalLock = false; // Destrava a tela em caso de falha de conexão
             }
         };
 
-        // ========================================================
-        // JUIZ DO SORTEIO ONLINE (PREPARADO PARA 1x1, 2x2 e 3x3)
-        // ========================================================
-        window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
-            try {
-                const meuUid = auth.currentUser.uid;
-                
-                // Define quantas cartas precisamos esperar virar com base no tipo de jogo
-                const maxJogadores = state.tipoJogo === '1v1' ? 2 : (state.tipoJogo === '2v2' ? 4 : 6);
-                
-                // 1. Filtra as cartas. Só avança se TODOS da sala já escolheram a sua!
-                const cartasEscolhidas = Object.values(cartasFirebase).filter(c => c && c.escolhidaPor);
-                if (cartasEscolhidas.length < maxJogadores) return;
+// ========================================================
+// JUIZ DO SORTEIO ONLINE (Quem tira a maior carta domina)
+// ========================================================
+window.finalizarSorteioMultiplayer = async function(cartasFirebase, jogadores) {
+    try {
+        // 1. Filtra as cartas para achar as duas que foram escolhidas
+        const cartasEscolhidas = Object.values(cartasFirebase).filter(c => c && c.escolhidaPor);
+        
+        // Proteção: Se por algum motivo de rede não tiver 2 cartas, aborta
+        if (cartasEscolhidas.length < 2) return;
 
-                // 2. CHAMA O JUIZ SUPREMO PARA SEPARAR AS EQUIPES
-                let listaEquipes = window.processarEquipesMultiplayer(jogadores, cartasFirebase);
+        const carta1 = cartasEscolhidas[0];
+        const carta2 = cartasEscolhidas[1];
 
-                // 3. Verifica Empate no Topo (Se os maiores empatarem, cancela e resorteia)
-                if (listaEquipes[0].power === listaEquipes[1].power) {
-                    const luckTitle = document.querySelector('#screen-luck p');
-                    if (luckTitle) {
-                        luckTitle.innerText = "EMPATE NO TOPO! NOVO SORTEIO";
-                        luckTitle.classList.replace('text-luxury-gold', 'text-amazon');
-                        
-                        setTimeout(async () => {
-                            luckTitle.innerText = "Escolha uma carta para o sorteio";
-                            luckTitle.classList.replace('text-amazon', 'text-luxury-gold');
-                            // Apenas o dono da sala zera as cartas
-                            const snap = await get(ref(database, `salas/${state.salaId}`));
-                            if (snap.exists() && snap.val().config.criador === meuUid) {
-                                await update(ref(database, `salas/${state.salaId}`), { mesa_sorteio: window.gerar8CartasSorteio() });
-                            }
-                        }, 2000);
+        // 2. Hierarquia do Sorteio (Incluindo os Bebos!)
+        function getSorteioPower(c) {
+            if (c.rank === 'Q' && c.suit === 'Espadas') return 100;
+            if (c.rank === '3' && c.suit === 'Paus') return 99;
+            if (c.rank === 'A' && c.suit === 'Paus') return 98;
+            return c.power;
+        }
+
+        const poder1 = getSorteioPower(carta1);
+        const poder2 = getSorteioPower(carta2);
+
+        // 3. EMPATE: Baralha e dá de novo!
+        if (poder1 === poder2) {
+            const luckTitle = document.querySelector('#screen-luck p');
+            if (luckTitle) {
+                luckTitle.innerText = "EMPATE! NOVO SORTEIO";
+                luckTitle.classList.replace('text-luxury-gold', 'text-amazon');
+                
+                setTimeout(async () => {
+                    luckTitle.innerText = "Escolha uma carta para o sorteio";
+                    luckTitle.classList.replace('text-amazon', 'text-luxury-gold');
+                    
+                    // Apenas UM dos jogadores (o dono da sala) envia as novas cartas para não duplicar
+                    const meuUid = auth.currentUser.uid;
+                    const salaRef = ref(database, `salas/${state.salaId}`);
+                    const snap = await get(salaRef);
+                    if (snap.exists() && snap.val().config.criador === meuUid) {
+                        const novasCartas = window.gerar8CartasSorteio();
+                        await update(salaRef, { mesa_sorteio: novasCartas });
                     }
-                    return;
-                }
-
-                // 4. MONTA A RODA DA MESA (Intercalando Pedreiros e Carpinteiros)
-                let ordemMesa = [];
-                if (state.tipoJogo === '3v3') {
-                    // [Dono(Eq A), NoSerra(Eq B), Aliado1(Eq A), Invasor1(Eq B), Aliado2(Eq A), Invasor2(Eq B)]
-                    // A equipe A tem os índices 0, 1, 2. A equipe B tem 3, 4, 5 (sendo o 5 o menor de todos).
-                    ordemMesa = [
-                        listaEquipes[0], // Dono da Mesa
-                        listaEquipes[5], // No Serra
-                        listaEquipes[1], // Aliado 1 
-                        listaEquipes[3], // Invasor 1 
-                        listaEquipes[2], // Aliado 2 
-                        listaEquipes[4]  // Invasor 2 
-                    ];
-                } else if (state.tipoJogo === '2v2') {
-                    // [Dono(Eq A), NoSerra(Eq B), ParceiroDono(Eq A), ParceiroSerra(Eq B)]
-                    ordemMesa = [listaEquipes[0], listaEquipes[3], listaEquipes[1], listaEquipes[2]];
-                } else {
-                    // 1x1 Clássico
-                    ordemMesa = [listaEquipes[0], listaEquipes[1]];
-                }
-
-                // 5. SALVA A IDENTIDADE NA MEMÓRIA DO CELULAR (Isto alimenta as caixas!)
-                state.jogadoresDefinidos = ordemMesa; 
-                
-                const meuPerfil = ordemMesa.find(j => j.uid === meuUid);
-                state.isDono = (meuPerfil && meuPerfil.papel === 'Dono');
-                state.minhaEquipe = meuPerfil ? meuPerfil.equipe : 'Membro';
-                state.pSerraScore = 1;
-                state.eSerraScore = 1;
-                
-                // A Ordem da Mesa vira a Ordem de Turnos oficial
-                state.ordemTurnos = ordemMesa.map(j => j.uid);
-                
-                // Acha o líder adversário para botar o nome dele no Placar Clássico antigo
-                const liderAdversario = ordemMesa.find(j => j.equipe !== state.minhaEquipe && (j.papel === 'Dono' || j.papel === 'NoSerra'));
-                state.enemyName = liderAdversario ? liderAdversario.nome.toUpperCase() : "ADVERSÁRIO";
-
-                // 6. ATUALIZA A TELA DE RESULTADO (Veredito do Baralho)
-                const nomeDono = listaEquipes[0].nome.toUpperCase();
-                const nomeSerra = listaEquipes[listaEquipes.length - 1].nome.toUpperCase();
-                
-                // --- AJUSTE INTELIGENTE DO TÍTULO ---
-                const statusText = document.getElementById('final-status-text');
-                
-                if (state.tipoJogo === '1v1') {
-                    // Estilo Clássico 1x1: Foca nos nomes dos jogadores
-                    statusText.innerText = `${nomeDono} DOMINA`;
-                    statusText.className = "text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase text-[#d4af37]"; 
-                } else {
-                    // Estilo Multiplayer Novo: Foca nas equipes
-                    const isMinhaEquipeVencedora = (state.minhaEquipe === 'Pedreiros'); 
-                    statusText.innerText = isMinhaEquipeVencedora ? `SUA EQUIPE DOMINA` : `ADVERSÁRIOS DOMINAM`;
-                    statusText.className = `text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase ${isMinhaEquipeVencedora ? 'text-[#22c55e]' : 'text-[#ef4444]'}`;
-                }
-                
-                document.getElementById('label-dono').innerText = nomeDono;
-                document.getElementById('label-serra').innerText = nomeSerra;
-                
-                // Imagem de Vitória (Puxando a arte dos guardiões)
-                const bgResultado = document.getElementById('bg-resultado-sorteio');
-                if (bgResultado && typeof amazoniaGuardians !== 'undefined') {
-                    const guardiaoEncontrado = amazoniaGuardians.find(g => nomeDono.includes(g.name.toUpperCase()));
-                    const img = (guardiaoEncontrado && guardiaoEncontrado.vitoriaImg) ? guardiaoEncontrado.vitoriaImg : 'vitoria_testurion.png';
-                    bgResultado.style.backgroundImage = `url('${img}')`;
-                }
-
-                // 7. AVISA O FIREBASE QUE O JOGO VAI COMEÇAR
-                const snap = await get(ref(database, `salas/${state.salaId}`));
-                if (snap.exists() && snap.val().config.criador === meuUid) {
-                    await update(ref(database, `salas/${state.salaId}/config`), { status: 'jogando' });
-                }
-
-                navTo('screen-luck', 'screen-result');
-
-            } catch (e) {
-                console.error("Ocorreu um erro no juiz do sorteio online:", e);
+                }, 2000);
             }
-        };
+            return;
+        }
 
-                /** 
- * MOTOR DE EQUIPES E RENDERIZAÇÃO DE MESA 
- * 1. O Juiz (Processa o resultado do sorteio)
- * 2. O Artista (Desenha as caixas na tela na ordem correta)
- */
-
-// 1. O JUIZ: Define Pedreiros, Carpinteiros, Dono e No Serra
-window.processarEquipesMultiplayer = function(jogadores, mesaSorteio) {
-    // Transforma o Firebase em uma lista organizada
-    const lista = Object.keys(jogadores).map(uid => {
-        // Encontra a carta que o jogador escolheu
-        const carta = Object.values(mesaSorteio).find(c => c.escolhidaPor === uid);
-        return {
-            uid: uid,
-            nome: jogadores[uid].nome,
-            power: carta ? carta.power : 0
-        };
-    });
-
-    // Ordenar do maior para o menor (Quem tirou maior carta fica no topo)
-    lista.sort((a, b) => b.power - a.power);
-
-    // Atribui papéis e equipes
-    return lista.map((jogador, index) => {
-        const total = lista.length;
-        const equipe = (index < total / 2) ? 'Pedreiros' : 'Carpinteiros';
-        let papel = 'Membro';
+        // 4. TEMOS UM VENCEDOR
+        const vencedorUid = poder1 > poder2 ? carta1.escolhidaPor : carta2.escolhidaPor;
+        const perdedorUid = poder1 > poder2 ? carta2.escolhidaPor : carta1.escolhidaPor;
         
-        if (index === 0) papel = 'Dono';
-        else if (index === total - 1) papel = 'NoSerra';
+        const meuUid = auth.currentUser.uid;
+        
+        // Define quem é Dono e quem vai pro Serra
+        state.isDono = (meuUid === vencedorUid);
+        state.pSerraScore = 1;
+        state.eSerraScore = 1;
+        
+        // No SerraBebos, quem está "No Serra" (perdedor do sorteio) sempre joga a primeira carta
+        state.ordemTurnos = [perdedorUid, vencedorUid]; 
 
-        return { ...jogador, equipe, papel };
-    });
+        // Puxa os nomes dos jogadores
+        const nomeVencedor = jogadores[vencedorUid].nome.toUpperCase();
+        const nomePerdedor = jogadores[perdedorUid].nome.toUpperCase();
+        
+        // Salva o nome do adversário para usar na mesa de jogo depois
+        state.enemyName = (meuUid === vencedorUid) ? nomePerdedor : nomeVencedor;
+
+                // 5. ATUALIZA A TELA DE RESULTADOS
+        const statusText = document.getElementById('final-status-text');
+        const isMeVencedor = (meuUid === vencedorUid);
+        
+        statusText.innerText = isMeVencedor ? `${nomeVencedor} DOMINA` : `${nomeVencedor} DOMINA`;
+        statusText.className = `text-3xl text-center font-black font-cinzel mb-6 tracking-widest uppercase ${isMeVencedor ? 'text-[#22c55e]' : 'text-[#ef4444]'}`;
+        
+        document.getElementById('label-dono').innerText = nomeVencedor;
+        document.getElementById('label-serra').innerText = nomePerdedor;
+        
+        // 🔥 A CORREÇÃO DA IMAGEM: Puxa o Guardião exato de quem venceu para as duas telas!
+        const bgResultado = document.getElementById('bg-resultado-sorteio');
+        if (bgResultado) {
+            let imagemDoVencedor = 'vitoria_testurion.png'; // Fallback seguro
+            
+            // Procura na sua lista de Guardiões qual bate com o nome do Vencedor (Ex: MARIA YARA)
+            if (typeof amazoniaGuardians !== 'undefined') {
+                const guardiaoEncontrado = amazoniaGuardians.find(g => 
+                    nomeVencedor.includes(g.name.toUpperCase())
+                );
+                if (guardiaoEncontrado && guardiaoEncontrado.vitoriaImg) {
+                    imagemDoVencedor = guardiaoEncontrado.vitoriaImg;
+                }
+            }
+            
+            // Aplica a imagem do Guardião vencedor tanto para quem ganhou quanto para quem perdeu
+            bgResultado.style.backgroundImage = `url('${imagemDoVencedor}')`;
+        }
+
+        // 6. LIBERA A TRANSIÇÃO E MUDA STATUS DA SALA (Apenas o criador faz a chamada do Firebase)
+        const snap = await get(ref(database, `salas/${state.salaId}`));
+        if (snap.exists() && snap.val().config.criador === meuUid) {
+            await update(ref(database, `salas/${state.salaId}/config`), { status: 'jogando' });
+        }
+
+        navTo('screen-luck', 'screen-result');
+
+    } catch (e) {
+        console.error("Ocorreu um erro no juiz do sorteio online:", e);
+    }
 };
-
-// 2. O ARTISTA: Desenha as caixas na ordem da direita (3x3 ou 2x2)
-window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid) {
-    const grid = document.getElementById('multiplayer-players-grid');
-    if (!grid) return;
-    
-    grid.innerHTML = ''; 
-    
-    // Grid de 3 colunas para o 3x3, ou 2 para 2x2
-    const colunas = state.tipoJogo === '3v3' ? 'grid-cols-3' : 'grid-cols-2';
-    grid.className = `grid ${colunas} gap-2 px-1 mt-1`;
-
-    jogadoresOrdenados.forEach((jogador, index) => {
-        const isTurno = (jogador.uid === turnoAtualUid);
-        const isEu = (auth.currentUser && jogador.uid === auth.currentUser.uid);
-        
-        // Define o símbolo e cor
-        const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
-        const simbolo = isCarpinteiro ? '🪚' : '⛏️';
-        const corEquipe = isCarpinteiro ? 'text-[#22c55e]' : 'text-[#ef4444]';
-        
-        // Luz de vez
-        const luzClasse = isTurno ? 'bg-[#22c55e] animate-pulse shadow-[0_0_10px_#22c55e]' : 'bg-black/40';
-        
-        // Rótulo Dinâmico para a Mesa (Alinha com a sua imagem)
-        const labels = state.tipoJogo === '3v3' 
-            ? ["ALIADO 1", "ADVERSÁRIO 1", "ALIADO 2", "ADVERSÁRIO 2", "ALIADO 3", "ADVERSÁRIO 3"]
-            : ["ALIADO 1", "ADVERSÁRIO 1", "ALIADO 2", "ADVERSÁRIO 2"];
-        
-        const meuLabel = labels[index] || "JOGADOR";
-        
-        grid.innerHTML += `
-            <div class="flex flex-col items-center">
-                <div class="w-full bg-[#1a0f0a] border border-[#d4af37]/60 rounded-md p-1.5 flex flex-col items-center shadow-md">
-                    <span class="text-[8px] font-cinzel text-[#d4af37] tracking-widest uppercase">${meuLabel}</span>
-                    <span class="text-[10px] font-black text-white truncate w-full text-center">${jogador.nome}</span>
-                    <div class="w-2 h-2 rounded-full mt-1 ${luzClasse}"></div>
-                </div>
-                <span class="text-[8px] font-bold mt-0.5 ${corEquipe}">${simbolo} ${jogador.equipe === state.minhaEquipe ? 'AMIGO' : 'INVASOR'}</span>
-            </div>
-        `;
-    });
-};
-                
 
                 
         // ========================================================
@@ -2694,139 +2460,39 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
 };
-                
-       // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (COM SÍMBOLOS E LUZ DE TURNO)
-        window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid) {
-            const grid = document.getElementById('multiplayer-players-grid');
-            if (!grid) return;
-            
-            grid.innerHTML = ''; // Limpa a mesa
-            
-            // Ajusta o tamanho da grade (2 colunas para 2x2, mais apertado para 3x3)
-            grid.className = `grid grid-cols-2 gap-1.5 px-2 mt-1 ${state.tipoJogo === '3v3' ? 'text-[8px]' : 'text-[9px]'}`;
 
-            jogadoresMesa.forEach(jogador => {
-                const isTurno = (jogador.uid === turnoAtualUid);
-                const isEu = (auth.currentUser && jogador.uid === auth.currentUser.uid);
-                
-                // Identifica a equipe para definir a cor e o símbolo correto
-                const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
-                const simbolo = isCarpinteiro ? '🪚' : '⛏️';
-                const corEquipe = isCarpinteiro ? 'text-[#22c55e]' : 'text-[#ef4444]';
-                
-                // A LUZ DE TURNO
-                const luzClasse = isTurno 
-                    ? 'bg-[#22c55e] shadow-[0_0_12px_#22c55e] animate-pulse' 
-                    : 'bg-black border border-gray-700 shadow-inner';
-                
-                // Bordas brilham se for a sua própria caixa
-                const bordaCaixa = isEu ? 'border-[#d4af37]' : 'border-gray-800';
-                
-                // Define o papel do jogador em relação a você
-                const papel = isEu ? 'VOCÊ' : (jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR');
 
-                grid.innerHTML += `
-                    <div class="relative bg-black/70 border ${bordaCaixa} rounded p-2 flex flex-col justify-center shadow-inner backdrop-blur-sm">
-                        
-                        <div class="flex justify-between items-center">
-                            <span class="font-cinzel text-white uppercase tracking-widest font-black truncate max-w-[80%]">
-                                ${jogador.nome}
-                            </span>
-                            <div class="w-3 h-3 rounded-full ${luzClasse} transition-all duration-300"></div>
-                        </div>
-                        
-                        <div class="flex justify-between items-end mt-1">
-                            <span class="font-cinzel ${corEquipe} font-bold tracking-widest uppercase opacity-90 flex items-center gap-1">
-                                <span class="text-xs">${simbolo}</span> ${papel}
-                            </span>
-                            <span class="font-inter text-gray-400 text-[8px] uppercase">
-                                ${jogador.cartasNaMao} cartas
-                            </span>
-                        </div>
-                        
-                    </div>
-                `;
-            });
-        };
-
-         // ========================================================
-        // O CARTEADOR ONLINE E ROTEADOR DE ARENAS (FUSÃO SEGURA)
+        // ========================================================
+            // O CARTEADOR ONLINE E ROTEADOR DE ARENAS
         // =========================================================
+
         window.irParaMesa = function() {
-            const mesaMadeira = document.querySelector('.wood-table');
-            const battleMsg = document.getElementById('battle-msg'); 
-            const painel1x1 = document.querySelector('.score-ui');
-            const painelMultiplayer = document.getElementById('multiplayer-ui');
-            
-            fecharAlertaSeringal(); 
-
-            // ROTEADOR: Qual imagem e qual painel de mesa puxar?
-            if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
-                // Caminho exclusivo do 2x2 e 3x3
-                mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
-                if (battleMsg) battleMsg.classList.add('hidden'); 
-                
-                // Ativa o placar das novas equipes e esconde o antigo
-                if (painel1x1) painel1x1.classList.add('hidden');
-                if (painelMultiplayer) painelMultiplayer.classList.remove('hidden');
-            } else {
-                // 🚧 SEU CÓDIGO DO 1x1 BLINDADO 100% INTOCADO 🚧
-                let imagemAdversario = 'arena.png'; 
-                if (typeof getImagemArena === 'function') {
-                    imagemAdversario = getImagemArena(state.enemyName);
-                }
-                mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
-                if (battleMsg) battleMsg.classList.remove('hidden');
-                
-                // Garante que no 1x1 o painel clássico permaneça visível
-                if (painel1x1) painel1x1.classList.remove('hidden');
-                if (painelMultiplayer) painelMultiplayer.classList.add('hidden');
-            }
-
-            if (state.isOnline) {
-                navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
-            } else {
-                navTo('screen-result', 'screen-battle', startSeringalGame); 
-            }
-        };
-
- // =========================================================
-// ROTEADOR DE ARENAS 1x1 (DOMÍNIO DO ADVERSÁRIO)
-// =========================================================
-window.getImagemArena = function(enemyName) {
-    // Se não tiver nome (ex: erro de rede), volta para a arena padrão
-    if (!enemyName) return 'arena.png';
+    const mesaMadeira = document.querySelector('.wood-table');
+    const battleMsg = document.getElementById('battle-msg'); 
     
-    // Converte para maiúsculo para facilitar a busca, ignorando acentos onde possível
-    const nomeAdversario = enemyName.toUpperCase();
-    
-    // Verifica qual Guardião está no nome do adversário e puxa a arena dele
-    if (nomeAdversario.includes("TESTÚRION") || nomeAdversario.includes("TESTURION")) {
-        return "arena_testurion.png";
+    fecharAlertaSeringal(); 
+
+    // ROTEADOR: Qual imagem de mesa puxar?
+    if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
+        mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
+        if (battleMsg) battleMsg.classList.add('hidden'); // Esconde o logo para caber as caixas
+    } else {
+        // CORREÇÃO: Definindo um fallback seguro para a imagem da arena
+        let imagemAdversario = 'arena.png'; 
+        if (typeof getImagemArena === 'function') {
+            imagemAdversario = getImagemArena(state.enemyName);
+        }
+        
+        mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
+        if (battleMsg) battleMsg.classList.remove('hidden');
     }
-    if (nomeAdversario.includes("LENTORION")) {
-        return "arena_lentorion.png";
+
+    if (state.isOnline) {
+        navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
+    } else {
+        navTo('screen-result', 'screen-battle', startSeringalGame); 
     }
-    if (nomeAdversario.includes("CAIMÃ-KAY") || nomeAdversario.includes("CAIMA-KAY")) {
-        return "arena_caimakay.png";
-    }
-    if (nomeAdversario.includes("ZÉ BIGODE") || nomeAdversario.includes("ZE BIGODE")) {
-        return "arena_zebigode.png";
-    }
-    if (nomeAdversario.includes("BACCARENA")) {
-        return "arena_baccarena.png";
-    }
-    if (nomeAdversario.includes("AETHERNOX")) {
-        return "arena_aethernox.png";
-    }
-    if (nomeAdversario.includes("YARA")) {
-        return "arena_yara.png";
-    }
-    
-    // Fallback: Se for o Pirarucog (offline) ou algum nome que não deu match
-    return 'arena.png';
 };
-                
 
            // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
             window.updateArenaUI = function() {
@@ -2943,38 +2609,6 @@ window.getImagemArena = function(enemyName) {
                     btnPopo.classList.add('hidden', 'opacity-50', 'pointer-events-none');
                     btnPopo.style.display = 'none';
                 }
-            }
-                
-            // --- CÁLCULO DE PLACAR PARA MULTIPLAYER 2x2 e 3x3 ---
-            if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) {
-                let ptsCarpinteiros = 0, ptsPedreiros = 0;
-                let serrasCarpinteiros = 0, serrasPedreiros = 0;
-                
-                if (state.jogadoresDefinidos) {
-                    state.jogadoresDefinidos.forEach(j => {
-                        const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
-                        if (j.equipe === 'Carpinteiros') ptsCarpinteiros += pts;
-                        else ptsPedreiros += pts;
-                        
-                        // Captura as serras do Dono ou NoSerra de cada equipe
-                        if (j.papel === 'Dono' || j.papel === 'NoSerra') {
-                            const ss = (state.serrasGlobais && state.serrasGlobais[j.uid]) ? state.serrasGlobais[j.uid] : 1;
-                            if (j.equipe === 'Carpinteiros') serrasCarpinteiros = ss;
-                            else serrasPedreiros = ss;
-                        }
-                    });
-                }
-                
-                // Aplica nos painéis do HTML
-                const elScoreCarp = document.getElementById('score-carpinteiros');
-                const elScorePed = document.getElementById('score-pedreiros');
-                if (elScoreCarp) elScoreCarp.innerText = ptsCarpinteiros;
-                if (elScorePed) elScorePed.innerText = ptsPedreiros;
-                
-                const elSerrasCarp = document.getElementById('serras-carpinteiros');
-                const elSerrasPed = document.getElementById('serras-pedreiros');
-                if (elSerrasCarp) elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
-                if (elSerrasPed) elSerrasPed.innerText = `${serrasPedreiros}/3`;
             }
         };
 
@@ -3102,21 +2736,11 @@ window.getImagemArena = function(enemyName) {
             atualizacoes[`salas/${state.salaId}/mesa_jogo/maos/${meuUid}`] = maoParaEnvio;
             atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas/${meuUid}`] = cartaJogada;
             
-// 🔥 CORREÇÃO DE TURNO MULTIPLAYER E 1x1: Passa a vez na roda ou encerra a vaza
-if (!state.todasCartasJogadasNuvem) state.todasCartasJogadasNuvem = {};
-const jogadasAtuais = state.todasCartasJogadasNuvem;
-const qtdJaJogada = Object.keys(jogadasAtuais).length;
-const maxJogadores = state.ordemTurnos.length;
-
-// Só passa o turno se ainda faltam pessoas para jogar nesta vaza
-if (qtdJaJogada + 1 < maxJogadores) {
-    const meuIndex = state.ordemTurnos.indexOf(meuUid);
-    const proximoUid = state.ordemTurnos[(meuIndex + 1) % maxJogadores];
-    atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = proximoUid;
-} else {
-    // Todo mundo jogou! A vaza vai ser resolvida, ninguém ganha o turno agora.
-    atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = "resolvendo";
-}
+            // 🔥 A CORREÇÃO DE TURNO AQUI: Só passa a vez se o inimigo ainda não tiver jogado!
+            if (!state.eCard) {
+                const inimigoUid = state.ordemTurnos.find(uid => uid !== meuUid);
+                atualizacoes[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = inimigoUid;
+            }
             
             // Avisa o adversário que a Bisca tá na roda!
             if (isBiscaAtivadaAgora) {
@@ -3147,101 +2771,114 @@ if (qtdJaJogada + 1 < maxJogadores) {
     }
 };
 
-         // ========================================================
-        // O CARTEADOR DA NUVEM (PREPARADO PARA MULTIPLAYER)
-        // ========================================================
-        window.startSeringalGameOnline = async function() {
-            window.pontuacaoJaContada = false;
-            state.roundEnded = false; 
-            state.pPopoUsed = false; state.ePopoUsed = false;
-            state.isFirstTrick = true; state.isBiscaNaRodaActive = false;
-            state.resolvendoVaza = false; state.pCard = null; state.eCard = null;
-            state.pScore = 0; state.eScore = 0;
-            state.pTricksWon = 0; state.eTricksWon = 0;
-            
-            document.getElementById('bisca-alert').classList.add('hidden');
-            document.getElementById('trick-result-msg').classList.add('hidden');
-            document.getElementById('trunfada-ui').classList.add('hidden'); 
-            
-            const meuUid = auth.currentUser.uid;
+       window.startSeringalGameOnline = async function() {
+    window.pontuacaoJaContada = false;
+    state.roundEnded = false; 
+    state.pPopoUsed = false;
+    state.ePopoUsed = false;
+    state.isFirstTrick = true;
+    state.isBiscaNaRodaActive = false;
+    state.resolvendoVaza = false;
+    state.pCard = null;
+    state.eCard = null;
 
-            if (state.isDono) {
-                state.distribuindoCartas = true; 
-                state.canPlay = false; state.pTurn = false;
-                if (window.updateArenaUI) window.updateArenaUI(); 
+    state.pScore = 0;
+    state.eScore = 0;
+    state.pTricksWon = 0;
+    state.eTricksWon = 0;
+    
+    document.getElementById('bisca-alert').classList.add('hidden');
+    document.getElementById('trick-result-msg').classList.add('hidden');
+    document.getElementById('trunfada-ui').classList.add('hidden'); 
+    
+    const meuUid = auth.currentUser.uid;
 
-                try {
-                    let novoBaralho = createFullDeck();
-                    shuffle(novoBaralho);
+    if (state.isDono) {
+        state.distribuindoCartas = true; 
+        state.canPlay = false; 
+        state.pTurn = false;
+        if (window.updateArenaUI) window.updateArenaUI(); 
 
-                    // Puxa a lista de UIDs que definimos no Sorteio
-                    let arrayTurnos = state.ordemTurnos || [meuUid]; 
-                    let maosDistribuidas = {};
-                    
-                    // Dá 4 cartas para CADA jogador na mesa (Funciona no 1x1, 2x2 e 3x3!)
-                    arrayTurnos.forEach(uid => {
-                        let mao = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
-                        let maoObj = {};
-                        for(let i=0; i<mao.length; i++) maoObj[i] = mao[i];
-                        maosDistribuidas[uid] = maoObj;
-                    });
+        try {
+            let novoBaralho = createFullDeck();
+            shuffle(novoBaralho);
 
-                    // O Vira é a próxima carta
-                    let cartaVira = novoBaralho.pop();
-                    novoBaralho.unshift(cartaVira); // Vai pro fundo
+            let arrayTurnos = [];
+            if (state.ordemTurnos) {
+                if (Array.isArray(state.ordemTurnos)) arrayTurnos = state.ordemTurnos;
+                else arrayTurnos = Object.keys(state.ordemTurnos).map(k => state.ordemTurnos[k]);
+            }
 
-                    let baralhoObj = {};
-                    for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
+            const uidSerra = arrayTurnos.length === 2 ? arrayTurnos[0] : null;
+            const uidDono = arrayTurnos.length === 2 ? arrayTurnos[1] : meuUid;
 
-                    // Quem joga primeiro? No SerraBebos, é sempre o No Serra (O 2º da lista)
-                    const uidPrimeiroAJogar = arrayTurnos.length > 1 ? arrayTurnos[1] : meuUid;
+            if (!uidSerra) {
+                console.error("Erro Crítico: Oponentes não encontrados.");
+                return;
+            }
 
-                    // Inicia o rastreamento de Papô, Vazas e Pontos para todos da sala
-                    let popoIncial = {}, pontosIniciais = {}, vazasIniciais = {};
-                    arrayTurnos.forEach(uid => {
-                        popoIncial[uid] = false;
-                        pontosIniciais[uid] = 0;
-                        vazasIniciais[uid] = 0;
-                    });
+            let maoSerra = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
+            let maoDono = [novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop(), novoBaralho.pop()];
 
-                    const dadosMesa = {
-                        baralho: baralhoObj,
-                        vira: cartaVira,
-                        trunfo: cartaVira.suit,
-                        maos: maosDistribuidas,
-                        estado: {
-                            turnoAtual: uidPrimeiroAJogar, 
-                            liderAtual: uidPrimeiroAJogar, 
-                            cartasJogadas: null,
-                            isBiscaNaRodaActive: false,
-                            isFirstTrickNuvem: true, 
-                            popoUsado: popoIncial,
-                            pontos: pontosIniciais,
-                            vazas: vazasIniciais,
-                            placarSerras: {
-                                [meuUid]: state.pSerraScore || 1, // Dono
-                                [uidPrimeiroAJogar]: state.eSerraScore || 1 // No Serra
-                            },
-                            donoDaMesa: meuUid,
-                            ordemTurnosSegura: arrayTurnos
-                        }
-                    };
-                    
-                    await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
-                } catch (error) {
-                    console.error("Erro ao gerar a mesa:", error);
+            let cartaVira = novoBaralho.pop();
+            novoBaralho.unshift(cartaVira);
+
+            let baralhoObj = {};
+            for(let i=0; i<novoBaralho.length; i++) baralhoObj[i] = novoBaralho[i];
+
+            let maoSerraObj = {};
+            for(let i=0; i<maoSerra.length; i++) maoSerraObj[i] = maoSerra[i];
+
+            let maoDonoObj = {};
+            for(let i=0; i<maoDono.length; i++) maoDonoObj[i] = maoDono[i];
+
+            const dadosMesa = {
+                baralho: baralhoObj,
+                vira: cartaVira,
+                trunfo: cartaVira.suit,
+                maos: { [uidSerra]: maoSerraObj, [uidDono]: maoDonoObj },
+                estado: {
+                    turnoAtual: uidSerra, 
+                    liderAtual: uidSerra, 
+                    cartasJogadas: null,
+                    isBiscaNaRodaActive: false,
+                    // 🔥 A MAGIA AQUI: O FIREBASE COMANDA A BISCA E O PAPÔ
+                    isFirstTrickNuvem: true, 
+                    popoUsado: { [uidSerra]: false, [uidDono]: false },
+                    pontos: { [uidSerra]: 0, [uidDono]: 0 },
+                    vazas: { [uidSerra]: 0, [uidDono]: 0 },
+                    placarSerras: {
+                        [meuUid]: state.pSerraScore || 1,
+                        [uidSerra]: state.eSerraScore || 1
+                    },
+                    donoDaMesa: meuUid,
+                    ordemTurnosSegura: arrayTurnos
                 }
-            } else {
-                state.distribuindoCartas = true; state.canPlay = false; 
-                if (window.updateArenaUI) window.updateArenaUI(); 
-                if (typeof mostrarAlertaSeringal === 'function') mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
-            }
+            };
             
-            if (!state.listenerAtivo) {
-                window.ouvirMesaJogoOnline();
-            }
-        };
-
+            await set(ref(database, `salas/${state.salaId}/mesa_jogo`), dadosMesa);
+        } catch (error) {
+            console.error("Erro ao gerar a mesa:", error);
+            alert("A floresta bloqueou o baralho. Recarregue a página.");
+        }
+    } else {
+        if (state.pHand && state.pHand.length === 4 && state.deck && state.deck.length > 0) {
+            state.distribuindoCartas = false;
+            state.canPlay = state.pTurn && !state.resolvendoVaza;
+            if (window.updateArenaUI) window.updateArenaUI(); 
+            if (typeof fecharAlertaSeringal === 'function') fecharAlertaSeringal();
+        } else {
+            state.distribuindoCartas = true; 
+            state.canPlay = false; 
+            if (window.updateArenaUI) window.updateArenaUI(); 
+            if (typeof mostrarAlertaSeringal === 'function') mostrarAlertaSeringal("Carteador", "O Dono da Mesa está embaralhando as cartas. Aguarde...");
+        }
+    }
+    
+    if (!state.listenerAtivo) {
+        window.ouvirMesaJogoOnline();
+    }
+};
                 
     window.ouvirMesaJogoOnline = function() {
     if (state.listenerAtivo) return; 
@@ -3343,61 +2980,21 @@ if (qtdJaJogada + 1 < maxJogadores) {
             if(playedE) playedE.innerHTML = '';
         }
 
-        // ==========================================
-        // 🔥 INJETANDO ENERGIA NAS CAIXINHAS MULTIPLAYER
-        // ==========================================
-        if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
-            if (state.jogadoresDefinidos) {
-                const turnoDaNuvem = estadoSeguro.turnoAtual;
-                
-                const listaParaUI = state.jogadoresDefinidos.map(j => {
-                    // Conta quantas cartas cada jogador tem na mão olhando a nuvem
-                    let qtd = 0;
-                    if (j.uid === meuUid) {
-                        qtd = state.pHand.length; // Minha mão
-                    } else if (maosSeguras[j.uid]) {
-                        qtd = Object.keys(maosSeguras[j.uid]).filter(k => maosSeguras[j.uid][k] !== null).length; // Mão dos outros
-                    }
-                    return { ...j, cartasNaMao: qtd };
-                });
-
-                // Chama o Artista para desenhar a grade acesa!
-                if (window.renderizarCaixasMultiplayer) {
-                    window.renderizarCaixasMultiplayer(listaParaUI, turnoDaNuvem);
-                }
-            }
-        }
-        // ==========================================
-
         if(window.updateArenaUI) window.updateArenaUI();
-        
+
         if (state.pCard && state.eCard && !state.resolvendoVaza) {
             state.resolvendoVaza = true;
             state.canPlay = false; 
             setTimeout(() => { if(window.resolveTrickOnline) window.resolveTrickOnline(mesa, meuUid, inimigoUid); }, 1000);
         }
 
-                const modal = document.getElementById('game-modal');
-        if (isGameOver && modal && modal.classList.contains('hidden') && !state.roundEnded) {
-            
-            // Se o celular ainda estiver tocando a animação da vaza, ele espera!
-            if (state.resolvendoVaza) {
-                const vigiaAnimacao = setInterval(() => {
-                    if (!state.resolvendoVaza) {
-                        clearInterval(vigiaAnimacao);
-                        if (!state.roundEnded && window.endRound) {
-                            window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                        }
-                    }
-                }, 200);
-            } else {
-                // Se já acabou a animação, chama o veredito normalmente
-                setTimeout(() => {
-                    if(window.endRound && !state.roundEnded) {
-                        window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                    }
-                }, 500);
-            }
+        const modal = document.getElementById('game-modal');
+        if (isGameOver && !state.resolvendoVaza && modal && modal.classList.contains('hidden') && !state.roundEnded) {
+            setTimeout(() => {
+                if(window.endRound && !state.roundEnded) {
+                    window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                }
+            }, 500);
         }
     });
 };
@@ -3482,6 +3079,7 @@ if (qtdJaJogada + 1 < maxJogadores) {
                         
                         state.isFirstTrick = false;
                         state.isBiscaNaRodaActive = false;
+                        state.resolvendoVaza = false; 
 
                         if (state.isDono) {
                             const ganhadorDaVazaUid = (winner === 'p') ? meuUid : inimigoUid;
@@ -3564,32 +3162,15 @@ if (qtdJaJogada + 1 < maxJogadores) {
                                 };
                                 await update(ref(database), updates);
                             }
-                            
-            state.pCard = null;
-            state.eCard = null;
-            state.resolvendoVaza = false;
-                            
+
                         } else {
                             state.canPlay = state.pTurn && !state.pCard;
                             if(window.updateArenaUI) window.updateArenaUI();
-          
-            state.pCard = null;
-            state.eCard = null;
-            state.resolvendoVaza = false;
-                            
                         }
 
-                                    if (isLastTrickLocal && !state.roundEnded) {
-                                // Se for online e eu NÃO for o dono, eu espero os pontos chegarem da nuvem!
-                                if (!state.isOnline || state.isDono) {
-                                    if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                                } else {
-                                    // 👉 BLINDAGEM EXTRA (PASSO 2): Se eu não sou o dono (ex: a Yara) e a mesa limpou, chama o Veredito!
-                                    if (!state.pCard && !state.eCard) {
-                                        if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                                    }
-                                }
-                            }
+                        if (isLastTrickLocal && !state.roundEnded) {
+                            if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                        }
 
                     } catch (err) {
                         console.error("A Floresta tentou travar o jogo (setTimeout):", err);
@@ -3613,154 +3194,6 @@ if (qtdJaJogada + 1 < maxJogadores) {
                 if (window.updateArenaUI) window.updateArenaUI();
             }
         };
-
-     window.resolverVazaMultiplayer = async function(mesa, meuUid) {
-        state.resolvendoVaza = true;
-        try {
-            const estadoSeguro = mesa.estado || {};
-            const jogadas = estadoSeguro.cartasJogadas || {};
-            const turnosSalvos = estadoSeguro.ordemTurnosSegura || state.ordemTurnos;
-            const maxJogadores = turnosSalvos.length;
-            const liderAtual = estadoSeguro.liderAtual;
-
-            let liderIndex = turnosSalvos.indexOf(liderAtual);
-            let jogadasOrdenadas = [];
-            for(let i=0; i < maxJogadores; i++) {
-                let uid = turnosSalvos[(liderIndex + i) % maxJogadores];
-                if(jogadas[uid]) jogadasOrdenadas.push({uid: uid, card: jogadas[uid]});
-            }
-            
-            // Só resolve se todo mundo da mesa jogou
-            if (jogadasOrdenadas.length !== maxJogadores) { state.resolvendoVaza = false; return; }
-
-            let winningCard = jogadasOrdenadas[0].card;
-            let winnerUid = jogadasOrdenadas[0].uid;
-            let trickPts = winningCard.pts || 0;
-            
-            // Compara todas as cartas para achar o vencedor real
-            for(let i=1; i < maxJogadores; i++) {
-                let currentCard = jogadasOrdenadas[i].card;
-                trickPts += currentCard.pts || 0;
-                let res = determineTrickWinner(winningCard, currentCard, true);
-                if (res === 'e') {
-                    winningCard = currentCard;
-                    winnerUid = jogadasOrdenadas[i].uid;
-                }
-            }
-
-            const winnerInfo = state.jogadoresDefinidos ? state.jogadoresDefinidos.find(j => j.uid === winnerUid) : null;
-            const wIsMinhaEquipe = winnerInfo ? (winnerInfo.equipe === state.minhaEquipe) : false;
-            
-            const wArea = document.getElementById(wIsMinhaEquipe ? 'played-p' : 'played-e');
-            const lArea = document.getElementById(wIsMinhaEquipe ? 'played-e' : 'played-p');
-            const trickMsg = document.getElementById('trick-result-msg');
-
-            // Animação da vaza
-            if (wArea && lArea) {
-                wArea.style.zIndex = "50"; lArea.style.zIndex = "10";
-                wArea.style.transform = "scale(1.1) translateY(-20px)";
-                lArea.style.transform = "scale(0.85) translateY(20px)";
-                wArea.style.opacity = "1"; lArea.style.opacity = "0.6";
-                
-                if(trickMsg) {
-                    const msgTxt = trickPts > 0 ? `+${trickPts} PONTOS!` : `VAZA DA EQUIPE!`;
-                    trickMsg.innerText = wIsMinhaEquipe ? `SUA EQUIPE: ${msgTxt}` : `INVASORES: ${msgTxt}`;
-                    trickMsg.className = `absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] ${wIsMinhaEquipe ? 'text-[#22c55e]' : 'text-[#ef4444]'} texto-vencedor-brilho font-cinzel font-black text-[16px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110`;
-                    trickMsg.classList.remove('hidden');
-                }
-            }
-
-            setTimeout(async () => {
-                const pP = document.getElementById('played-p');
-                const pE = document.getElementById('played-e');
-                if(pP) { pP.style = ''; pP.innerHTML = ''; }
-                if(pE) { pE.style = ''; pE.innerHTML = ''; }
-                if(trickMsg) trickMsg.classList.add('hidden');
-                
-                state.isFirstTrick = false;
-                state.resolvendoVaza = false; 
-
-                // O Dono da sala cuida da matemática no Firebase
-                if (state.isDono) {
-                    let novoBaralho = mesa.baralho ? Object.keys(mesa.baralho).map(k=>mesa.baralho[k]).filter(x=>x!==null) : [];
-                    let maosDistribuidas = {};
-                    turnosSalvos.forEach(uid => {
-                        maosDistribuidas[uid] = mesa.maos && mesa.maos[uid] ? Object.keys(mesa.maos[uid]).map(k=>mesa.maos[uid][k]).filter(x=>x!==null) : [];
-                    });
-                    
-                    let ptsAtual = estadoSeguro.pontos || {};
-                    let vzsAtual = estadoSeguro.vazas || {};
-                    ptsAtual[winnerUid] = (ptsAtual[winnerUid] || 0) + trickPts;
-                    vzsAtual[winnerUid] = (vzsAtual[winnerUid] || 0) + 1;
-
-                    // Distribui as cartas começando pelo vencedor da vaza
-                    if (novoBaralho.length > 0) {
-                        let winIndex = turnosSalvos.indexOf(winnerUid);
-                        for(let i=0; i<maxJogadores; i++) {
-                            let currUid = turnosSalvos[(winIndex + i) % maxJogadores];
-                            if (novoBaralho.length > 0) maosDistribuidas[currUid].push(novoBaralho.pop());
-                        }
-                    }
-
-                    let novoBaralhoObj = {};
-                    for(let i=0; i<novoBaralho.length; i++) novoBaralhoObj[i] = novoBaralho[i];
-                    
-                    let maosEnvio = {};
-                    turnosSalvos.forEach(uid => {
-                        let mObj = {};
-                        for(let i=0; i<maosDistribuidas[uid].length; i++) mObj[i] = maosDistribuidas[uid][i];
-                        maosEnvio[uid] = mObj;
-                    });
-
-                    // Verifica se o jogo acabou
-                    const isLastTrick = (novoBaralho.length === 0 && Object.values(maosDistribuidas).every(mao => mao.length === 0));
-
-                    const updates = {
-                        [`salas/${state.salaId}/mesa_jogo/estado/pontos`]: ptsAtual,
-                        [`salas/${state.salaId}/mesa_jogo/estado/vazas`]: vzsAtual,
-                        [`salas/${state.salaId}/mesa_jogo/estado/cartasJogadas`]: null
-                    };
-
-                    if (!isLastTrick) {
-                        // Se o jogo continua, atualiza baralho e passa o turno
-                        updates[`salas/${state.salaId}/mesa_jogo/baralho`] = novoBaralhoObj;
-                        updates[`salas/${state.salaId}/mesa_jogo/estado/turnoAtual`] = winnerUid;
-                        updates[`salas/${state.salaId}/mesa_jogo/estado/liderAtual`] = winnerUid;
-                        updates[`salas/${state.salaId}/mesa_jogo/estado/isBiscaNaRodaActive`] = null;
-                        updates[`salas/${state.salaId}/mesa_jogo/estado/isFirstTrickNuvem`] = false;
-                        turnosSalvos.forEach(uid => updates[`salas/${state.salaId}/mesa_jogo/maos/${uid}`] = maosEnvio[uid]);
-                        
-                        await update(ref(database), updates);
-                    } else {
-                        // Se o jogo acabou, apenas envia os pontos finais
-                        await update(ref(database), updates);
-                        
-                        // E chama o veredito (O Juiz Supremo)
-                        if (!state.roundEnded) {
-                            if (window.endRound) window.endRound(null, null, null, null, null);
-                        }
-                    }
-                    
-                 } else {
-                    // Quem não é o dono só destrava a própria mão localmente
-                    state.canPlay = state.pTurn && !state.pCard;
-                    if(window.updateArenaUI) window.updateArenaUI();
-                    
-                    // 👉 BLINDAGEM EXTRA PARA O 2x2 e 3x3 AQUI:
-                    const isLastTrickMulti = (state.pHand.length === 0 && state.deck.length === 0);
-                    if (isLastTrickMulti && !state.roundEnded) {
-                        if (window.endRound) window.endRound(null, null, null, null, null);
-                    }
-                }
-
-            }, 1800);
-        } catch (err) {
-            console.error("Erro no multi:", err);
-            state.resolvendoVaza = false;
-            state.canPlay = state.pTurn && !state.pCard && !state.distribuindoCartas;
-            if (window.updateArenaUI) window.updateArenaUI();
-        }
-    };
 
 
     </script>
