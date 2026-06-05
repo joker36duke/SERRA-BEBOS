@@ -2570,6 +2570,23 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
     let eVazas = eTricks !== null ? eTricks : state.eTricksWon;
 
+    // ⚖️ O JUIZ SUPREMO UNIVERSAL: Ajuste automático para Duelo ou Equipes
+    if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') && state.jogadoresDefinidos) {
+        pScore = 0;
+        eScore = 0;
+        
+        // Varre a mesa e soma os pontos da sua equipe contra os invasores
+        state.jogadoresDefinidos.forEach(j => {
+            // Assume que os pontos atualizados estão armazenados de forma global
+            const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
+            if (j.equipe === state.minhaEquipe) {
+                pScore += pts;
+            } else {
+                eScore += pts;
+            }
+        });
+    }
+
     const eraDonoNoInicio = state.isDono;
     
     if (pScore === 60 && eScore === 60) {
@@ -2581,13 +2598,32 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     }
 
     let pWon = forcedWinner === 'p' ? true : pScore > eScore;
-    let nomePlayer = (typeof player_name !== 'undefined') ? player_name : "Guardião";
-    let nomeOponente = state.isOnline ? (state.enemyName || "Oponente") : "Pirarucog";
 
-    let title = pWon ? "Vitória de " + nomePlayer : nomeOponente + " Venceu";
-    let desc = pWon 
-        ? `A experiência do Guardião falou mais alto! ${nomePlayer} faturou ${pScore} pontos.`
-        : `A selva engoliu a mesa. ${nomeOponente} levou a rodada com ${eScore} pontos.`;
+    // Puxando o nome verdadeiro do Firebase
+    let nomePlayer = "GUARDIÃO";
+    if (state.isOnline && typeof auth !== 'undefined' && auth.currentUser && auth.currentUser.displayName) {
+        nomePlayer = auth.currentUser.displayName.toUpperCase();
+    } else if (typeof player_name !== 'undefined' && player_name !== "") {
+        nomePlayer = player_name.toUpperCase();
+    }
+
+    let nomeOponente = state.isOnline ? (state.enemyName || "OPONENTE") : "PIRARUCOG";
+
+    // Textos dinâmicos e corretos com base no tipo de jogo
+    let title = "";
+    let desc = "";
+
+    if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) {
+        title = pWon ? "VITÓRIA DA SUA EQUIPE" : "OS INVASORES VENCERAM";
+        desc = pWon 
+            ? `A união fez a força! Sua equipe faturou ${pScore} pontos.`
+            : `A selva engoliu a mesa. Os adversários levaram a rodada com ${eScore} pontos.`;
+    } else {
+        title = pWon ? "VITÓRIA DE " + nomePlayer : nomeOponente + " VENCEU";
+        desc = pWon 
+            ? `A experiência falou mais alto! ${nomePlayer} faturou ${pScore} pontos.`
+            : `A selva engoliu a mesa. ${nomeOponente} levou a rodada com ${eScore} pontos.`;
+    }
 
     let matchOver = false;
     let matchEndReason = "";
@@ -2596,36 +2632,42 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     if (pWon) {
         if (eraDonoNoInicio) {
             if (state.eSerraScore === 1 && eVazas === 0) {
-                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, ${nomeOponente} sofreu derrota instantânea!`;
+                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, os adversários sofreram derrota instantânea!`;
             } else {
-                // 🔥 CORREÇÃO: Incrementamos livremente
                 state.eSerraScore++; 
-                // 🔥 Só acaba o jogo se PASSAR de 3 (3 derrotas reais, já que começou no 1)
                 if (state.eSerraScore > 3) { 
-                    matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `${nomeOponente} foi derrotado 3 vezes! O Seringal é seu!`;
-                    state.eSerraScore = 3; // Trava no 3 só para a UI não mostrar "4/3" no Veredito
+                    matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `Os adversários foram derrotados 3 vezes! O Seringal é seu!`;
+                    state.eSerraScore = 3;
                 }
             }
         } else {
             state.isDono = true; state.eSerraScore = 1; state.pSerraScore = 1; 
-            if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
+            // Rotação segura de turnos
+            if (state.isOnline && state.ordemTurnos) {
+                let novaOrdem = [...state.ordemTurnos];
+                novaOrdem.push(novaOrdem.shift()); 
+                state.ordemTurnos = novaOrdem;
+            }
         }
     } else {
         if (!eraDonoNoInicio) {
             if (state.pSerraScore === 1 && pVazas === 0) {
                 matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você sofreu derrota instantânea!`;
             } else {
-                // 🔥 CORREÇÃO: Incrementamos livremente
                 state.pSerraScore++;
-                // 🔥 Só acaba o jogo se PASSAR de 3 
                 if (state.pSerraScore > 3) {
-                    matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `${nomePlayer} foi derrotado 3 vezes na Serra.`;
-                    state.pSerraScore = 3; // Trava no 3 para a interface
+                    matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `Você foi derrotado 3 vezes na Serra.`;
+                    state.pSerraScore = 3;
                 }
             }
         } else {
             state.isDono = false; state.eSerraScore = 1; state.pSerraScore = 1; 
-            if (state.isOnline && state.ordemTurnos) state.ordemTurnos = [state.ordemTurnos[1], state.ordemTurnos[0]]; 
+            // Rotação segura de turnos
+            if (state.isOnline && state.ordemTurnos) {
+                let novaOrdem = [...state.ordemTurnos];
+                novaOrdem.push(novaOrdem.shift()); 
+                state.ordemTurnos = novaOrdem;
+            }
         }
     }
 
@@ -2642,16 +2684,14 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
 
-        if (matchOver) {
+    if (matchOver) {
         const btnContinue = document.getElementById('btn-continue');
         const btnGoOnline = document.getElementById('btn-go-online');
 
-        // Se você VENCEU e NÃO ESTÁ ONLINE (Ou seja, derrotou o Pirarucog no Tutorial)
         if (pWon && !state.isOnline) {
-            if (btnGoOnline) btnGoOnline.classList.remove('hidden'); // Revela o botão de Cadastro
-            if (btnContinue) btnContinue.classList.add('hidden'); // Esconde o "Voltar ao Início"
+            if (btnGoOnline) btnGoOnline.classList.remove('hidden'); 
+            if (btnContinue) btnContinue.classList.add('hidden'); 
         } else {
-            // Se perdeu para o Pirarucog ou o jogo multiplayer acabou
             if (btnContinue) btnContinue.classList.remove('hidden');
             if (btnGoOnline) btnGoOnline.classList.add('hidden');
         }
@@ -2660,12 +2700,9 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); 
         });
     } else {
-            
         if (state.isOnline) {
             const btn = document.getElementById('btn-continue');
-            
             if (pWon) {
-                // 🔥 SOU O VENCEDOR (NOVO DONO): Eu vejo o botão de dar as cartas!
                 if(btn) {
                     btn.classList.remove('hidden');
                     btn.innerText = "Dar as Cartas";
@@ -2673,17 +2710,15 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                         closeModal();
                         window.pontuacaoJaContada = false; 
                         state.roundEnded = false; 
-                        window.startSeringalGameOnline(); // Só eu crio o baralho no Firebase
+                        window.startSeringalGameOnline(); 
                     };
                 }
-                showModal(title, desc + `\n\nVocê é o Dono da Mesa! Quando estiver pronto, dê as cartas.`, null, null);
+                showModal(title, desc + `\n\nSua equipe agora é a Dona da Mesa! Quando estiver pronto, dê as cartas.`, null, null);
             } else {
-                // 🛑 SOU O PERDEDOR (NO SERRA): Não tenho botão. Só espero.
                 if(btn) btn.classList.add('hidden');
-                showModal(title, desc + `\n\n⏳ Aguardando ${nomeOponente} dar as cartas...`, null, null);
+                showModal(title, desc + `\n\n⏳ Aguardando os adversários darem as cartas...`, null, null);
             }
         } else {
-            // MODO OFFLINE: Funciona normalmente com o botão
             const btn = document.getElementById('btn-continue');
             if(btn) btn.classList.remove('hidden');
             
