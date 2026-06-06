@@ -3779,11 +3779,13 @@ if (qtdJaJogada + 1 < maxJogadores) {
                         }
                     }
                     
-                } else {
+             } else {
                     // Quem não é o dono só destrava a própria mão localmente
                     state.canPlay = state.pTurn && !state.pCard;
                     if(window.updateArenaUI) window.updateArenaUI();
+                    if (window.verificarFimDeJogoNuvem) window.verificarFimDeJogoNuvem();
                 }
+
             }, 1800);
         } catch (err) {
             console.error("Erro no multi:", err);
@@ -3793,9 +3795,8 @@ if (qtdJaJogada + 1 < maxJogadores) {
         }
     };
 
-
+                
     </script>
-
 
         </div> </div> <div class="hidden lg:flex flex-col w-[320px] h-[90vh] max-h-[850px] bg-[#2a0808] border-2 border-[#22c55e] rounded-2xl ml-8 p-6 shadow-[0_0_25px_rgba(34,197,94,0.15)]">
         <h2 class="text-[#ef4444] font-cinzel font-black text-xl text-center mb-6 tracking-[2px] uppercase drop-shadow-[0_3px_5px_rgba(0,0,0,1)]">
