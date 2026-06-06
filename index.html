@@ -3621,10 +3621,10 @@ if (qtdJaJogada + 1 < maxJogadores) {
                             state.canPlay = state.pTurn && !state.pCard;
                             if(window.updateArenaUI) window.updateArenaUI();
                         }
-
-                             if (isLastTrickLocal && !state.roundEnded) {
-                            // Se for online e eu NÃO for o dono, eu espero os pontos chegarem da nuvem!
-                            if (!state.isOnline || state.isDono) {
+                                                     if (state.isOnline) {
+                            if (window.verificarFimDeJogoNuvem) window.verificarFimDeJogoNuvem();
+                        } else {
+                            if (isLastTrickLocal && !state.roundEnded) {
                                 if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
                             }
                         }
