@@ -3404,17 +3404,59 @@ if (qtdJaJogada + 1 < maxJogadores) {
         state.pTurn = (estadoSeguro.turnoAtual === meuUid);
         state.canPlay = state.pTurn && !state.resolvendoVaza && !state.pCard && !state.distribuindoCartas;
 
-        if (state.eCard) {
-            const playedE = document.getElementById('played-e');
-            if(playedE) {
-                playedE.innerHTML = ''; playedE.style.zIndex = "20";
-                const cUI = (window.createCardUI || createCardUI)(state.eCard);
-                cUI.classList.add('played-card'); playedE.appendChild(cUI);
-            }
-        } else if (!state.resolvendoVaza) {
-            const playedE = document.getElementById('played-e');
-            if(playedE) playedE.innerHTML = '';
+ // --- MOTOR DE RENDERIZAÇÃO DE CARTAS (BIFURCADO PARA PROTEGER O 1x1) ---
+if (state.tipoJogo === '1v1') {
+    // 🛡️ MOTOR CLÁSSICO DO 1x1 (INTOCADO)
+    if (state.eCard) {
+        const playedE = document.getElementById('played-e');
+        if(playedE) {
+            playedE.innerHTML = ''; playedE.style.zIndex = "20";
+            const cUI = (window.createCardUI || createCardUI)(state.eCard);
+            cUI.classList.add('played-card'); playedE.appendChild(cUI);
         }
+    } else if (!state.resolvendoVaza) {
+        const playedE = document.getElementById('played-e');
+        if(playedE) playedE.innerHTML = '';
+    }
+} else {
+    // ⚔️ NOVO MOTOR PARA 2x2 E 3x3
+    if (!state.resolvendoVaza) {
+        const playedP = document.getElementById('played-p');
+        const playedE = document.getElementById('played-e');
+        if (playedP) playedP.innerHTML = '';
+        if (playedE) playedE.innerHTML = '';
+
+        // Vasculha todas as jogadas ativas no Firebase
+        Object.keys(jogadas).forEach(uid => {
+            const carta = jogadas[uid];
+            if (!carta) return;
+
+            const cUI = (window.createCardUI || createCardUI)(carta);
+            cUI.classList.add('played-card');
+
+            if (uid === meuUid) {
+                // Sua carta
+                if (playedP) { playedP.style.zIndex = "20"; playedP.appendChild(cUI); }
+            } else {
+                // Cartas dos outros (Aliados e Invasores)
+                if (playedE) {
+                    playedE.style.zIndex = "20";
+                    
+                    if (state.jogadoresDefinidos) {
+                        const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
+                        if (jInfo) {
+                            const tagNome = document.createElement('span');
+                            tagNome.className = "absolute -top-5 left-1/2 -translate-x-1/2 bg-black/90 text-[9px] text-[#d4af37] font-cinzel px-1.5 py-0.5 rounded shadow whitespace-nowrap z-50 tracking-wider border border-[#d4af37]/30 backdrop-blur-sm";
+                            tagNome.innerText = jInfo.nome.split(' ')[0];
+                            cUI.appendChild(tagNome);
+                        }
+                    }
+                    playedE.appendChild(cUI);
+                }
+            }
+        });
+    }
+}
 
         // ==========================================
         // 🔥 INJETANDO ENERGIA NAS CAIXINHAS MULTIPLAYER
