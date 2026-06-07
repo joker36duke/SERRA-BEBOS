@@ -3075,12 +3075,42 @@ window.getImagemArena = function(enemyName) {
 
     const checkTrump = window.isTrumpOrBebo || isTrumpOrBebo;
 
-    // Regra da Trunfada
-    if (state.deck.length === 0 && state.eCard && checkTrump(state.eCard)) {
+    // ==========================================
+    // 1. DESCOBRE QUEM É O LÍDER DA VAZA
+    // ==========================================
+    let euSouOLider = false;
+    let liderJogouTrunfo = false;
+
+    if (state.isOnline) {
+        const meuUid = auth.currentUser.uid;
+        euSouOLider = (state.liderAtual === meuUid);
+        
+        // Se eu não for o líder, busco a carta exata de quem liderou na nuvem!
+        if (!euSouOLider && state.liderAtual) {
+            const cartaDoLider = state.todasCartasJogadasNuvem ? state.todasCartasJogadasNuvem[state.liderAtual] : null;
+            if (cartaDoLider && checkTrump(cartaDoLider)) {
+                liderJogouTrunfo = true;
+            }
+        }
+    } else {
+        // Modo Offline (1x1 Clássico do Pirarucog)
+        euSouOLider = !state.eCard; // Se não tem carta do inimigo na mesa, eu sou o líder
+        if (state.eCard && checkTrump(state.eCard)) {
+            liderJogouTrunfo = true;
+        }
+    }
+
+    // ==========================================
+    // 2. AVALIA A REGRA DA TRUNFADA (Resposta Obrigatória)
+    // ==========================================
+    if (state.deck.length === 0 && liderJogouTrunfo) {
         const hasTrumpOrBebo = state.pHand.some(checkTrump);
+        
+        // Se eu tenho trunfo/bebo e tentei jogar outra coisa: BLOQUEIA!
         if (hasTrumpOrBebo && !checkTrump(state.pHand[index])) {
             const cUI = document.getElementById('ui-hand').children[index];
             if(cUI) { cUI.classList.remove('invalid-shake'); void cUI.offsetWidth; cUI.classList.add('invalid-shake'); }
+            
             const trunfadaUi = document.getElementById('trunfada-ui');
             const trunfadaText = document.getElementById('trunfada-text');
             if(trunfadaUi && trunfadaText) {
@@ -3093,10 +3123,13 @@ window.getImagemArena = function(enemyName) {
                     trunfadaText.innerHTML = "TRUNFADA<br>ATIVA";
                 }, 1500);
             }
-            return; 
+            return; // Impede a carta errada de ser jogada!
         }
     }
 
+    // ==========================================
+    // 3. REGISTRA A JOGADA NA MESA
+    // ==========================================
     state.canPlay = false; // Trava imediata do clique
     
     const cartaJogada = state.pHand[index];
@@ -3106,8 +3139,10 @@ window.getImagemArena = function(enemyName) {
     const activeSerraScore = state.isDono ? state.eSerraScore : state.pSerraScore;
     let isBiscaAtivadaAgora = false;
 
-    // BISCA NA RODA
-    if (!state.eCard && state.isFirstTrick && activeSerraScore === 1) {
+    // ==========================================
+    // 4. AVALIA A BISCA NA RODA (Poder exclusivo do Líder!)
+    // ==========================================
+    if (euSouOLider && state.isFirstTrick && activeSerraScore === 1) {
         if (cartaJogada.rank === '7' || cartaJogada.rank === 'A') {
             state.isBiscaNaRodaActive = true;
             isBiscaAtivadaAgora = true;
