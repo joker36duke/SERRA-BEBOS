@@ -2570,19 +2570,24 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
     let eVazas = eTricks !== null ? eTricks : state.eTricksWon;
 
-    // ⚖️ O JUIZ SUPREMO UNIVERSAL: Ajuste automático para Duelo ou Equipes
+        // ⚖️ O JUIZ SUPREMO UNIVERSAL: Ajuste automático para Duelo ou Equipes
     if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') && state.jogadoresDefinidos) {
         pScore = 0;
         eScore = 0;
+        pVazas = 0; // 🔥 Zera as vazas locais
+        eVazas = 0; // 🔥 Zera as vazas locais
         
-        // Varre a mesa e soma os pontos da sua equipe contra os invasores
+        // Varre a mesa e soma pontos e vazas da equipe
         state.jogadoresDefinidos.forEach(j => {
-            // Assume que os pontos atualizados estão armazenados de forma global
             const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
+            const vzs = (state.vazasGlobais && state.vazasGlobais[j.uid]) ? state.vazasGlobais[j.uid] : 0;
+            
             if (j.equipe === state.minhaEquipe) {
                 pScore += pts;
+                pVazas += vzs; // 🔥 Soma as vazas dos aliados
             } else {
                 eScore += pts;
+                eVazas += vzs; // 🔥 Soma as vazas dos invasores
             }
         });
     }
