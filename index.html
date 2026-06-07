@@ -3391,6 +3391,7 @@ if (qtdJaJogada + 1 < maxJogadores) {
         // 🔥 CORREÇÃO 1: Salva os pontos e as serras na memória global para o painel 2x2 ler
         state.pontosGlobais = estadoSeguro.pontos || {};
         state.serrasGlobais = estadoSeguro.placarSerras || {};    
+        state.vazasGlobais = estadoSeguro.vazas || {}; // <-- A MEMÓRIA DAS VAZAS AQUI
         state.pCard = jogadas[meuUid] || null;
         state.eCard = inimigoUid ? jogadas[inimigoUid] : null;
 
