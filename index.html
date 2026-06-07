@@ -3489,11 +3489,29 @@ if (state.tipoJogo === '1v1') {
 
         if(window.updateArenaUI) window.updateArenaUI();
         
-        if (state.pCard && state.eCard && !state.resolvendoVaza) {
-            state.resolvendoVaza = true;
-            state.canPlay = false; 
-            setTimeout(() => { if(window.resolveTrickOnline) window.resolveTrickOnline(mesa, meuUid, inimigoUid); }, 1000);
+        // --- GATILHO DE RESOLUÇÃO DE VAZA (BLINDADO 1x1 e MULTIPLAYER) ---
+        if (!state.resolvendoVaza) {
+            if (state.tipoJogo === '1v1') {
+                // Modo Clássico: Espera apenas 2 cartas (a sua e a do inimigo)
+                if (state.pCard && state.eCard) {
+                    state.resolvendoVaza = true;
+                    state.canPlay = false;
+                    setTimeout(() => { if(window.resolveTrickOnline) window.resolveTrickOnline(mesa, meuUid, inimigoUid); }, 1000);
+                }
+            } else {
+                // Modo 2x2 e 3x3: Espera TODOS os jogadores da mesa jogarem
+                const qtdJogadas = Object.keys(jogadas).length;
+                const maxJogadoresNaMesa = turnosSalvos.length; // Vai ser 4 no 2v2 e 6 no 3v3
+                
+                if (qtdJogadas === maxJogadoresNaMesa) {
+                    state.resolvendoVaza = true;
+                    state.canPlay = false;
+                    // 🔥 Chama o Juiz correto para as Equipes!
+                    setTimeout(() => { if(window.resolverVazaMultiplayer) window.resolverVazaMultiplayer(mesa, meuUid); }, 1000);
+                }
+            }
         }
+
 
          if (window.verificarFimDeJogoNuvem) window.verificarFimDeJogoNuvem();
     });
