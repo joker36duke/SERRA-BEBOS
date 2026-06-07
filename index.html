@@ -2980,25 +2980,18 @@ window.getImagemArena = function(enemyName) {
                 }
             }
                 
-                        // --- CÁLCULO DE PLACAR PARA MULTIPLAYER 2x2 e 3x3 ---
+      // --- CÁLCULO DE PLACAR PARA MULTIPLAYER 2x2 e 3x3 ---
             if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) {
                 let ptsCarpinteiros = 0, ptsPedreiros = 0;
                 let serrasCarpinteiros = 0, serrasPedreiros = 0;
-                let equipeNoSerra = ""; // Vai descobrir quem está apanhando
-
+                
                 if (state.jogadoresDefinidos) {
                     state.jogadoresDefinidos.forEach(j => {
-                        // Puxa os pontos somados da rede
                         const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
                         if (j.equipe === 'Carpinteiros') ptsCarpinteiros += pts;
                         else ptsPedreiros += pts;
                         
-                        // Verifica quem é o sofredor da vez
-                        if (j.papel === 'NoSerra') {
-                            equipeNoSerra = j.equipe;
-                        }
-                        
-                        // Captura as serras
+                        // Captura as serras do Dono ou NoSerra de cada equipe
                         if (j.papel === 'Dono' || j.papel === 'NoSerra') {
                             const ss = (state.serrasGlobais && state.serrasGlobais[j.uid]) ? state.serrasGlobais[j.uid] : 1;
                             if (j.equipe === 'Carpinteiros') serrasCarpinteiros = ss;
@@ -3007,25 +3000,18 @@ window.getImagemArena = function(enemyName) {
                     });
                 }
                 
-                // Aplica os pontos na tela
+                // Aplica nos painéis do HTML
                 const elScoreCarp = document.getElementById('score-carpinteiros');
                 const elScorePed = document.getElementById('score-pedreiros');
                 if (elScoreCarp) elScoreCarp.innerText = ptsCarpinteiros;
                 if (elScorePed) elScorePed.innerText = ptsPedreiros;
                 
-                // 🔥 CORREÇÃO 2: Mostra as Serras APENAS para a equipe que está No Serra
                 const elSerrasCarp = document.getElementById('serras-carpinteiros');
                 const elSerrasPed = document.getElementById('serras-pedreiros');
-                
-                if (elSerrasCarp) {
-                    elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
-                    elSerrasCarp.style.display = (equipeNoSerra === 'Carpinteiros') ? 'inline-flex' : 'none';
-                }
-                if (elSerrasPed) {
-                    elSerrasPed.innerText = `${serrasPedreiros}/3`;
-                    elSerrasPed.style.display = (equipeNoSerra === 'Pedreiros') ? 'inline-flex' : 'none';
-                }
+                if (elSerrasCarp) elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
+                if (elSerrasPed) elSerrasPed.innerText = `${serrasPedreiros}/3`;
             }
+        };
 
         // ==========================================
         // TROCA DO VIRA (PAPÔ) - AGORA NO MÓDULO!
