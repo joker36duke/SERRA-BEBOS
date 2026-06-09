@@ -3478,8 +3478,28 @@ if (state.tipoJogo === '1v1') {
         if (playedP) playedP.innerHTML = '';
         if (playedE) playedE.innerHTML = '';
 
-        // Separa quem sou eu e quem são os outros
+                // Separa quem sou eu e quem são os outros
         const jogadasAtivas = Object.keys(jogadas);
+        
+        // 🔥 LÓGICA DE PODER: Descobre qual carta está vencendo a vaza agora
+        let vencedorAtualUid = null;
+        let cartaVencedora = null;
+
+        if (jogadasAtivas.length > 0) {
+            const liderUid = estadoSeguro.liderAtual;
+            vencedorAtualUid = jogadas[liderUid] ? liderUid : jogadasAtivas[0];
+            cartaVencedora = jogadas[vencedorAtualUid];
+
+            jogadasAtivas.forEach(uid => {
+                if (uid !== vencedorAtualUid && jogadas[uid]) {
+                    if (determineTrickWinner(cartaVencedora, jogadas[uid], true) === 'e') {
+                        cartaVencedora = jogadas[uid];
+                        vencedorAtualUid = uid;
+                    }
+                }
+            });
+        }
+
         const outrosUids = jogadasAtivas.filter(uid => uid !== meuUid);
         const totalOutros = outrosUids.length;
 
