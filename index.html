@@ -3508,7 +3508,7 @@ if (state.tipoJogo === '1v1') {
             const cUI = (window.createCardUI || createCardUI)(jogadas[meuUid]);
             cUI.classList.add('played-card');
             if (playedP) {
-                playedP.style.zIndex = "30"; 
+                playedP.style.zIndex = (vencedorAtualUid === meuUid) ? "50" : "10"; 
                 playedP.appendChild(cUI);
             }
         }
