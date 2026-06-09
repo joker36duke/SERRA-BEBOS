@@ -3014,8 +3014,14 @@ window.getImagemArena = function(enemyName) {
                 
                 const elSerrasCarp = document.getElementById('serras-carpinteiros');
                 const elSerrasPed = document.getElementById('serras-pedreiros');
-                if (elSerrasCarp) elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
-                if (elSerrasPed) elSerrasPed.innerText = `${serrasPedreiros}/3`;
+                if (elSerrasCarp) {
+                    elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
+                    elSerrasCarp.style.display = (equipeNoSerra === 'Carpinteiros') ? 'inline-flex' : 'none';
+                }
+                if (elSerrasPed) {
+                    elSerrasPed.innerText = `${serrasPedreiros}/3`;
+                    elSerrasPed.style.display = (equipeNoSerra === 'Pedreiros') ? 'inline-flex' : 'none';
+                }
             }
         };
 
