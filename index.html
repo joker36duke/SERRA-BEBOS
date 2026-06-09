@@ -3498,8 +3498,9 @@ if (state.tipoJogo === '1v1') {
                 
                 // A MATEMÁTICA DO LEQUE (Espalha em arco)
                 const offset = index - (totalOutros - 1) / 2;
-                cUI.style.position = 'absolute';
-                cUI.style.transform = `translateX(${offset * 35}px) translateY(${Math.abs(offset) * 6}px) rotate(${offset * 12}deg)`;
+                if (index > 0) cUI.style.marginLeft = "-45px"; 
+                const rotateDeg = (index - (totalOutros - 1) / 2) * 12;
+                cUI.style.transform = `rotate(${rotateDeg}deg) translateY(${Math.abs(rotateDeg/2)}px)`;
                 cUI.style.zIndex = index + 1; 
 
                 // Etiqueta de identificação de quem jogou
