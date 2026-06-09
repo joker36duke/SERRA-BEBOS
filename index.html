@@ -3513,7 +3513,7 @@ if (state.tipoJogo === '1v1') {
             }
         }
 
-        // Renderiza a carta dos OUTROS (Fazendo o Leque no centro da mesa)
+         // Renderiza a carta dos OUTROS (Cada carta cuidando de si mesma)
         outrosUids.forEach((uid, index) => {
             const carta = jogadas[uid];
             if (!carta) return;
@@ -3522,22 +3522,28 @@ if (state.tipoJogo === '1v1') {
             cUI.classList.add('played-card');
 
             if (playedE) {
+                // Mantemos a caixa pai num z-index alto se alguém dali estiver ganhando
                 playedE.style.zIndex = (vencedorAtualUid && vencedorAtualUid !== meuUid) ? "50" : "15";
                 
-                // A MATEMÁTICA DO LEQUE (Espalha em arco)
+                // 🔥 A GRANDE MUDANÇA: 'absolute' solta as cartas umas das outras
+                cUI.style.position = 'absolute'; 
+                
+                // A MATEMÁTICA DO LEQUE (Espalha a partir do centro sem grudar)
                 const offset = index - (totalOutros - 1) / 2;
-                if (index > 0) cUI.style.marginLeft = "-25px"; // 🔥 Leque mais solto
+                const moveX = offset * 30; // Afasta as cartas horizontalmente
+                const rotateDeg = offset * 12; // Inclina as cartas
                 
-                const rotateDeg = (index - (totalOutros - 1) / 2) * 12;
-                let transformStr = `rotate(${rotateDeg}deg) translateY(${Math.abs(rotateDeg/2)}px)`;
+                let transformStr = `translateX(${moveX}px) rotate(${rotateDeg}deg) translateY(${Math.abs(rotateDeg/2)}px)`;
                 
-                // 🔥 A CARTA VENCEDORA SOBE E DESTACA NO LEQUE
+                // 🔥 A CARTA VENCEDORA SOBE E DESTACA SOZINHA
                 if (uid === vencedorAtualUid) {
-                    cUI.style.zIndex = "40"; 
-                    transformStr += " scale(1.05) translateY(-5px)"; 
+                    cUI.style.zIndex = "100"; 
+                    transformStr += " scale(1.1) translateY(-15px)"; // Pulo individual para cima
+                    cUI.style.boxShadow = "0 0 20px rgba(212,175,55,0.8)"; // Brilho de campeã
                 } else {
                     cUI.style.zIndex = index + 1; 
                 }
+                
                 cUI.style.transform = transformStr;
 
                 // Etiqueta de identificação de quem jogou
@@ -3545,7 +3551,7 @@ if (state.tipoJogo === '1v1') {
                     const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
                     if (jInfo) {
                         const tagNome = document.createElement('span');
-                        tagNome.className = "absolute -top-6 left-1/2 -translate-x-1/2 bg-black/95 text-[8px] font-cinzel px-2 py-0.5 rounded shadow whitespace-nowrap z-50 tracking-widest border backdrop-blur-sm";
+                        tagNome.className = "absolute -top-6 left-1/2 -translate-x-1/2 bg-black/95 text-[8px] font-cinzel px-2 py-0.5 rounded shadow z-[101] whitespace-nowrap tracking-widest border backdrop-blur-sm";
                         
                         // Cores táticas: Verde para aliados, Vermelho para invasores
                         if (jInfo.equipe === state.minhaEquipe) {
@@ -3562,7 +3568,6 @@ if (state.tipoJogo === '1v1') {
             }
         });
     }
-}
 
         // ==========================================
         // 🔥 INJETANDO ENERGIA NAS CAIXINHAS MULTIPLAYER
