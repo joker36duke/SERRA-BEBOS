@@ -3522,14 +3522,23 @@ if (state.tipoJogo === '1v1') {
             cUI.classList.add('played-card');
 
             if (playedE) {
-                playedE.style.zIndex = "20";
+                playedE.style.zIndex = (vencedorAtualUid && vencedorAtualUid !== meuUid) ? "50" : "15";
                 
                 // A MATEMÁTICA DO LEQUE (Espalha em arco)
                 const offset = index - (totalOutros - 1) / 2;
-                if (index > 0) cUI.style.marginLeft = "-45px"; 
+                if (index > 0) cUI.style.marginLeft = "-25px"; // 🔥 Leque mais solto
+                
                 const rotateDeg = (index - (totalOutros - 1) / 2) * 12;
-                cUI.style.transform = `rotate(${rotateDeg}deg) translateY(${Math.abs(rotateDeg/2)}px)`;
-                cUI.style.zIndex = index + 1; 
+                let transformStr = `rotate(${rotateDeg}deg) translateY(${Math.abs(rotateDeg/2)}px)`;
+                
+                // 🔥 A CARTA VENCEDORA SOBE E DESTACA NO LEQUE
+                if (uid === vencedorAtualUid) {
+                    cUI.style.zIndex = "40"; 
+                    transformStr += " scale(1.05) translateY(-5px)"; 
+                } else {
+                    cUI.style.zIndex = index + 1; 
+                }
+                cUI.style.transform = transformStr;
 
                 // Etiqueta de identificação de quem jogou
                 if (state.jogadoresDefinidos) {
