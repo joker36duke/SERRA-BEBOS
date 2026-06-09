@@ -2989,6 +2989,7 @@ window.getImagemArena = function(enemyName) {
             if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) {
                 let ptsCarpinteiros = 0, ptsPedreiros = 0;
                 let serrasCarpinteiros = 0, serrasPedreiros = 0;
+                let equipeNoSerra = "";    
                 
                 if (state.jogadoresDefinidos) {
                     state.jogadoresDefinidos.forEach(j => {
