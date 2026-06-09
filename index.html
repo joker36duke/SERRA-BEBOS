@@ -2983,9 +2983,7 @@ window.getImagemArena = function(enemyName) {
                     btnPopo.classList.add('hidden', 'opacity-50', 'pointer-events-none');
                     btnPopo.style.display = 'none';
                 }
-            }
-          if (j.papel === 'NoSerra') equipeNoSerra = j.equipe;
-                
+            }           
                 
       // --- CÁLCULO DE PLACAR PARA MULTIPLAYER 2x2 e 3x3 ---
             if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) {
@@ -2998,7 +2996,8 @@ window.getImagemArena = function(enemyName) {
                         const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
                         if (j.equipe === 'Carpinteiros') ptsCarpinteiros += pts;
                         else ptsPedreiros += pts;
-                        
+                    if (j.papel === 'NoSerra') equipeNoSerra = j.equipe;
+                             
                         // Captura as serras do Dono ou NoSerra de cada equipe
                         if (j.papel === 'Dono' || j.papel === 'NoSerra') {
                             const ss = (state.serrasGlobais && state.serrasGlobais[j.uid]) ? state.serrasGlobais[j.uid] : 1;
