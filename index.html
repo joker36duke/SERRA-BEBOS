@@ -3463,40 +3463,64 @@ if (state.tipoJogo === '1v1') {
         if(playedE) playedE.innerHTML = '';
     }
 } else {
-    // ⚔️ NOVO MOTOR PARA 2x2 E 3x3
+    // ⚔️ NOVO MOTOR PARA 2x2 E 3x3 (COM O EFEITO LEQUE DA MESA)
     if (!state.resolvendoVaza) {
         const playedP = document.getElementById('played-p');
         const playedE = document.getElementById('played-e');
         if (playedP) playedP.innerHTML = '';
         if (playedE) playedE.innerHTML = '';
 
-        // Vasculha todas as jogadas ativas no Firebase
-        Object.keys(jogadas).forEach(uid => {
+        // Separa quem sou eu e quem são os outros
+        const jogadasAtivas = Object.keys(jogadas);
+        const outrosUids = jogadasAtivas.filter(uid => uid !== meuUid);
+        const totalOutros = outrosUids.length;
+
+        // Renderiza a MINHA carta (Isolada no meu lado da mesa)
+        if (jogadas[meuUid]) {
+            const cUI = (window.createCardUI || createCardUI)(jogadas[meuUid]);
+            cUI.classList.add('played-card');
+            if (playedP) {
+                playedP.style.zIndex = "30"; 
+                playedP.appendChild(cUI);
+            }
+        }
+
+        // Renderiza a carta dos OUTROS (Fazendo o Leque no centro da mesa)
+        outrosUids.forEach((uid, index) => {
             const carta = jogadas[uid];
             if (!carta) return;
 
             const cUI = (window.createCardUI || createCardUI)(carta);
             cUI.classList.add('played-card');
 
-            if (uid === meuUid) {
-                // Sua carta
-                if (playedP) { playedP.style.zIndex = "20"; playedP.appendChild(cUI); }
-            } else {
-                // Cartas dos outros (Aliados e Invasores)
-                if (playedE) {
-                    playedE.style.zIndex = "20";
-                    
-                    if (state.jogadoresDefinidos) {
-                        const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
-                        if (jInfo) {
-                            const tagNome = document.createElement('span');
-                            tagNome.className = "absolute -top-5 left-1/2 -translate-x-1/2 bg-black/90 text-[9px] text-[#d4af37] font-cinzel px-1.5 py-0.5 rounded shadow whitespace-nowrap z-50 tracking-wider border border-[#d4af37]/30 backdrop-blur-sm";
-                            tagNome.innerText = jInfo.nome.split(' ')[0];
-                            cUI.appendChild(tagNome);
+            if (playedE) {
+                playedE.style.zIndex = "20";
+                
+                // A MATEMÁTICA DO LEQUE (Espalha em arco)
+                const offset = index - (totalOutros - 1) / 2;
+                cUI.style.position = 'absolute';
+                cUI.style.transform = `translateX(${offset * 35}px) translateY(${Math.abs(offset) * 6}px) rotate(${offset * 12}deg)`;
+                cUI.style.zIndex = index + 1; 
+
+                // Etiqueta de identificação de quem jogou
+                if (state.jogadoresDefinidos) {
+                    const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
+                    if (jInfo) {
+                        const tagNome = document.createElement('span');
+                        tagNome.className = "absolute -top-6 left-1/2 -translate-x-1/2 bg-black/95 text-[8px] font-cinzel px-2 py-0.5 rounded shadow whitespace-nowrap z-50 tracking-widest border backdrop-blur-sm";
+                        
+                        // Cores táticas: Verde para aliados, Vermelho para invasores
+                        if (jInfo.equipe === state.minhaEquipe) {
+                            tagNome.classList.add('text-[#22c55e]', 'border-[#22c55e]/40');
+                        } else {
+                            tagNome.classList.add('text-[#ef4444]', 'border-[#ef4444]/40');
                         }
+
+                        tagNome.innerText = jInfo.nome.split(' ')[0].toUpperCase();
+                        cUI.appendChild(tagNome);
                     }
-                    playedE.appendChild(cUI);
                 }
+                playedE.appendChild(cUI);
             }
         });
     }
