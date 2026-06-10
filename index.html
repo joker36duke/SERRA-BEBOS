@@ -3443,8 +3443,11 @@ if (qtdJaJogada + 1 < maxJogadores) {
         state.vira = mesa.vira;
         state.trumpSuit = mesa.trunfo;
         state.liderAtual = estadoSeguro.liderAtual;
-        state.pScore = pontosSeguros[meuUid] || 0;
-        state.eScore = inimigoUid ? (pontosSeguros[inimigoUid] || 0) : 0;
+        const chaveP = state.tipoJogo === '1v1' ? meuUid : state.minhaEquipe;
+const chaveE = state.tipoJogo === '1v1' ? inimigoUid : (state.minhaEquipe === 'Pedreiros' ? 'Carpinteiros' : 'Pedreiros');
+state.pSerraScore = estadoSeguro.placarSerras[chaveP] || 1;
+state.eSerraScore = estadoSeguro.placarSerras[chaveE] || 1;
+
         state.pTricksWon = vazasSeguras[meuUid] || 0; 
         state.eTricksWon = inimigoUid ? (vazasSeguras[inimigoUid] || 0) : 0; 
 
