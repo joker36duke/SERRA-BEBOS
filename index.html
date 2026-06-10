@@ -3003,7 +3003,7 @@ window.getImagemArena = function(enemyName) {
                              
                         // Captura as serras do Dono ou NoSerra de cada equipe
                         if (j.papel === 'Dono' || j.papel === 'NoSerra') {
-                            const ss = (state.serrasGlobais && state.serrasGlobais[j.uid]) ? state.serrasGlobais[j.uid] : 1;
+                            const ss = (state.serrasGlobais && state.serrasGlobais[j.equipe]) ? state.serrasGlobais[j.equipe] : 1;
                             if (j.equipe === 'Carpinteiros') serrasCarpinteiros = ss;
                             else serrasPedreiros = ss;
                         }
