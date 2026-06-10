@@ -2682,7 +2682,10 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         const meuUid = auth.currentUser.uid;
         if (pWon) {
             let atualizacoesNuvem = {};
-            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
+            const chaveP = state.tipoJogo === '1v1' ? meuUid : state.minhaEquipe;
+const chaveE = state.tipoJogo === '1v1' ? state.ordemTurnos.find(u => u !== meuUid) : (state.minhaEquipe === 'Pedreiros' ? 'Carpinteiros' : 'Pedreiros');
+atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${chaveP}`] = state.pSerraScore;
+atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${chaveE}`] = state.eSerraScore;
             atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : state.ordemTurnos.find(u => u !== meuUid);
             atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
             update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
