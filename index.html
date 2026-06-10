@@ -2564,7 +2564,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     if (window.pontuacaoJaContada) return;
     window.pontuacaoJaContada = true;
     state.roundEnded = true;
-
+} else {
     let pScore = pFinal !== null ? pFinal : state.pScore;
     let eScore = eFinal !== null ? eFinal : state.eScore;
     let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
