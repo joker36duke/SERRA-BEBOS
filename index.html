@@ -2871,11 +2871,16 @@ window.getImagemArena = function(enemyName) {
 };
                 
 
-           // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
-            window.updateArenaUI = function() {
-            // Pontuações
-            document.getElementById('score-p').innerText = state.pScore;
-            document.getElementById('score-e').innerText = state.eScore;
+    // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
+        window.updateArenaUI = function() {
+            
+            // --- 🛡️ PLACAR CLÁSSICO 1x1 ---
+            if (state.tipoJogo === '1v1') {
+                // A função ouvirMesaJogoOnline já faz a matemática em tempo real.
+                // Aqui nós apenas imprimimos os valores oficiais na tela!
+                document.getElementById('score-p').innerText = state.pScore;
+                document.getElementById('score-e').innerText = state.eScore;
+            }
 
             // 👉 NOME DO JOGADOR
             let meuNome = "GUARDIÃO";
