@@ -2682,10 +2682,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         const meuUid = auth.currentUser.uid;
         if (pWon) {
             let atualizacoesNuvem = {};
-            const chaveP = state.tipoJogo === '1v1' ? meuUid : state.minhaEquipe;
-const chaveE = state.tipoJogo === '1v1' ? state.ordemTurnos.find(u => u !== meuUid) : (state.minhaEquipe === 'Pedreiros' ? 'Carpinteiros' : 'Pedreiros');
-atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${chaveP}`] = state.pSerraScore;
-atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${chaveE}`] = state.eSerraScore;
+            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
             atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : state.ordemTurnos.find(u => u !== meuUid);
             atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
             update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
@@ -2871,16 +2868,11 @@ window.getImagemArena = function(enemyName) {
 };
                 
 
-    // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
-        window.updateArenaUI = function() {
-            
-            // --- 🛡️ PLACAR CLÁSSICO 1x1 ---
-            if (state.tipoJogo === '1v1') {
-                // A função ouvirMesaJogoOnline já faz a matemática em tempo real.
-                // Aqui nós apenas imprimimos os valores oficiais na tela!
-                document.getElementById('score-p').innerText = state.pScore;
-                document.getElementById('score-e').innerText = state.eScore;
-            }
+           // --- ATUALIZAÇÃO DA UI DA MESA (VERSÃO COMPLETA E ONLINE) ---
+            window.updateArenaUI = function() {
+            // Pontuações
+            document.getElementById('score-p').innerText = state.pScore;
+            document.getElementById('score-e').innerText = state.eScore;
 
             // 👉 NOME DO JOGADOR
             let meuNome = "GUARDIÃO";
@@ -2991,24 +2983,22 @@ window.getImagemArena = function(enemyName) {
                     btnPopo.classList.add('hidden', 'opacity-50', 'pointer-events-none');
                     btnPopo.style.display = 'none';
                 }
-            }           
+            }
                 
       // --- CÁLCULO DE PLACAR PARA MULTIPLAYER 2x2 e 3x3 ---
             if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) {
                 let ptsCarpinteiros = 0, ptsPedreiros = 0;
                 let serrasCarpinteiros = 0, serrasPedreiros = 0;
-                let equipeNoSerra = "";    
                 
                 if (state.jogadoresDefinidos) {
                     state.jogadoresDefinidos.forEach(j => {
                         const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
                         if (j.equipe === 'Carpinteiros') ptsCarpinteiros += pts;
                         else ptsPedreiros += pts;
-                    if (j.papel === 'NoSerra') equipeNoSerra = j.equipe;
-                             
+                        
                         // Captura as serras do Dono ou NoSerra de cada equipe
                         if (j.papel === 'Dono' || j.papel === 'NoSerra') {
-                            const ss = (state.serrasGlobais && state.serrasGlobais[j.equipe]) ? state.serrasGlobais[j.equipe] : 1;
+                            const ss = (state.serrasGlobais && state.serrasGlobais[j.uid]) ? state.serrasGlobais[j.uid] : 1;
                             if (j.equipe === 'Carpinteiros') serrasCarpinteiros = ss;
                             else serrasPedreiros = ss;
                         }
@@ -3023,14 +3013,8 @@ window.getImagemArena = function(enemyName) {
                 
                 const elSerrasCarp = document.getElementById('serras-carpinteiros');
                 const elSerrasPed = document.getElementById('serras-pedreiros');
-                if (elSerrasCarp) {
-                    elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
-                    elSerrasCarp.style.display = (equipeNoSerra === 'Carpinteiros') ? 'inline-flex' : 'none';
-                }
-                if (elSerrasPed) {
-                    elSerrasPed.innerText = `${serrasPedreiros}/3`;
-                    elSerrasPed.style.display = (equipeNoSerra === 'Pedreiros') ? 'inline-flex' : 'none';
-                }
+                if (elSerrasCarp) elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
+                if (elSerrasPed) elSerrasPed.innerText = `${serrasPedreiros}/3`;
             }
         };
 
@@ -3451,11 +3435,8 @@ if (qtdJaJogada + 1 < maxJogadores) {
         state.vira = mesa.vira;
         state.trumpSuit = mesa.trunfo;
         state.liderAtual = estadoSeguro.liderAtual;
-        const chaveP = state.tipoJogo === '1v1' ? meuUid : state.minhaEquipe;
-const chaveE = state.tipoJogo === '1v1' ? inimigoUid : (state.minhaEquipe === 'Pedreiros' ? 'Carpinteiros' : 'Pedreiros');
-state.pSerraScore = estadoSeguro.placarSerras[chaveP] || 1;
-state.eSerraScore = estadoSeguro.placarSerras[chaveE] || 1;
-
+        state.pScore = pontosSeguros[meuUid] || 0;
+        state.eScore = inimigoUid ? (pontosSeguros[inimigoUid] || 0) : 0;
         state.pTricksWon = vazasSeguras[meuUid] || 0; 
         state.eTricksWon = inimigoUid ? (vazasSeguras[inimigoUid] || 0) : 0; 
 
@@ -3489,28 +3470,8 @@ if (state.tipoJogo === '1v1') {
         if (playedP) playedP.innerHTML = '';
         if (playedE) playedE.innerHTML = '';
 
-                // Separa quem sou eu e quem são os outros
+        // Separa quem sou eu e quem são os outros
         const jogadasAtivas = Object.keys(jogadas);
-        
-        // 🔥 LÓGICA DE PODER: Descobre qual carta está vencendo a vaza agora
-        let vencedorAtualUid = null;
-        let cartaVencedora = null;
-
-        if (jogadasAtivas.length > 0) {
-            const liderUid = estadoSeguro.liderAtual;
-            vencedorAtualUid = jogadas[liderUid] ? liderUid : jogadasAtivas[0];
-            cartaVencedora = jogadas[vencedorAtualUid];
-
-            jogadasAtivas.forEach(uid => {
-                if (uid !== vencedorAtualUid && jogadas[uid]) {
-                    if (determineTrickWinner(cartaVencedora, jogadas[uid], true) === 'e') {
-                        cartaVencedora = jogadas[uid];
-                        vencedorAtualUid = uid;
-                    }
-                }
-            });
-        }
-
         const outrosUids = jogadasAtivas.filter(uid => uid !== meuUid);
         const totalOutros = outrosUids.length;
 
@@ -3519,12 +3480,12 @@ if (state.tipoJogo === '1v1') {
             const cUI = (window.createCardUI || createCardUI)(jogadas[meuUid]);
             cUI.classList.add('played-card');
             if (playedP) {
-                playedP.style.zIndex = (vencedorAtualUid === meuUid) ? "50" : "10"; 
+                playedP.style.zIndex = "30"; 
                 playedP.appendChild(cUI);
             }
         }
 
-         // Renderiza a carta dos OUTROS (Cada carta cuidando de si mesma)
+        // Renderiza a carta dos OUTROS (Fazendo o Leque no centro da mesa)
         outrosUids.forEach((uid, index) => {
             const carta = jogadas[uid];
             if (!carta) return;
@@ -3533,36 +3494,20 @@ if (state.tipoJogo === '1v1') {
             cUI.classList.add('played-card');
 
             if (playedE) {
-                // Mantemos a caixa pai num z-index alto se alguém dali estiver ganhando
-                playedE.style.zIndex = (vencedorAtualUid && vencedorAtualUid !== meuUid) ? "50" : "15";
+                playedE.style.zIndex = "20";
                 
-                // 🔥 A GRANDE MUDANÇA: 'absolute' solta as cartas umas das outras
-                cUI.style.position = 'absolute'; 
-                
-                // A MATEMÁTICA DO LEQUE (Espalha a partir do centro sem grudar)
+                // A MATEMÁTICA DO LEQUE (Espalha em arco)
                 const offset = index - (totalOutros - 1) / 2;
-                const moveX = offset * 30; // Afasta as cartas horizontalmente
-                const rotateDeg = offset * 12; // Inclina as cartas
-                
-                let transformStr = `translateX(${moveX}px) rotate(${rotateDeg}deg) translateY(${Math.abs(rotateDeg/2)}px)`;
-                
-                // 🔥 A CARTA VENCEDORA SOBE E DESTACA SOZINHA
-                if (uid === vencedorAtualUid) {
-                    cUI.style.zIndex = "100"; 
-                    transformStr += " scale(1.1) translateY(-15px)"; // Pulo individual para cima
-                    cUI.style.boxShadow = "0 0 20px rgba(212,175,55,0.8)"; // Brilho de campeã
-                } else {
-                    cUI.style.zIndex = index + 1; 
-                }
-                
-                cUI.style.transform = transformStr;
+                cUI.style.position = 'absolute';
+                cUI.style.transform = `translateX(${offset * 35}px) translateY(${Math.abs(offset) * 6}px) rotate(${offset * 12}deg)`;
+                cUI.style.zIndex = index + 1; 
 
                 // Etiqueta de identificação de quem jogou
                 if (state.jogadoresDefinidos) {
                     const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
                     if (jInfo) {
                         const tagNome = document.createElement('span');
-                        tagNome.className = "absolute -top-6 left-1/2 -translate-x-1/2 bg-black/95 text-[8px] font-cinzel px-2 py-0.5 rounded shadow z-[101] whitespace-nowrap tracking-widest border backdrop-blur-sm";
+                        tagNome.className = "absolute -top-6 left-1/2 -translate-x-1/2 bg-black/95 text-[8px] font-cinzel px-2 py-0.5 rounded shadow whitespace-nowrap z-50 tracking-widest border backdrop-blur-sm";
                         
                         // Cores táticas: Verde para aliados, Vermelho para invasores
                         if (jInfo.equipe === state.minhaEquipe) {
@@ -3576,11 +3521,11 @@ if (state.tipoJogo === '1v1') {
                     }
                 }
                 playedE.appendChild(cUI);
-              }
-           });
-         }
-       }
-        
+            }
+        });
+    }
+}
+
         // ==========================================
         // 🔥 INJETANDO ENERGIA NAS CAIXINHAS MULTIPLAYER
         // ==========================================
