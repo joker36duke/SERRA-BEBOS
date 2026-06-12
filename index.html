@@ -3749,14 +3749,24 @@ if (state.tipoJogo === '1v1') {
                         } else {
                             state.canPlay = state.pTurn && !state.pCard;
                             if(window.updateArenaUI) window.updateArenaUI();
-                        }
-                                                     if (state.isOnline) {
-                            if (window.verificarFimDeJogoNuvem) window.verificarFimDeJogoNuvem();
-                        } else {
-                            if (isLastTrickLocal && !state.roundEnded) {
-                                if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                            }
-                        }
+                        }       
+            if (state.isOnline) {
+            // 🔀 Desvio Online: Cada modo com o seu verificador de fim de jogo
+            if (state.tipoJogo === '1v1') {
+                if (window.verificarFimDeJogoNuvem) window.verificarFimDeJogoNuvem();
+            } else {
+                if (window.verificarFimDeJogoNuvemMultiplayer) window.verificarFimDeJogoNuvemMultiplayer();
+            }
+        } else {
+            if (isLastTrickLocal && !state.roundEnded) {
+                // 🔀 Desvio Offline: O 1x1 segue o seu caminho intocável
+                if (state.tipoJogo === '1v1') {
+                    if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
+                } else {
+                    if (window.endRoundMultiplayer) window.endRoundMultiplayer();
+                }
+            }
+        }
 
                     } catch (err) {
                         console.error("A Floresta tentou travar o jogo (setTimeout):", err);
