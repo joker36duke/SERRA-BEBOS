@@ -3435,10 +3435,15 @@ if (qtdJaJogada + 1 < maxJogadores) {
         state.vira = mesa.vira;
         state.trumpSuit = mesa.trunfo;
         state.liderAtual = estadoSeguro.liderAtual;
-        state.pScore = pontosSeguros[meuUid] || 0;
-        state.eScore = inimigoUid ? (pontosSeguros[inimigoUid] || 0) : 0;
+        
+        // O NOSSO ESCUDO DO 1x1 ENTRA AQUI:
+        if (state.tipoJogo === '1v1') {
+            state.pScore = pontosSeguros[meuUid] || 0;
+            state.eScore = inimigoUid ? (pontosSeguros[inimigoUid] || 0) : 0;
+        }
+        
         state.pTricksWon = vazasSeguras[meuUid] || 0; 
-        state.eTricksWon = inimigoUid ? (vazasSeguras[inimigoUid] || 0) : 0; 
+        state.eTricksWon = inimigoUid ? (vazasSeguras[inimigoUid] || 0) : 0;  
 
         state.isBiscaNaRodaActive = estadoSeguro.isBiscaNaRodaActive || false;
         const bAlert = document.getElementById('bisca-alert');
