@@ -3339,20 +3339,18 @@ if (qtdJaJogada + 1 < maxJogadores) {
         if (window.vigiaAtivo) return; 
         window.vigiaAtivo = true;
         
-         // 5. O Vigia espera a animação acabar para não encerrar no meio do movimento.
+                 // 5. O Vigia espera a animação acabar para não encerrar no meio do movimento.
         const vigiaAnima = setInterval(() => {
             if (!state.resolvendoVaza) {
                 clearInterval(vigiaAnima);
                 window.vigiaAtivo = false;
                 
-                // 6. Juiz Supremo: Chama o fim sem medo (com tempo para a internet sincronizar os pontos finais!)
+                // 6. Juiz Supremo: Chama o fim sem medo.
                 if (!state.roundEnded && window.endRound) {
-                    setTimeout(() => {
-                        window.endRound(null, null, null, null, null);
-                    }, 1000); // Espera 1 segundo exato para o Firebase entregar os pontos da última vaza
+                    window.endRound(null, null, null, null, null);
                 }
             }
-        }, 300);
+        }, 1000);
     }
 };  
 
