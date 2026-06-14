@@ -3751,18 +3751,13 @@ if (state.tipoJogo === '1v1') {
                                 await update(ref(database), updates);
                             }
 
-                        } else {
+                         } else {
                             state.canPlay = state.pTurn && !state.pCard;
                             if(window.updateArenaUI) window.updateArenaUI();
                         }       
-            if (state.isOnline) {
-                                  if (isLastTrickLocal && !state.roundEnded) {
-                            if (window.endRound) window.endRound(null, state.pScore, state.eScore, state.pTricksWon, state.eTricksWon);
-                        }
-                }
-
 
                     } catch (err) {
+
                         console.error("A Floresta tentou travar o jogo (setTimeout):", err);
                         state.resolvendoVaza = false; 
                         
