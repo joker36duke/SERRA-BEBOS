@@ -2244,49 +2244,86 @@ function confirmGuardian() {
         // TELA DE SORTEIO BLINDADA E COM ANIMAÇÕES SUAVES
         // ========================================================
         window.renderizarMesaSorteioOnline = function(cartasFirebase) {
-            const grid = document.getElementById('luck-grid');
-            if (!grid || !cartasFirebase) return;
+    const grid = document.getElementById('luck-grid');
+    if (!grid || !cartasFirebase) return;
 
-            // Limpa a mesa apenas se for um sorteio NOVO (todas as cartas viradas para baixo)
-            // ou se a mesa ainda não foi construída na tela.
-            const isReset = Object.values(cartasFirebase).every(c => c && !c.virada);
-            
-            if (isReset || grid.children.length !== 8) {
-                state.sorteioLocalLock = false; // 🔥 Destrava para um novo sorteio!
-                grid.innerHTML = '';
-                for (let i = 0; i < 8; i++) {
-                    const c = document.createElement('div');
-                    c.className = 'luck-card';
-                    c.innerHTML = `
-                        <div class="luck-card-inner">
-                            <div class="luck-card-back card-back-style overflow-hidden"></div>
-                            <div class="luck-card-front"></div>
-                        </div>
-                    `;
-                    c.onclick = () => window.escolherCartaSorteio(i);
-                    grid.appendChild(c);
-                }
-            }
+    const meuUid = auth.currentUser ? auth.currentUser.uid : null;
+    let euJaEscolhi = false;
 
-            // Animação Suave: Apenas vira as cartas escolhidas, sem recriar o HTML e piscar a tela
-            for (let i = 0; i < 8; i++) {
-                const cartaDb = cartasFirebase[i];
-                if (!cartaDb) continue;
+    // Limpa a mesa apenas se for um sorteio NOVO (todas as cartas viradas para baixo)
+    // ou se a mesa ainda não foi construída na tela.
+    const isReset = Object.values(cartasFirebase).every(c => c && !c.virada);
+    
+    if (isReset || grid.children.length !== 8) {
+        state.sorteioLocalLock = false; // 🔥 Destrava para um novo sorteio!
+        grid.innerHTML = '';
+        
+        // RESET DO LETREIRO (Respeitando o escudo de Empate)
+        const statusTexto = document.getElementById('texto-status-sorteio');
+        if (statusTexto && !statusTexto.innerText.includes("EMPATE")) {
+            statusTexto.innerText = "Escolha uma carta para o sorteio";
+            statusTexto.classList.remove('text-amazon');
+            statusTexto.classList.add('text-luxury-gold', 'animate-pulse');
+        }
 
-                const c = grid.children[i];
-                if (!c) continue;
-                const inner = c.querySelector('.luck-card-inner');
+        for (let i = 0; i < 8; i++) {
+            const c = document.createElement('div');
+            c.className = 'luck-card';
+            c.innerHTML = `
+                <div class="luck-card-inner">
+                    <div class="luck-card-back card-back-style overflow-hidden"></div>
+                    <div class="luck-card-front"></div>
+                </div>
+            `;
+            c.onclick = () => window.escolherCartaSorteio(i);
+            grid.appendChild(c);
+        }
+    }
 
-                // Se a carta foi virada na nuvem, mas ainda não virou na sua tela
-                if (cartaDb.virada && !inner.classList.contains('flipped')) {
-                    const front = c.querySelector('.luck-card-front');
-                    front.innerHTML = '';
-                    front.appendChild((window.createCardUI || createCardUI)(cartaDb));
-                    inner.classList.add('flipped');
-                    c.onclick = null; // Desativa o clique apenas nesta carta que já virou
-                }
-            }
-        };
+    // Animação Suave: Apenas vira as cartas escolhidas e verifica quem escolheu
+    for (let i = 0; i < 8; i++) {
+        const cartaDb = cartasFirebase[i];
+        if (!cartaDb) continue;
+
+        // Verifica se ESSA carta pertence a você
+        if (cartaDb.escolhidaPor === meuUid) {
+            euJaEscolhi = true;
+        }
+
+        const c = grid.children[i];
+        if (!c) continue;
+        const inner = c.querySelector('.luck-card-inner');
+
+        // Se a carta foi virada na nuvem, mas ainda não virou na sua tela
+        if (cartaDb.virada && !inner.classList.contains('flipped')) {
+            const front = c.querySelector('.luck-card-front');
+            front.innerHTML = '';
+            front.appendChild((window.createCardUI || createCardUI)(cartaDb));
+            inner.classList.add('flipped');
+            c.onclick = null; // Desativa o clique apenas nesta carta que já virou
+        }
+    }
+
+    // ATUALIZA O FEEDBACK VISUAL NO LETREIRO (COM PROTEÇÃO)
+    const statusTexto = document.getElementById('texto-status-sorteio');
+    if (statusTexto) {
+        
+        // PROTEÇÃO: Não encostamos no letreiro se estiver dando aviso de Empate
+        if (statusTexto.innerText.includes("EMPATE")) {
+            return; 
+        }
+
+        if (euJaEscolhi) {
+            statusTexto.innerText = "CARTA GARANTIDA! AGUARDE...";
+            statusTexto.classList.remove('text-luxury-gold', 'animate-pulse');
+            statusTexto.classList.add('text-amazon'); // Fica verde Amazônia
+        } else {
+            statusTexto.innerText = "Escolha uma carta para o sorteio";
+            statusTexto.classList.remove('text-amazon');
+            statusTexto.classList.add('text-luxury-gold', 'animate-pulse');
+        }
+    }
+};
 
         // ========================================================
         // ESCOLHA DE CARTA BLINDADA (ANTI-TRAVAMENTO E ANTI-FANTASMA)
