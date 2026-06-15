@@ -2314,74 +2314,59 @@ function confirmGuardian() {
         // ESCOLHA DE CARTA BLINDADA (ANTI-TRAVAMENTO E ANTI-FANTASMA)
         // ========================================================
         window.escolherCartaSorteio = async function(indice) {
-            // Trava local para evitar que o jogador clique em duas cartas ao mesmo tempo
-            if (!state.salaId || state.sorteioLocalLock) return;
+    if (!state.salaId || state.sorteioLocalLock) return;
 
-            const meuUid = auth.currentUser ? auth.currentUser.uid : null;
-            if (!meuUid) return;
+    const meuUid = auth.currentUser ? auth.currentUser.uid : null;
+    if (!meuUid) return;
 
-            // 1. TRAVA A TELA IMEDIATAMENTE
-            state.sorteioLocalLock = true; 
+    state.sorteioLocalLock = true; // Trava a tela
 
-            // 2. A VÁLVULA DE ESCAPE (O SEGREDO ANTI-CONGELAMENTO)
-            // Se o Firebase não responder em 3 segundos (por queda de internet), a tela destrava sozinha!
-            const travaDeSeguranca = setTimeout(() => {
-                state.sorteioLocalLock = false;
-                console.log("Aviso: Tempo de resposta excedido. Tela destravada.");
-            }, 3000);
+    // Válvula de segurança de 3 segundos
+    const travaDeSeguranca = setTimeout(() => {
+        state.sorteioLocalLock = false;
+    }, 3000);
 
-            try {
-                // Consulta rápida para ver como está a mesa agora
-                const snapshot = await get(ref(database, `salas/${state.salaId}/mesa_sorteio`));
-                
-                if (snapshot.exists()) {
-                    const cartasAtuais = snapshot.val();
-                    
-                    // ANTI-FANTASMA: Eu já escolhi uma carta antes e o celular gaguejou?
-                    const jaEscolhi = Object.values(cartasAtuais).some(c => c && c.escolhidaPor === meuUid);
-                    if (jaEscolhi) {
-                        clearTimeout(travaDeSeguranca);
-                        return; // Mantém a tela travada e apenas espera o sorteio acabar.
-                    }
+    try {
+        const mesaRef = ref(database, `salas/${state.salaId}/mesa_sorteio`);
+        
+        const resultado = await runTransaction(mesaRef, (mesaSorteio) => {
+            if (!mesaSorteio) return;
 
-                    // REFLEXO LENTO: Alguém já pegou ESSA carta específica enquanto eu clicava?
-                    if (cartasAtuais[indice] && cartasAtuais[indice].escolhidaPor) {
-                        mostrarAlertaSeringal("Reflexo Lento!", "Alguém foi mais rápido e pegou essa carta. Escolha outra!");
-                        clearTimeout(travaDeSeguranca);
-                        state.sorteioLocalLock = false; // Destrava IMEDIATAMENTE para tentar outra
-                        return;
-                    }
+            // Anti-fantasma: verifica se já escolhi algo na nuvem
+            const jaEscolhi = Object.values(mesaSorteio).some(c => c && c.escolhidaPor === meuUid);
+            if (jaEscolhi) return; 
+
+            // Se alguém já pegou a carta que eu cliquei, aborta
+            if (mesaSorteio[indice] && mesaSorteio[indice].escolhidaPor) return;
+
+            mesaSorteio[indice].escolhidaPor = meuUid;
+            mesaSorteio[indice].virada = true;
+            return mesaSorteio; 
+        });
+
+        clearTimeout(travaDeSeguranca);
+
+        if (!resultado.committed) {
+            // Se falhou, checa se foi porque EU já tinha escolhido ou porque ROUBARAM
+            const snap = await get(mesaRef);
+            if (snap.exists()) {
+                const mesaAtual = snap.val();
+                const euJaTinha = Object.values(mesaAtual).some(c => c && c.escolhidaPor === meuUid);
+                if (!euJaTinha) {
+                    mostrarAlertaSeringal("Escapou!", "Alguém foi mais rápido! Escolha outra carta.");
+                    state.sorteioLocalLock = false;
                 }
-
-                // 3. A CORRIDA NO SERVIDOR (TRANSAÇÃO RIGOROSA)
-                const cartaRef = ref(database, `salas/${state.salaId}/mesa_sorteio/${indice}`);
-                const resultado = await runTransaction(cartaRef, (carta) => {
-                    // Só deixa eu pegar se a carta existir e ninguém tiver pego ainda
-                    if (carta && !carta.escolhidaPor) {
-                        carta.escolhidaPor = meuUid;
-                        carta.virada = true;
-                        return carta;
-                    }
-                    return; // Aborta se alguém pegou no mesmo milissegundo exato
-                });
-
-                // O Firebase respondeu! Cancela a válvula de escape de 3 segundos
-                clearTimeout(travaDeSeguranca); 
-
-                if (!resultado.committed) {
-                    // Empate de dedos! O adversário ganhou por milissegundos na nuvem.
-                    mostrarAlertaSeringal("Escapou!", "A carta fugiu da sua mão! Tente outra rapidamente.");
-                    state.sorteioLocalLock = false; // Destrava a tela para ele escolher outra
-                } 
-                // Se resultado.committed for TRUE, a state.sorteioLocalLock CONTINUA TRUE.
-                // O jogador descansa o dedo e espera os outros terminarem.
-
-            } catch (erro) {
-                console.error("Erro de conexão na mata:", erro);
-                clearTimeout(travaDeSeguranca);
-                state.sorteioLocalLock = false; // Caiu a internet no meio? Destrava para tentar de novo.
+            } else {
+                state.sorteioLocalLock = false;
             }
-        };
+        }
+        // Se comitted = true, a carta é garantida e o sorteioLocalLock continua true
+    } catch (erro) {
+        console.error("Erro de conexão na mata:", erro);
+        clearTimeout(travaDeSeguranca);
+        state.sorteioLocalLock = false;
+    }
+};
 
         // ========================================================
         // JUIZ DO SORTEIO ONLINE (PREPARADO PARA 1x1, 2x2 e 3x3)
