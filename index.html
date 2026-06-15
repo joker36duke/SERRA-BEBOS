@@ -2250,15 +2250,12 @@ function confirmGuardian() {
     const meuUid = auth.currentUser ? auth.currentUser.uid : null;
     let euJaEscolhi = false;
 
-    // Limpa a mesa apenas se for um sorteio NOVO (todas as cartas viradas para baixo)
-    // ou se a mesa ainda não foi construída na tela.
     const isReset = Object.values(cartasFirebase).every(c => c && !c.virada);
     
     if (isReset || grid.children.length !== 8) {
-        state.sorteioLocalLock = false; // 🔥 Destrava para um novo sorteio!
+        state.sorteioLocalLock = false; 
         grid.innerHTML = '';
         
-        // RESET DO LETREIRO (Respeitando o escudo de Empate)
         const statusTexto = document.getElementById('texto-status-sorteio');
         if (statusTexto && !statusTexto.innerText.includes("EMPATE")) {
             statusTexto.innerText = "Escolha uma carta para o sorteio";
@@ -2280,43 +2277,31 @@ function confirmGuardian() {
         }
     }
 
-    // Animação Suave: Apenas vira as cartas escolhidas e verifica quem escolheu
     for (let i = 0; i < 8; i++) {
         const cartaDb = cartasFirebase[i];
         if (!cartaDb) continue;
 
-        // Verifica se ESSA carta pertence a você
-        if (cartaDb.escolhidaPor === meuUid) {
-            euJaEscolhi = true;
-        }
+        if (cartaDb.escolhidaPor === meuUid) euJaEscolhi = true;
 
         const c = grid.children[i];
         if (!c) continue;
         const inner = c.querySelector('.luck-card-inner');
 
-        // Se a carta foi virada na nuvem, mas ainda não virou na sua tela
         if (cartaDb.virada && !inner.classList.contains('flipped')) {
             const front = c.querySelector('.luck-card-front');
             front.innerHTML = '';
             front.appendChild((window.createCardUI || createCardUI)(cartaDb));
             inner.classList.add('flipped');
-            c.onclick = null; // Desativa o clique apenas nesta carta que já virou
+            c.onclick = null;
         }
     }
 
-    // ATUALIZA O FEEDBACK VISUAL NO LETREIRO (COM PROTEÇÃO)
     const statusTexto = document.getElementById('texto-status-sorteio');
-    if (statusTexto) {
-        
-        // PROTEÇÃO: Não encostamos no letreiro se estiver dando aviso de Empate
-        if (statusTexto.innerText.includes("EMPATE")) {
-            return; 
-        }
-
+    if (statusTexto && !statusTexto.innerText.includes("EMPATE")) {
         if (euJaEscolhi) {
             statusTexto.innerText = "CARTA GARANTIDA! AGUARDE...";
             statusTexto.classList.remove('text-luxury-gold', 'animate-pulse');
-            statusTexto.classList.add('text-amazon'); // Fica verde Amazônia
+            statusTexto.classList.add('text-amazon'); 
         } else {
             statusTexto.innerText = "Escolha uma carta para o sorteio";
             statusTexto.classList.remove('text-amazon');
