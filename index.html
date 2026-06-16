@@ -3025,7 +3025,7 @@ window.getImagemArena = function(enemyName) {
                     });
                 }
                 
-                                // Aplica nos painéis do HTML
+                 // Aplica nos painéis do HTML
                 const elScoreCarp = document.getElementById('score-carpinteiros');
                 const elScorePed = document.getElementById('score-pedreiros');
                 if (elScoreCarp) elScoreCarp.innerText = ptsCarpinteiros;
@@ -3039,25 +3039,22 @@ window.getImagemArena = function(enemyName) {
                 if (elSerrasCarp) elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
                 if (elSerrasPed) elSerrasPed.innerText = `${serrasPedreiros}/3`;
 
-                // 2. Lógica visual: Esconde o contador de quem é o Dono da Mesa e mostra o de quem tá no Serra
-                if (state.minhaEquipe === 'Carpinteiros') {
-                    if (state.isDono) {
-                        if (elSerrasCarp) elSerrasCarp.classList.add('hidden'); // Sua equipe é dona (esconde o seu)
-                        if (elSerrasPed) elSerrasPed.classList.remove('hidden'); // Mostra o do inimigo
-                    } else {
-                        if (elSerrasPed) elSerrasPed.classList.add('hidden'); // Inimigo é dono (esconde o dele)
-                        if (elSerrasCarp) elSerrasCarp.classList.remove('hidden'); // Mostra o seu
-                    }
-                } else if (state.minhaEquipe === 'Pedreiros') {
-                    if (state.isDono) {
-                        if (elSerrasPed) elSerrasPed.classList.add('hidden'); 
-                        if (elSerrasCarp) elSerrasCarp.classList.remove('hidden'); 
-                    } else {
-                        if (elSerrasCarp) elSerrasCarp.classList.add('hidden'); 
-                        if (elSerrasPed) elSerrasPed.classList.remove('hidden'); 
-                    }
+                // 2. O Pulo do Gato: Descobre a Equipe Dona olhando para o 1º jogador da roda sincronizada
+                let equipeDona = state.minhaEquipe; 
+                if (state.ordemTurnos && state.ordemTurnos.length > 0 && state.jogadoresDefinidos) {
+                    const uidDonoReal = state.ordemTurnos[0];
+                    const infoDono = state.jogadoresDefinidos.find(j => j.uid === uidDonoReal);
+                    if (infoDono) equipeDona = infoDono.equipe;
                 }
-                // === NOVO BLOCO SUBSTITUÍDO TERMINA AQUI ===
+
+                // 3. Lógica visual da Equipe (Esconde da Equipe Dona, mostra da Equipe no Serra)
+                if (equipeDona === 'Carpinteiros') {
+                    if (elSerrasCarp) elSerrasCarp.classList.add('hidden'); // Carpinteiros dominam (esconde)
+                    if (elSerrasPed) elSerrasPed.classList.remove('hidden'); // Pedreiros no Serra (mostra)
+                } else {
+                    if (elSerrasPed) elSerrasPed.classList.add('hidden'); // Pedreiros dominam (esconde)
+                    if (elSerrasCarp) elSerrasCarp.classList.remove('hidden'); // Carpinteiros no Serra (mostra)
+                }
             }
         };
 
