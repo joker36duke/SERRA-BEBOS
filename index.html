@@ -3423,10 +3423,14 @@ if (qtdJaJogada + 1 < maxJogadores) {
 
         const estadoSeguro = mesa.estado || {};
 
-        // 1º DESCOBRE OS TURNOS
+        // 1º DESCOBRE OS TURNOS (A trava de 2 jogadores continua intacta SOMENTE no 1x1)
         let turnosSalvos = lerArray(estadoSeguro.ordemTurnosSegura || state.ordemTurnos);
-        if (turnosSalvos.length !== 2) turnosSalvos = state.ordemTurnos;
-
+        
+        if (state.tipoJogo === '1v1' && turnosSalvos.length !== 2) {
+            turnosSalvos = state.ordemTurnos; 
+        } else if ((state.tipoJogo === '2v2' || state.tipoJogo === '3v3') && turnosSalvos.length === 0) {
+            turnosSalvos = state.ordemTurnos; 
+        }
         // 2º DESCOBRE O INIMIGO ANTES DE LER OS DADOS DELE
         const inimigoUid = turnosSalvos.find(uid => uid !== meuUid);
 
