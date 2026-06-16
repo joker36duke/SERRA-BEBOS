@@ -2317,48 +2317,52 @@ function confirmGuardian() {
     const meuUid = auth.currentUser ? auth.currentUser.uid : null;
     if (!meuUid) return;
 
-    state.sorteioLocalLock = true; // Trava a tela
+    state.sorteioLocalLock = true;
 
-    // Válvula de segurança de 3 segundos
     const travaDeSeguranca = setTimeout(() => {
         state.sorteioLocalLock = false;
-    }, 3000);
+    }, 4000);
 
     try {
         const mesaRef = ref(database, `salas/${state.salaId}/mesa_sorteio`);
+        const snapMesa = await get(mesaRef);
         
-        const resultado = await runTransaction(mesaRef, (mesaSorteio) => {
-            if (!mesaSorteio) return;
+        if (snapMesa.exists()) {
+            const mesaAtual = snapMesa.val();
+            
+            const jaEscolhi = Object.values(mesaAtual).some(c => c && c.escolhidaPor === meuUid);
+            if (jaEscolhi) {
+                clearTimeout(travaDeSeguranca);
+                return; 
+            }
 
-            // Anti-fantasma: verifica se já escolhi algo na nuvem
-            const jaEscolhi = Object.values(mesaSorteio).some(c => c && c.escolhidaPor === meuUid);
-            if (jaEscolhi) return; 
+            if (mesaAtual[indice] && mesaAtual[indice].escolhidaPor) {
+                mostrarAlertaSeringal("Escapou!", "Alguém foi mais rápido. Escolha outra carta!");
+                clearTimeout(travaDeSeguranca);
+                state.sorteioLocalLock = false;
+                return;
+            }
+        }
+        
+        const cartaRef = ref(database, `salas/${state.salaId}/mesa_sorteio/${indice}`);
+        const resultado = await runTransaction(cartaRef, (carta) => {
+            if (carta === null) return; 
 
-            // Se alguém já pegou a carta que eu cliquei, aborta
-            if (mesaSorteio[indice] && mesaSorteio[indice].escolhidaPor) return;
-
-            mesaSorteio[indice].escolhidaPor = meuUid;
-            mesaSorteio[indice].virada = true;
-            return mesaSorteio; 
+            if (carta && !carta.escolhidaPor) {
+                carta.escolhidaPor = meuUid;
+                carta.virada = true;
+                return carta;
+            }
+            return; 
         });
 
         clearTimeout(travaDeSeguranca);
 
         if (!resultado.committed) {
-            // Se falhou, checa se foi porque EU já tinha escolhido ou porque ROUBARAM
-            const snap = await get(mesaRef);
-            if (snap.exists()) {
-                const mesaAtual = snap.val();
-                const euJaTinha = Object.values(mesaAtual).some(c => c && c.escolhidaPor === meuUid);
-                if (!euJaTinha) {
-                    mostrarAlertaSeringal("Escapou!", "Alguém foi mais rápido! Escolha outra carta.");
-                    state.sorteioLocalLock = false;
-                }
-            } else {
-                state.sorteioLocalLock = false;
-            }
+            mostrarAlertaSeringal("Escapou!", "A carta fugiu da sua mão! Tente outra rapidamente.");
+            state.sorteioLocalLock = false;
         }
-        // Se comitted = true, a carta é garantida e o sorteioLocalLock continua true
+
     } catch (erro) {
         console.error("Erro de conexão na mata:", erro);
         clearTimeout(travaDeSeguranca);
