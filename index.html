@@ -2255,8 +2255,8 @@ function confirmGuardian() {
         grid.innerHTML = '';
         
         const statusTexto = document.getElementById('texto-status-sorteio');
-        if (statusTexto && !statusTexto.innerText.includes("EMPATE")) {
-            statusTexto.innerText = "Escolha uma carta para o sorteio";
+        if (statusTexto && !statusTexto.textContent.toUpperCase().includes("EMPATE")) {
+            statusTexto.textContent = "ESCOLHA UMA CARTA PARA O SORTEIO";
             statusTexto.classList.remove('text-amazon');
             statusTexto.classList.add('text-luxury-gold', 'animate-pulse');
         }
@@ -2295,13 +2295,13 @@ function confirmGuardian() {
     }
 
     const statusTexto = document.getElementById('texto-status-sorteio');
-    if (statusTexto && !statusTexto.innerText.includes("EMPATE")) {
+    if (statusTexto && !statusTexto.textContent.toUpperCase().includes("EMPATE")) {
         if (euJaEscolhi) {
-            statusTexto.innerText = "CARTA GARANTIDA! AGUARDE...";
+            statusTexto.textContent = "CARTA GARANTIDA! AGUARDE...";
             statusTexto.classList.remove('text-luxury-gold', 'animate-pulse');
             statusTexto.classList.add('text-amazon'); 
         } else {
-            statusTexto.innerText = "Escolha uma carta para o sorteio";
+            statusTexto.textContent = "ESCOLHA UMA CARTA PARA O SORTEIO";
             statusTexto.classList.remove('text-amazon');
             statusTexto.classList.add('text-luxury-gold', 'animate-pulse');
         }
