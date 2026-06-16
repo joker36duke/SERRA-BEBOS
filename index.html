@@ -3057,7 +3057,15 @@ window.getImagemArena = function(enemyName) {
                 }
             }
         };
-
+                
+// === NOVA FUNÇÃO EXCLUSIVA PARA EQUIPES (2x2 e 3x3) ===
+window.verificarDominioDaEquipe = function() {
+    if (!state.ordemTurnos || !state.jogadoresDefinidos) return state.isDono;
+    const uidDonoReal = state.ordemTurnos[0];
+    const infoDono = state.jogadoresDefinidos.find(j => j.uid === uidDonoReal);
+    return infoDono ? (infoDono.equipe === state.minhaEquipe) : state.isDono;
+};
+                
         // ==========================================
         // TROCA DO VIRA (PAPÔ) - AGORA NO MÓDULO!
         // ==========================================
