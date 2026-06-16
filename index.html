@@ -2612,7 +2612,10 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         });
     }
 
-    const eraDonoNoInicio = state.isDono;
+        // O 1x1 continua usando a variável clássica, as equipes usam a nova função:
+    const eraDonoNoInicio = (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3')) 
+        ? window.verificarDominioDaEquipe() 
+        : state.isDono;
     
     if (pScore === 60 && eScore === 60) {
         showModal("EMPATE NA MESA!", "A rodada terminou em 60 a 60. Cartas redistribuídas!", "Repetir Rodada", () => { 
