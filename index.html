@@ -2257,8 +2257,10 @@ function confirmGuardian() {
         const statusTexto = document.getElementById('texto-status-sorteio');
         if (statusTexto && !statusTexto.textContent.toUpperCase().includes("EMPATE")) {
             statusTexto.textContent = "ESCOLHA UMA CARTA PARA O SORTEIO";
-            statusTexto.classList.remove('text-amazon');
-            statusTexto.classList.add('text-luxury-gold', 'animate-pulse');
+            
+            // Garante que começa com o visual Dourado (Espera)
+            statusTexto.classList.remove('text-[#22c55e]', 'border-[#22c55e]', 'shadow-[0_0_25px_rgba(34,197,94,0.4)]');
+            statusTexto.classList.add('text-luxury-gold', 'animate-pulse', 'border-[#d4af37]', 'shadow-[0_0_25px_rgba(212,175,55,0.4)]');
         }
 
         for (let i = 0; i < 8; i++) {
@@ -2294,16 +2296,25 @@ function confirmGuardian() {
         }
     }
 
+    // ATUALIZA O FEEDBACK VISUAL NO LETREIRO (COM NOVO CONTRASTE)
     const statusTexto = document.getElementById('texto-status-sorteio');
     if (statusTexto && !statusTexto.textContent.toUpperCase().includes("EMPATE")) {
         if (euJaEscolhi) {
             statusTexto.textContent = "CARTA GARANTIDA! AGUARDE...";
-            statusTexto.classList.remove('text-luxury-gold', 'animate-pulse');
-            statusTexto.classList.add('text-amazon'); 
+            
+            // Remove o visual Dourado
+            statusTexto.classList.remove('text-luxury-gold', 'animate-pulse', 'border-[#d4af37]', 'shadow-[0_0_25px_rgba(212,175,55,0.4)]');
+            
+            // Adiciona o visual Verde Brilhante (Sucesso)
+            statusTexto.classList.add('text-[#22c55e]', 'border-[#22c55e]', 'shadow-[0_0_25px_rgba(34,197,94,0.4)]'); 
         } else {
             statusTexto.textContent = "ESCOLHA UMA CARTA PARA O SORTEIO";
-            statusTexto.classList.remove('text-amazon');
-            statusTexto.classList.add('text-luxury-gold', 'animate-pulse');
+            
+            // Remove o visual Verde Brilhante
+            statusTexto.classList.remove('text-[#22c55e]', 'border-[#22c55e]', 'shadow-[0_0_25px_rgba(34,197,94,0.4)]');
+            
+            // Devolve o visual Dourado com pulso
+            statusTexto.classList.add('text-luxury-gold', 'animate-pulse', 'border-[#d4af37]', 'shadow-[0_0_25px_rgba(212,175,55,0.4)]');
         }
     }
 };
