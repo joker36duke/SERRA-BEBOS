@@ -3025,16 +3025,39 @@ window.getImagemArena = function(enemyName) {
                     });
                 }
                 
-                // Aplica nos painéis do HTML
+                                // Aplica nos painéis do HTML
                 const elScoreCarp = document.getElementById('score-carpinteiros');
                 const elScorePed = document.getElementById('score-pedreiros');
                 if (elScoreCarp) elScoreCarp.innerText = ptsCarpinteiros;
                 if (elScorePed) elScorePed.innerText = ptsPedreiros;
                 
+                // === NOVO BLOCO SUBSTITUÍDO COMEÇA AQUI ===
                 const elSerrasCarp = document.getElementById('serras-carpinteiros');
                 const elSerrasPed = document.getElementById('serras-pedreiros');
+                
+                // 1. Atualiza os textos dos contadores
                 if (elSerrasCarp) elSerrasCarp.innerText = `${serrasCarpinteiros}/3`;
                 if (elSerrasPed) elSerrasPed.innerText = `${serrasPedreiros}/3`;
+
+                // 2. Lógica visual: Esconde o contador de quem é o Dono da Mesa e mostra o de quem tá no Serra
+                if (state.minhaEquipe === 'Carpinteiros') {
+                    if (state.isDono) {
+                        if (elSerrasCarp) elSerrasCarp.classList.add('hidden'); // Sua equipe é dona (esconde o seu)
+                        if (elSerrasPed) elSerrasPed.classList.remove('hidden'); // Mostra o do inimigo
+                    } else {
+                        if (elSerrasPed) elSerrasPed.classList.add('hidden'); // Inimigo é dono (esconde o dele)
+                        if (elSerrasCarp) elSerrasCarp.classList.remove('hidden'); // Mostra o seu
+                    }
+                } else if (state.minhaEquipe === 'Pedreiros') {
+                    if (state.isDono) {
+                        if (elSerrasPed) elSerrasPed.classList.add('hidden'); 
+                        if (elSerrasCarp) elSerrasCarp.classList.remove('hidden'); 
+                    } else {
+                        if (elSerrasCarp) elSerrasCarp.classList.add('hidden'); 
+                        if (elSerrasPed) elSerrasPed.classList.remove('hidden'); 
+                    }
+                }
+                // === NOVO BLOCO SUBSTITUÍDO TERMINA AQUI ===
             }
         };
 
