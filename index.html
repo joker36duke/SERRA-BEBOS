@@ -2699,16 +2699,22 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
 
-    if(window.updateArenaUI) window.updateArenaUI();
-
-    if (state.isOnline) {
+        if (state.isOnline) {
         const meuUid = auth.currentUser.uid;
         if (pWon) {
-            let atualizacoesNuvem = {};
-            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
-            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : state.ordemTurnos.find(u => u !== meuUid);
-            atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
-            update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
+            
+            if (state.tipoJogo === '1v1') {
+                // 🚧 CÓDIGO ORIGINAL DO 1x1 (100% INTOCADO) 🚧
+                let atualizacoesNuvem = {};
+                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
+                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : state.ordemTurnos.find(u => u !== meuUid);
+                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
+                update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
+            } else {
+                // ⚔️ SE FOR EQUIPE, USA A FUNÇÃO NOVA
+                window.salvarFimDeRodadaEquipes(meuUid);
+            }
+            
         }
     }
 
