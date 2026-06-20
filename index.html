@@ -2764,17 +2764,19 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     }
 };
                 
- // === NOVA FUNÇÃO: SALVA O PLACAR DAS EQUIPES NA NUVEM ===
+// === NOVA FUNÇÃO: SALVA O PLACAR DAS EQUIPES NA NUVEM ===
 window.salvarFimDeRodadaEquipes = function(meuUid) {
     let atualizacoesNuvem = {};
     
-    // Descobre quem são os "representantes" de cada equipe na memória
+    // 🔥 CORREÇÃO: Salva o placar atualizado (2/3, 3/3) para TODOS os membros da equipe
     if (state.jogadoresDefinidos) {
-        const repAmigo = state.jogadoresDefinidos.find(j => j.equipe === state.minhaEquipe && (j.papel === 'Dono' || j.papel === 'NoSerra'));
-        const repInimigo = state.jogadoresDefinidos.find(j => j.equipe !== state.minhaEquipe && (j.papel === 'Dono' || j.papel === 'NoSerra'));
-        
-        if (repAmigo) atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${repAmigo.uid}`] = state.pSerraScore;
-        if (repInimigo) atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${repInimigo.uid}`] = state.eSerraScore;
+        state.jogadoresDefinidos.forEach(j => {
+            if (j.equipe === state.minhaEquipe) {
+                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${j.uid}`] = state.pSerraScore;
+            } else {
+                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${j.uid}`] = state.eSerraScore;
+            }
+        });
     }
 
     // Salva o novo Dono e a Roda (igual ao 1x1, mas blindado na nova função)
@@ -2785,7 +2787,7 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
     if (typeof update !== 'undefined' && typeof ref !== 'undefined' && typeof database !== 'undefined') {
         update(ref(database), atualizacoesNuvem).catch(err => console.error("Erro ao salvar equipes:", err));
     }
-}; 
+};
                 
        // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (COM SÍMBOLOS E LUZ DE TURNO)
         window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid) {
