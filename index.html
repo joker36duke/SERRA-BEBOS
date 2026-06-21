@@ -2788,53 +2788,66 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
         update(ref(database), atualizacoesNuvem).catch(err => console.error("Erro ao salvar equipes:", err));
     }
 };
-                
-       // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (COM SÍMBOLOS E LUZ DE TURNO)
+            
+     // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (LEITURA OTIMIZADA)
         window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid) {
             const grid = document.getElementById('multiplayer-players-grid');
             if (!grid) return;
             
-            grid.innerHTML = ''; // Limpa a mesa
+            grid.innerHTML = ''; 
             
-            // Ajusta o tamanho da grade (2 colunas para 2x2, mais apertado para 3x3)
-            grid.className = `grid grid-cols-2 gap-1.5 px-2 mt-1 ${state.tipoJogo === '3v3' ? 'text-[8px]' : 'text-[9px]'}`;
+            // Remove a classe que forçava a fonte minúscula no 3x3 e mantém apenas a estrutura
+            grid.className = 'grid grid-cols-2 gap-1.5 px-2 mt-1';
 
             jogadoresMesa.forEach(jogador => {
                 const isTurno = (jogador.uid === turnoAtualUid);
                 const isEu = (auth.currentUser && jogador.uid === auth.currentUser.uid);
                 
-                // Identifica a equipe para definir a cor e o símbolo correto
                 const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
                 const simbolo = isCarpinteiro ? '🪚' : '⛏️';
                 const corEquipe = isCarpinteiro ? 'text-[#22c55e]' : 'text-[#ef4444]';
                 
-                // A LUZ DE TURNO
+                // A LUZ DE TURNO (Um pouco menor para não roubar espaço do nome)
                 const luzClasse = isTurno 
                     ? 'bg-[#22c55e] shadow-[0_0_12px_#22c55e] animate-pulse' 
                     : 'bg-black border border-gray-700 shadow-inner';
                 
-                // Bordas brilham se for a sua própria caixa
                 const bordaCaixa = isEu ? 'border-[#d4af37]' : 'border-gray-800';
                 
-                // Define o papel do jogador em relação a você
-                const papel = isEu ? 'VOCÊ' : (jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR');
+                let textoPapel = "";
+                let corPapel = corEquipe; 
 
+                if (jogador.papel === 'Dono') {
+                    textoPapel = "DONO DA MESA";
+                    corPapel = "text-[#d4af37]"; 
+                } else if (jogador.papel === 'NoSerra') {
+                    textoPapel = "NO SERRA";
+                    corPapel = "text-white/90"; 
+                } else {
+                    textoPapel = jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR';
+                }
+
+                if (isEu) {
+                    textoPapel += " (VOCÊ)";
+                }
+
+                // ESTRUTURA OTIMIZADA: py-1.5, texto explícito maior (text-[11px] e text-[9px]), text-sm no ícone
                 grid.innerHTML += `
-                    <div class="relative bg-black/70 border ${bordaCaixa} rounded p-2 flex flex-col justify-center shadow-inner backdrop-blur-sm">
+                    <div class="relative bg-black/70 border ${bordaCaixa} rounded px-2 py-1.5 flex flex-col justify-center shadow-inner backdrop-blur-sm">
                         
-                        <div class="flex justify-between items-center">
-                            <span class="font-cinzel text-white uppercase tracking-widest font-black truncate max-w-[80%]">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="font-cinzel text-white uppercase tracking-wider font-black text-[11px] truncate max-w-[80%] drop-shadow-md">
                                 ${jogador.nome}
                             </span>
-                            <div class="w-3 h-3 rounded-full ${luzClasse} transition-all duration-300"></div>
+                            <div class="w-2.5 h-2.5 rounded-full ${luzClasse} transition-all duration-300 shrink-0"></div>
                         </div>
                         
-                        <div class="flex justify-between items-end mt-1">
-                            <span class="font-cinzel ${corEquipe} font-bold tracking-widest uppercase opacity-90 flex items-center gap-1">
-                                <span class="text-xs">${simbolo}</span> ${papel}
+                        <div class="flex justify-between items-end mt-0.5">
+                            <span class="font-cinzel ${corPapel} font-bold tracking-wider uppercase flex items-center gap-1 truncate max-w-[70%] text-[9px]">
+                                <span class="text-sm drop-shadow-sm">${simbolo}</span> ${textoPapel}
                             </span>
-                            <span class="font-inter text-gray-400 text-[8px] uppercase">
-                                ${jogador.cartasNaMao} cartas
+                            <span class="font-inter text-gray-200 text-[10px] font-bold uppercase whitespace-nowrap">
+                                ${jogador.cartasNaMao} <span class="text-[8px] font-normal text-gray-400">cartas</span>
                             </span>
                         </div>
                         
