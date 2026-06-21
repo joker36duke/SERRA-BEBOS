@@ -3968,20 +3968,30 @@ if (state.tipoJogo === '1v1') {
             const lArea = document.getElementById(wIsMinhaEquipe ? 'played-e' : 'played-p');
             const trickMsg = document.getElementById('trick-result-msg');
 
-            // Animação da vaza
-            if (wArea && lArea) {
-                wArea.style.zIndex = "50"; lArea.style.zIndex = "10";
-                wArea.style.transform = "scale(1.1) translateY(-20px)";
-                lArea.style.transform = "scale(0.85) translateY(20px)";
-                wArea.style.opacity = "1"; lArea.style.opacity = "0.6";
-                
-                if(trickMsg) {
-                    const msgTxt = trickPts > 0 ? `+${trickPts} PONTOS!` : `VAZA DA EQUIPE!`;
-                    trickMsg.innerText = wIsMinhaEquipe ? `SUA EQUIPE: ${msgTxt}` : `INVASORES: ${msgTxt}`;
-                    trickMsg.className = `absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] ${wIsMinhaEquipe ? 'text-[#22c55e]' : 'text-[#ef4444]'} texto-vencedor-brilho font-cinzel font-black text-[16px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110`;
-                    trickMsg.classList.remove('hidden');
-                }
-            }
+// 1. Destaca APENAS a carta vencedora e afunda as perdedoras
+const allWrappers = document.querySelectorAll('[id^="wrapper-"]');
+allWrappers.forEach(w => {
+    if (w.id === `wrapper-${winnerUid}`) {
+        // Carta vencedora salta e domina a tela
+        w.style.zIndex = "999";
+        w.style.transform += " scale(1.25) translateY(-35px)";
+        
+        const cartaDentro = w.querySelector('.card-mesa');
+        if (cartaDentro) cartaDentro.classList.add('card-winner-glow');
+    } else {
+        // Cartas perdedoras afundam, escurecem e saem do caminho
+        w.style.opacity = "0.3";
+        w.style.transform += " scale(0.8) translateY(30px)";
+    }
+});
+
+// 2. Mostra a mensagem de pontos
+if(trickMsg) {
+    const msgTxt = trickPts > 0 ? `+${trickPts} PONTOS!` : `VAZA DA EQUIPE!`;
+    trickMsg.innerText = wIsMinhaEquipe ? `SUA EQUIPE: ${msgTxt}` : `INVASORES: ${msgTxt}`;
+    trickMsg.className = `absolute top-[45%] left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1000] ${wIsMinhaEquipe ? 'text-[#22c55e]' : 'text-[#ef4444]'} texto-vencedor-brilho font-cinzel font-black text-[18px] tracking-[4px] whitespace-nowrap pointer-events-none transition-all duration-300 transform scale-110`;
+    trickMsg.classList.remove('hidden');
+}
 
             setTimeout(async () => {
                 const pP = document.getElementById('played-p');
