@@ -3564,7 +3564,7 @@ if (state.tipoJogo === '1v1') {
         if(playedE) playedE.innerHTML = '';
     }
 } else {
-    // ⚔️ NOVO MOTOR PARA 2x2 E 3x3 (COM EFEITO LEQUE E CAMADAS INTELIGENTES)
+    // ⚔️ NOVO MOTOR PARA 2x2 E 3x3 (SISTEMA DE WRAPPERS E LEQUE)
     if (!state.resolvendoVaza) {
         const playedP = document.getElementById('played-p');
         const playedE = document.getElementById('played-e');
@@ -3573,20 +3573,18 @@ if (state.tipoJogo === '1v1') {
 
         const jogadasAtivas = Object.keys(jogadas);
         
-        // --- 1. INTELIGÊNCIA DE CAMADAS: DESCOBRE QUEM ESTÁ VENCENDO AGORA ---
+        // --- 1. JUIZ DE CAMADAS: QUEM ESTÁ VENCENDO AGORA? ---
         let currentWinnerUid = null;
         let winningCardSoFar = null;
         const liderUid = estadoSeguro.liderAtual;
 
-        // O código olha para quem liderou a vaza e compara com as outras cartas jogadas
         if (liderUid && jogadas[liderUid]) {
             winningCardSoFar = jogadas[liderUid];
             currentWinnerUid = liderUid;
-            
             jogadasAtivas.forEach(uid => {
                 if (uid !== liderUid) {
                     let res = window.determineTrickWinner ? window.determineTrickWinner(winningCardSoFar, jogadas[uid], true) : determineTrickWinner(winningCardSoFar, jogadas[uid], true);
-                    if (res === 'e') { // Se a carta desafiante for mais forte, ela toma a coroa
+                    if (res === 'e') {
                         winningCardSoFar = jogadas[uid];
                         currentWinnerUid = uid;
                     }
@@ -3594,24 +3592,41 @@ if (state.tipoJogo === '1v1') {
             });
         }
 
-        // --- 2. RENDERIZA A SUA CARTA (ISOLADA) ---
-        if (jogadas[meuUid]) {
-            const cUI = (window.createCardUI || createCardUI)(jogadas[meuUid]);
-            cUI.classList.add('played-card');
-            
-            // SE VOCÊ FOR O VENCEDOR ATUAL, SUA CARTA VEM PRA FRENTE DE TUDO
-            playedP.style.zIndex = (meuUid === currentWinnerUid) ? "50" : "10";
-            
-            // Etiqueta com seu nome
-            const tagNome = document.createElement('span');
-            tagNome.className = "absolute -top-6 left-1/2 -translate-x-1/2 bg-black/90 text-[10px] font-cinzel font-black px-2 py-0.5 rounded border border-[#d4af37]/50 shadow-lg text-[#d4af37] whitespace-nowrap z-50 tracking-widest";
-            tagNome.innerText = "VOCÊ";
-            cUI.appendChild(tagNome);
-            
-            playedP.appendChild(cUI);
+        // Garante que o contêiner do ganhador fique na frente
+        if (currentWinnerUid === meuUid) {
+            if (playedP) playedP.style.zIndex = "100";
+            if (playedE) playedE.style.zIndex = "10";
+        } else {
+            if (playedP) playedP.style.zIndex = "10";
+            if (playedE) playedE.style.zIndex = "100";
         }
 
-        // --- 3. RENDERIZA O LEQUE DOS ADVERSÁRIOS E ALIADOS ---
+        // --- 2. RENDERIZA A SUA CARTA ---
+        if (jogadas[meuUid]) {
+            const wrapperP = document.createElement('div');
+            wrapperP.id = `wrapper-${meuUid}`;
+            wrapperP.style.position = 'relative';
+            wrapperP.style.transition = 'all 0.4s ease';
+
+            const cUI = (window.createCardUI || createCardUI)(jogadas[meuUid]);
+            cUI.classList.add('played-card');
+
+            if (currentWinnerUid === meuUid) {
+                 wrapperP.style.transform = "scale(1.05) translateY(-10px)";
+                 wrapperP.style.zIndex = "50";
+                 cUI.style.boxShadow = "0 0 25px rgba(212,175,55,0.9)";
+            }
+            
+            const tagNome = document.createElement('div');
+            tagNome.className = "absolute -top-7 left-1/2 -translate-x-1/2 bg-black/95 text-[10px] font-cinzel font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap z-[100] tracking-widest border border-[#d4af37]/80 text-[#d4af37]";
+            tagNome.innerText = "VOCÊ";
+            
+            wrapperP.appendChild(cUI);
+            wrapperP.appendChild(tagNome);
+            if (playedP) playedP.appendChild(wrapperP);
+        }
+
+        // --- 3. RENDERIZA O LEQUE DOS OUTROS ---
         const outrosUids = jogadasAtivas.filter(uid => uid !== meuUid);
         const totalOutros = outrosUids.length;
 
@@ -3619,44 +3634,43 @@ if (state.tipoJogo === '1v1') {
             const carta = jogadas[uid];
             if (!carta) return;
 
+            // O Wrapper protege a matemática do JS contra o CSS
+            const wrapperE = document.createElement('div');
+            wrapperE.id = `wrapper-${uid}`;
+            wrapperE.style.position = 'absolute';
+            wrapperE.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            
+            const offset = index - (totalOutros - 1) / 2;
+            let myTransform = `translateX(${offset * 50}px) translateY(${Math.abs(offset) * 12}px) rotate(${offset * 12}deg)`;
+            
+            if (currentWinnerUid === uid) {
+                 wrapperE.style.zIndex = "50";
+                 myTransform += " scale(1.1) translateY(-15px)"; // Pula pra frente
+            } else {
+                 wrapperE.style.zIndex = index + 1;
+            }
+            wrapperE.style.transform = myTransform;
+
             const cUI = (window.createCardUI || createCardUI)(carta);
             cUI.classList.add('played-card');
-
-            // A MATEMÁTICA DO LEQUE (Impede que fiquem coladas)
-            // Empurra a carta 35 pixels pro lado e rotaciona 10 graus dependendo da ordem
-            const offset = index - (totalOutros - 1) / 2;
-            cUI.style.position = 'absolute';
-            cUI.style.transform = `translateX(${offset * 35}px) translateY(${Math.abs(offset) * 6}px) rotate(${offset * 10}deg)`;
             
-            // O GERENCIADOR DE CAMADAS (Z-INDEX)
-            if (uid === currentWinnerUid) {
-                // A CARTA VENCEDORA PULA PARA A CAMADA 50
-                cUI.style.zIndex = 50; 
-                // E ganha uma leve aura dourada para destacar na mesa
-                cUI.style.boxShadow = "0 0 20px rgba(212,175,55,0.8)"; 
-            } else {
-                // AS OUTRAS FICAM NAS CAMADAS INFERIORES (1, 2, 3...)
-                cUI.style.zIndex = index + 1; 
-            }
+            if (currentWinnerUid === uid) cUI.style.boxShadow = "0 0 25px rgba(212,175,55,0.9)";
 
-            // Etiqueta com o nome de quem jogou
+            const tagNome = document.createElement('div');
+            tagNome.className = "absolute -top-7 left-1/2 -translate-x-1/2 bg-black/95 text-[9px] font-cinzel font-black px-2 py-1 rounded shadow-lg whitespace-nowrap z-[100] tracking-widest border backdrop-blur-sm";
+            
             if (state.jogadoresDefinidos) {
                 const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
                 if (jInfo) {
-                    const tagNome = document.createElement('span');
-                    tagNome.className = "absolute -top-6 left-1/2 -translate-x-1/2 bg-black/95 text-[8px] font-cinzel font-black px-2 py-0.5 rounded shadow whitespace-nowrap z-50 tracking-widest border backdrop-blur-sm";
-                    
-                    if (jInfo.equipe === state.minhaEquipe) {
-                        tagNome.classList.add('text-[#22c55e]', 'border-[#22c55e]/60');
-                    } else {
-                        tagNome.classList.add('text-[#ef4444]', 'border-[#ef4444]/60');
-                    }
-
+                    if (jInfo.equipe === state.minhaEquipe) tagNome.classList.add('text-[#22c55e]', 'border-[#22c55e]/60');
+                    else tagNome.classList.add('text-[#ef4444]', 'border-[#ef4444]/60');
                     tagNome.innerText = jInfo.nome.split(' ')[0].toUpperCase();
-                    cUI.appendChild(tagNome);
                 }
             }
-            playedE.appendChild(cUI);
+            
+            wrapperE.appendChild(cUI);
+            wrapperE.appendChild(tagNome);
+            if (playedE) playedE.appendChild(wrapperE);
         });
     }
 }
