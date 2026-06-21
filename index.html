@@ -2789,14 +2789,12 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
     }
 };
             
-     // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (LEITURA OTIMIZADA)
-        window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid) {
+        // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (DINÂMICO EM TEMPO REAL)
+        window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, currentDonoUid, currentSerraUid) {
             const grid = document.getElementById('multiplayer-players-grid');
             if (!grid) return;
             
             grid.innerHTML = ''; 
-            
-            // Remove a classe que forçava a fonte minúscula no 3x3 e mantém apenas a estrutura
             grid.className = 'grid grid-cols-2 gap-1.5 px-2 mt-1';
 
             jogadoresMesa.forEach(jogador => {
@@ -2807,7 +2805,6 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
                 const simbolo = isCarpinteiro ? '🪚' : '⛏️';
                 const corEquipe = isCarpinteiro ? 'text-[#22c55e]' : 'text-[#ef4444]';
                 
-                // A LUZ DE TURNO (Um pouco menor para não roubar espaço do nome)
                 const luzClasse = isTurno 
                     ? 'bg-[#22c55e] shadow-[0_0_12px_#22c55e] animate-pulse' 
                     : 'bg-black border border-gray-700 shadow-inner';
@@ -2817,12 +2814,13 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
                 let textoPapel = "";
                 let corPapel = corEquipe; 
 
-                if (jogador.papel === 'Dono') {
+                // 🔥 CORREÇÃO: Comparação viva usando as credenciais dinâmicas do Firebase!
+                if (jogador.uid === currentDonoUid) {
                     textoPapel = "DONO DA MESA";
-                    corPapel = "text-[#d4af37]"; 
-                } else if (jogador.papel === 'NoSerra') {
+                    corPapel = "text-[#d4af37]"; // Dourado permanente pro Dono ativo
+                } else if (jogador.uid === currentSerraUid) {
                     textoPapel = "NO SERRA";
-                    corPapel = "text-white/90"; 
+                    corPapel = "text-white/90"; // Prata/Branco pro alvo ativo
                 } else {
                     textoPapel = jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR';
                 }
@@ -2831,7 +2829,6 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
                     textoPapel += " (VOCÊ)";
                 }
 
-                // ESTRUTURA OTIMIZADA: py-1.5, texto explícito maior (text-[11px] e text-[9px]), text-sm no ícone
                 grid.innerHTML += `
                     <div class="relative bg-black/70 border ${bordaCaixa} rounded px-2 py-1.5 flex flex-col justify-center shadow-inner backdrop-blur-sm">
                         
