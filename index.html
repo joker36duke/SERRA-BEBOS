@@ -3638,7 +3638,6 @@ if (state.tipoJogo === '1v1') {
                 const turnoDaNuvem = estadoSeguro.turnoAtual;
                 
                 const listaParaUI = state.jogadoresDefinidos.map(j => {
-                    // Conta quantas cartas cada jogador tem na mão olhando a nuvem
                     let qtd = 0;
                     if (j.uid === meuUid) {
                         qtd = state.pHand.length; // Minha mão
@@ -3648,12 +3647,16 @@ if (state.tipoJogo === '1v1') {
                     return { ...j, cartasNaMao: qtd };
                 });
 
-                // Chama o Artista para desenhar a grade acesa!
                 if (window.renderizarCaixasMultiplayer) {
-                    window.renderizarCaixasMultiplayer(listaParaUI, turnoDaNuvem);
+                    // 🔥 CORREÇÃO: Captura os UIDs dos líderes em tempo real direto da rotação da nuvem
+                    const currentDonoUid = estadoSeguro.donoDaMesa || turnosSalvos[0];
+                    const currentSerraUid = turnosSalvos[1]; 
+                    
+                    window.renderizarCaixasMultiplayer(listaParaUI, turnoDaNuvem, currentDonoUid, currentSerraUid);
                 }
             }
         }
+
         // ==========================================
 
         if(window.updateArenaUI) window.updateArenaUI();
