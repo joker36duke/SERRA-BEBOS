@@ -2853,46 +2853,65 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
             });
         };
 
-         // ========================================================
-        // O CARTEADOR ONLINE E ROTEADOR DE ARENAS (FUSÃO SEGURA)
-        // =========================================================
-        window.irParaMesa = function() {
-            const mesaMadeira = document.querySelector('.wood-table');
-            const battleMsg = document.getElementById('battle-msg'); 
-            const painel1x1 = document.querySelector('.score-ui');
-            const painelMultiplayer = document.getElementById('multiplayer-ui');
-            
-            fecharAlertaSeringal(); 
+// =========================================================
+// O CARTEADOR ONLINE E ROTEADOR DE ARENAS (COM AJUSTE DE CÂMERA)
+// =========================================================
+window.irParaMesa = function() {
+    const mesaMadeira = document.querySelector('.wood-table');
+    const battleMsg = document.getElementById('battle-msg'); 
+    const painel1x1 = document.querySelector('.score-ui');
+    const painelMultiplayer = document.getElementById('multiplayer-ui');
+    
+    // ELEMENTOS DA MESA QUE PRECISAMOS AJUSTAR O ESPAÇO
+    const playedE = document.getElementById('played-e');
+    const playedP = document.getElementById('played-p');
+    const containerCartasJogadas = playedE.parentElement; // A div central
+    const enemyHand = document.getElementById('enemy-hand-table'); // A mão do topo
+    
+    fecharAlertaSeringal(); 
 
-            // ROTEADOR: Qual imagem e qual painel de mesa puxar?
-            if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
-                // Caminho exclusivo do 2x2 e 3x3
-                mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
-                if (battleMsg) battleMsg.classList.add('hidden'); 
-                
-                // Ativa o placar das novas equipes e esconde o antigo
-                if (painel1x1) painel1x1.classList.add('hidden');
-                if (painelMultiplayer) painelMultiplayer.classList.remove('hidden');
-            } else {
-                // 🚧 SEU CÓDIGO DO 1x1 BLINDADO 100% INTOCADO 🚧
-                let imagemAdversario = 'arena.png'; 
-                if (typeof getImagemArena === 'function') {
-                    imagemAdversario = getImagemArena(state.enemyName);
-                }
-                mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
-                if (battleMsg) battleMsg.classList.remove('hidden');
-                
-                // Garante que no 1x1 o painel clássico permaneça visível
-                if (painel1x1) painel1x1.classList.remove('hidden');
-                if (painelMultiplayer) painelMultiplayer.classList.add('hidden');
-            }
+    // ROTEADOR: Qual imagem, painel e câmera puxar?
+    if (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') {
+        // --- MODO MULTIPLAYER ---
+        mesaMadeira.style.backgroundImage = "url('arena_multiplayer.png')";
+        if (battleMsg) battleMsg.classList.add('hidden'); 
+        if (painel1x1) painel1x1.classList.add('hidden');
+        if (painelMultiplayer) painelMultiplayer.classList.remove('hidden');
 
-            if (state.isOnline) {
-                navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
-            } else {
-                navTo('screen-result', 'screen-battle', startSeringalGame); 
-            }
-        };
+        // 🎯 O AJUSTE DE CÂMERA (Empurra tudo para baixo e nivela)
+        // 1. Desce as cartas jogadas na mesa (de 38% para 55%)
+        containerCartasJogadas.classList.replace('mt-[38%]', 'mt-[55%]');
+        // 2. Desce a mão de costas do adversário (de 33% para 42%)
+        enemyHand.classList.replace('top-[33%]', 'top-[42%]');
+        // 3. Nivela a mesa (remove as inclinações clássicas do 1x1)
+        playedE.classList.remove('-rotate-12');
+        playedP.classList.remove('rotate-6');
+
+    } else {
+        // --- 🚧 MODO CLÁSSICO 1x1 (INTOCADO) 🚧 ---
+        let imagemAdversario = 'arena.png'; 
+        if (typeof getImagemArena === 'function') {
+            imagemAdversario = getImagemArena(state.enemyName);
+        }
+        mesaMadeira.style.backgroundImage = `url('${imagemAdversario}')`;
+        if (battleMsg) battleMsg.classList.remove('hidden');
+        if (painel1x1) painel1x1.classList.remove('hidden');
+        if (painelMultiplayer) painelMultiplayer.classList.add('hidden');
+
+        // 🎯 RESTAURA A CÂMERA ORIGINAL DO 1x1
+        containerCartasJogadas.classList.replace('mt-[55%]', 'mt-[38%]');
+        enemyHand.classList.replace('top-[42%]', 'top-[33%]');
+        playedE.classList.add('-rotate-12');
+        playedP.classList.add('rotate-6');
+    }
+
+    // Chama o jogo real
+    if (state.isOnline) {
+        navTo('screen-result', 'screen-battle', window.startSeringalGameOnline);
+    } else {
+        navTo('screen-result', 'screen-battle', startSeringalGame); 
+    }
+};
 
  // =========================================================
 // ROTEADOR DE ARENAS 1x1 (DOMÍNIO DO ADVERSÁRIO)
