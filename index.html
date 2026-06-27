@@ -2865,8 +2865,8 @@ window.irParaMesa = function() {
     // ELEMENTOS PARA AJUSTAR O ESPAÇO (A CÂMERA)
     const playedE = document.getElementById('played-e');
     const playedP = document.getElementById('played-p');
-    const containerCartasJogadas = playedE.parentElement; // A div central do leque
-    const enemyHand = document.getElementById('enemy-hand-table'); // A mão de costas
+    const containerCartasJogadas = playedE.parentElement; 
+    const enemyHand = document.getElementById('enemy-hand-table'); 
     
     fecharAlertaSeringal(); 
 
@@ -2877,16 +2877,14 @@ window.irParaMesa = function() {
         if (painel1x1) painel1x1.classList.add('hidden');
         if (painelMultiplayer) painelMultiplayer.classList.remove('hidden');
 
-        // 🎯 AJUSTE DE CÂMERA PARA O MULTIPLAYER
-        // 1. Desce as cartas jogadas para fugir do painel gigante
-        containerCartasJogadas.classList.remove('mt-[38%]');
-        containerCartasJogadas.classList.add('mt-[50%]');
+        // 🎯 CÂMERA DO MULTIPLAYER (O Sweet Spot do Damião)
+        // Coloca as cartas emborcadas exatamente na borda da madeira (seguras das caixas)
+        enemyHand.className = 'absolute left-1/2 -translate-x-1/2 flex gap-2 scale-[0.85] origin-top pointer-events-none top-[36%]';
         
-        // 2. Desce a mão de costas do adversário
-        enemyHand.classList.remove('top-[33%]');
-        enemyHand.classList.add('top-[44%]');
+        // Mantém o leque no lugar perfeito que encontramos
+        containerCartasJogadas.className = 'flex justify-center items-center -space-x-10 z-10 mt-[46%]';
         
-        // 3. Nivela a mesa (remove a inclinação do 1x1 para o leque ficar reto)
+        // Remove a inclinação clássica do 1x1
         playedE.classList.remove('-rotate-12');
         playedP.classList.remove('rotate-6');
 
@@ -2902,11 +2900,8 @@ window.irParaMesa = function() {
         if (painelMultiplayer) painelMultiplayer.classList.add('hidden');
 
         // 🎯 RESTAURA A CÂMERA ORIGINAL DO 1x1
-        containerCartasJogadas.classList.remove('mt-[50%]');
-        containerCartasJogadas.classList.add('mt-[38%]'); 
-        
-        enemyHand.classList.remove('top-[44%]');
-        enemyHand.classList.add('top-[33%]'); 
+        enemyHand.className = 'absolute left-1/2 -translate-x-1/2 flex gap-2 scale-[0.85] origin-top pointer-events-none top-[33%]';
+        containerCartasJogadas.className = 'flex justify-center items-center -space-x-10 z-10 mt-[38%]';
         
         playedE.classList.add('-rotate-12'); 
         playedP.classList.add('rotate-6');
@@ -2918,7 +2913,7 @@ window.irParaMesa = function() {
         navTo('screen-result', 'screen-battle', startSeringalGame); 
     }
 };
-
+                
  // =========================================================
 // ROTEADOR DE ARENAS 1x1 (DOMÍNIO DO ADVERSÁRIO)
 // =========================================================
