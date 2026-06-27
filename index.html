@@ -2801,69 +2801,90 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
     }
 };
             
-        // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (DINÂMICO EM TEMPO REAL)
-        window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, currentDonoUid, currentSerraUid) {
-            const grid = document.getElementById('multiplayer-players-grid');
-            if (!grid) return;
-            
-            grid.innerHTML = ''; 
-            grid.className = 'grid grid-cols-2 gap-1.5 px-2 mt-1';
+        // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (COLUNAS TRAVADAS POR EQUIPE)
+window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, currentDonoUid, currentSerraUid) {
+    const grid = document.getElementById('multiplayer-players-grid');
+    if (!grid) return;
+    
+    grid.innerHTML = ''; 
+    // Usamos grid-cols-2: Coluna 1 sempre Carpinteiros, Coluna 2 sempre Pedreiros
+    grid.className = 'grid grid-cols-2 gap-x-2 gap-y-1.5 px-2 mt-1';
 
-            jogadoresMesa.forEach(jogador => {
-                const isTurno = (jogador.uid === turnoAtualUid);
-                const isEu = (auth.currentUser && jogador.uid === auth.currentUser.uid);
-                
-                const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
-                const simbolo = isCarpinteiro ? '🪚' : '⛏️';
-                const corEquipe = isCarpinteiro ? 'text-[#22c55e]' : 'text-[#ef4444]';
-                
-                const luzClasse = isTurno 
-                    ? 'bg-[#22c55e] shadow-[0_0_12px_#22c55e] animate-pulse' 
-                    : 'bg-black border border-gray-700 shadow-inner';
-                
-                const bordaCaixa = isEu ? 'border-[#d4af37]' : 'border-gray-800';
-                
-                let textoPapel = "";
-                let corPapel = corEquipe; 
+    // 1. O Juiz Separa as Equipes
+    const carpinteiros = jogadoresMesa.filter(j => j.equipe === 'Carpinteiros');
+    const pedreiros = jogadoresMesa.filter(j => j.equipe === 'Pedreiros');
+    
+    // Pega o número máximo de linhas necessárias
+    const maxLinhas = Math.max(carpinteiros.length, pedreiros.length);
 
-                // 🔥 CORREÇÃO: Comparação viva usando as credenciais dinâmicas do Firebase!
-                if (jogador.uid === currentDonoUid) {
-                    textoPapel = "DONO DA MESA";
-                    corPapel = "text-[#d4af37]"; // Dourado permanente pro Dono ativo
-                } else if (jogador.uid === currentSerraUid) {
-                    textoPapel = "NO SERRA";
-                    corPapel = "text-white/90"; // Prata/Branco pro alvo ativo
-                } else {
-                    textoPapel = jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR';
-                }
+    // 2. A Fábrica de Caixinhas
+    const desenharCaixa = (jogador) => {
+        if (!jogador) return `<div></div>`; // Preenche o espaço vazio se a sala estiver incompleta
 
-                if (isEu) {
-                    textoPapel += " (VOCÊ)";
-                }
+        const isTurno = (jogador.uid === turnoAtualUid);
+        const isEu = (typeof auth !== 'undefined' && auth.currentUser && jogador.uid === auth.currentUser.uid);
+        
+        const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
+        
+        // 🎯 NOVAS CORES: Vermelho para Carpinteiros, Azul para Pedreiros
+        const corEquipe = isCarpinteiro ? 'text-[#ef4444]' : 'text-[#3b82f6]';
+        
+        // 🎯 A luz acompanha a cor da equipe
+        let luzClasse = 'bg-black border border-gray-700 shadow-inner';
+        if (isTurno) {
+            luzClasse = isCarpinteiro 
+                ? 'bg-[#ef4444] shadow-[0_0_12px_#ef4444] animate-pulse' 
+                : 'bg-[#3b82f6] shadow-[0_0_12px_#3b82f6] animate-pulse';
+        }
+        
+        const bordaCaixa = isEu ? 'border-[#d4af37]' : 'border-gray-800';
+        
+        let textoPapel = "";
+        let corPapel = corEquipe; 
 
-                grid.innerHTML += `
-                    <div class="relative bg-black/70 border ${bordaCaixa} rounded px-2 py-1.5 flex flex-col justify-center shadow-inner backdrop-blur-sm">
-                        
-                        <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-cinzel text-white uppercase tracking-wider font-black text-[11px] truncate max-w-[80%] drop-shadow-md">
-                                ${jogador.nome}
-                            </span>
-                            <div class="w-2.5 h-2.5 rounded-full ${luzClasse} transition-all duration-300 shrink-0"></div>
-                        </div>
-                        
-                        <div class="flex justify-between items-end mt-0.5">
-                            <span class="font-cinzel ${corPapel} font-bold tracking-wider uppercase flex items-center gap-1 truncate max-w-[70%] text-[9px]">
-                                <span class="text-sm drop-shadow-sm">${simbolo}</span> ${textoPapel}
-                            </span>
-                            <span class="font-inter text-gray-200 text-[10px] font-bold uppercase whitespace-nowrap">
-                                ${jogador.cartasNaMao} <span class="text-[8px] font-normal text-gray-400">cartas</span>
-                            </span>
-                        </div>
-                        
-                    </div>
-                `;
-            });
-        };
+        if (jogador.uid === currentDonoUid) {
+            textoPapel = "DONO DA MESA";
+            corPapel = "text-[#d4af37]"; 
+        } else if (jogador.uid === currentSerraUid) {
+            textoPapel = "NO SERRA";
+            corPapel = "text-white/90"; 
+        } else {
+            textoPapel = jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR';
+        }
+
+        if (isEu) textoPapel += " (VOCÊ)";
+
+        return `
+            <div class="relative bg-black/70 border ${bordaCaixa} rounded px-2 py-1.5 flex flex-col justify-center shadow-inner backdrop-blur-sm">
+                
+                <div class="flex justify-between items-center mb-0.5">
+                    <span class="font-cinzel text-white uppercase tracking-wider font-black text-[11px] truncate max-w-[80%] drop-shadow-md">
+                        ${jogador.nome}
+                    </span>
+                    <div class="w-2.5 h-2.5 rounded-full ${luzClasse} transition-all duration-300 shrink-0"></div>
+                </div>
+                
+                <div class="flex justify-between items-end mt-0.5">
+                    <span class="font-cinzel ${corPapel} font-bold tracking-wider uppercase truncate max-w-[75%] text-[9px]">
+                        ${textoPapel}
+                    </span>
+                    <span class="font-inter text-gray-200 text-[10px] font-bold uppercase whitespace-nowrap shrink-0">
+                        ${jogador.cartasNaMao} <span class="text-[8px] font-normal text-gray-400">cartas</span>
+                    </span>
+                </div>
+                
+            </div>
+        `;
+    };
+
+    // 3. Imprime as caixas linha por linha
+    for (let i = 0; i < maxLinhas; i++) {
+        // Coluna 1: Carpinteiros (Esquerda)
+        grid.innerHTML += desenharCaixa(carpinteiros[i]);
+        // Coluna 2: Pedreiros (Direita)
+        grid.innerHTML += desenharCaixa(pedreiros[i]);
+    }
+};
 
 // =========================================================
 // O CARTEADOR ONLINE E ROTEADOR DE ARENAS (COM CÂMERA INTELIGENTE)
