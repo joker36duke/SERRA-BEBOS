@@ -1239,11 +1239,11 @@
             if (bgResultado) {
                 if (pWins) {
                     const guardiaoAtual = amazoniaGuardians.find(g => g.name === player_name);
-                    const imagemVitoria = (guardiaoAtual && guardiaoAtual.vitoriaImg) ? guardiaoAtual.vitoriaImg : 'vitoria_testurion.png';
+                    const imagemVitoria = (guardiaoAtual && guardiaoAtual.vitoriaImg) ? guardiaoAtual.vitoriaImg : 'vitoria_testurion.webp';
                     bgResultado.style.backgroundImage = `url('${imagemVitoria}')`;
                 } else {
                     // Carrega a imagem do Pirarucog se for offline, ou uma imagem genérica de oponente se for online
-                    bgResultado.style.backgroundImage = state.isOnline ? "url('fundo_adversario.png')" : "url('vitoria_pirarucog.png')";
+                    bgResultado.style.backgroundImage = state.isOnline ? "url('fundo_adversario.png')" : "url('vitoria_pirarucog.webp')";
                 }
             }
             
