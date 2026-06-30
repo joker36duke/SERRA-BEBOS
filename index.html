@@ -3724,9 +3724,10 @@ if (state.tipoJogo === '1v1') {
                  cUI.style.boxShadow = "0 0 25px rgba(212,175,55,0.9)";
             }
             
-            const tagNome = document.createElement('div');
-            tagNome.className = "absolute -top-7 left-1/2 -translate-x-1/2 bg-black/95 text-[10px] font-cinzel font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap z-[100] tracking-widest border border-[#d4af37]/80 text-[#d4af37]";
+            const tagNome = document.createElement('span');
+            tagNome.className = "absolute -top-7 left-1/2 -translate-x-1/2 bg-black text-[10px] font-cinzel font-black px-2 py-0.5 rounded shadow-lg whitespace-nowrap z-[100] tracking-widest border border-white text-white";
             tagNome.innerText = "VOCÊ";
+            cUI.appendChild(tagNome);
             
             wrapperP.appendChild(cUI);
             wrapperP.appendChild(tagNome);
