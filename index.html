@@ -3763,17 +3763,23 @@ if (state.tipoJogo === '1v1') {
             
             if (currentWinnerUid === uid) cUI.style.boxShadow = "0 0 25px rgba(212,175,55,0.9)";
 
-            const tagNome = document.createElement('div');
-            tagNome.className = "absolute -top-7 left-1/2 -translate-x-1/2 bg-black/95 text-[9px] font-cinzel font-black px-2 py-1 rounded shadow-lg whitespace-nowrap z-[100] tracking-widest border backdrop-blur-sm";
-            
-            if (state.jogadoresDefinidos) {
-                const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
-                if (jInfo) {
-                    if (jInfo.equipe === state.minhaEquipe) tagNome.classList.add('text-[#22c55e]', 'border-[#22c55e]/60');
-                    else tagNome.classList.add('text-[#ef4444]', 'border-[#ef4444]/60');
-                    tagNome.innerText = jInfo.nome.split(' ')[0].toUpperCase();
-                }
-            }
+const tagNome = document.createElement('div');
+tagNome.className = "absolute -top-7 left-1/2 -translate-x-1/2 bg-black/95 text-[9px] font-cinzel font-black px-2 py-1 rounded shadow-lg whitespace-nowrap z-[100] tracking-widest border backdrop-blur-sm";
+
+if (state.jogadoresDefinidos) {
+    const jInfo = state.jogadoresDefinidos.find(j => j.uid === uid);
+    if (jInfo) {
+        // 🎯 A NOVA LÓGICA DE CORES DAS CARTAS (IDENTIDADE DO CLÃ)
+        if (jInfo.equipe === 'Carpinteiros') {
+            // Texto Verde, Borda Vermelha
+            tagNome.classList.add('text-[#22c55e]', 'border-[#ef4444]');
+        } else {
+            // Texto Amarelo, Borda Azul
+            tagNome.classList.add('text-[#fbbf24]', 'border-[#3b82f6]');
+        }
+        tagNome.innerText = jInfo.nome.split(' ')[0].toUpperCase();
+    }
+}
             
             wrapperE.appendChild(cUI);
             wrapperE.appendChild(tagNome);
