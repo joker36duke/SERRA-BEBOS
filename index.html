@@ -2875,26 +2875,47 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
         
         const bordaCaixa = isEu ? 'border-[#d4af37]' : 'border-gray-800';
         
+        // 🎯 LÓGICA DE CORES DO UNIVERSO (PRETO E BRANCO)
         let textoPapel = "";
         let corPapel = corEquipe; 
+        
+        let bgCaixa = "bg-black/70"; 
+        let bordaCaixa = "border-gray-800";
+        let corNome = "text-white"; 
+        let corCartas = "text-gray-200";
+        let corCartasLabel = "text-gray-400";
 
         if (jogador.uid === currentDonoUid) {
             textoPapel = "DONO DA MESA";
-            corPapel = "text-[#d4af37]"; 
+            corPapel = "text-white"; 
+            bgCaixa = "bg-black"; // Preto sólido
+            bordaCaixa = "border-white"; // Borda branca forte
         } else if (jogador.uid === currentSerraUid) {
             textoPapel = "NO SERRA";
-            corPapel = "text-white/90"; 
+            corPapel = "text-black"; 
+            bgCaixa = "bg-white"; // Inversão: Branco sólido para alerta máximo
+            bordaCaixa = "border-black"; 
+            corNome = "text-black"; // O nome precisa ficar preto para dar leitura
+            corCartas = "text-gray-800";
+            corCartasLabel = "text-gray-600";
         } else {
             textoPapel = jogador.equipe === state.minhaEquipe ? 'ALIADO' : 'INVASOR';
         }
 
-        if (isEu) textoPapel += " (VOCÊ)";
+        if (isEu) {
+            textoPapel += " (VOCÊ)";
+            // Se for Você, mas não estiver No Serra, garante a identidade Preto/Branco
+            if (jogador.uid !== currentSerraUid) {
+                bordaCaixa = "border-white"; 
+                corPapel = "text-white";
+            }
+        }
 
         return `
-            <div class="relative bg-black/70 border ${bordaCaixa} rounded px-2 py-1.5 flex flex-col justify-center shadow-inner backdrop-blur-sm">
+            <div class="relative ${bgCaixa} border ${bordaCaixa} rounded px-2 py-1.5 flex flex-col justify-center shadow-inner backdrop-blur-sm transition-colors duration-500">
                 
                 <div class="flex justify-between items-center mb-0.5">
-                    <span class="font-cinzel text-white uppercase tracking-wider font-black text-[11px] truncate max-w-[80%] drop-shadow-md">
+                    <span class="font-cinzel ${corNome} uppercase tracking-wider font-black text-[11px] truncate max-w-[80%] drop-shadow-md">
                         ${jogador.nome}
                     </span>
                     <div class="w-2.5 h-2.5 rounded-full ${luzClasse} transition-all duration-300 shrink-0"></div>
@@ -2904,8 +2925,8 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
                     <span class="font-cinzel ${corPapel} font-bold tracking-wider uppercase truncate max-w-[75%] text-[9px]">
                         ${textoPapel}
                     </span>
-                    <span class="font-inter text-gray-200 text-[10px] font-bold uppercase whitespace-nowrap shrink-0">
-                        ${jogador.cartasNaMao} <span class="text-[8px] font-normal text-gray-400">cartas</span>
+                    <span class="font-inter ${corCartas} text-[10px] font-bold uppercase whitespace-nowrap shrink-0">
+                        ${jogador.cartasNaMao} <span class="text-[8px] font-normal ${corCartasLabel}">cartas</span>
                     </span>
                 </div>
                 
