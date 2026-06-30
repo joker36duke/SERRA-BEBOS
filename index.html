@@ -975,39 +975,39 @@
             <h2 class="font-cinzel font-black text-3xl md:text-4xl text-[#d4af37] tracking-widest uppercase mb-2 drop-shadow-lg text-center">
                 O Grande Serra
             </h2>
-            <p class="font-cinzel text-white/80 text-sm md:text-base mb-10 text-center max-w-md">
-                Bem-vindo ao online, <strong id="lobby-player-name" class="text-[#22c55e]">Lenda</strong>. Escolha sua mesa e enfrente guardiões de todo o Seringal.
-            </p>
+            <p class="font-cinzel text-[#fcd34d] text-sm md:text-base mb-10 text-center max-w-md drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
+    Bem-vindo ao online, <strong id="lobby-player-name" class="text-[#22c55e]">Lenda</strong>. Escolha sua mesa e enfrente guardiões de todo o Seringal.
+</p>
 
-            <div class="w-full max-w-sm flex flex-col gap-4">
-              <button onclick="buscarPartida1x1()" class="group relative w-full bg-[#1a0f0a]/90 border-2 border-[#d4af37] rounded-lg p-4 flex items-center justify-between shadow-[0_4px_15px_rgba(212,175,55,0.2)] hover:bg-[#3d1f14] hover:scale-105 transition-all active:scale-95">
-                    <div class="flex flex-col text-left">
-                        <span class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest">DUELO 1x1</span>
-                        <span class="font-inter text-xs text-white/60 uppercase">Você contra um oponente</span>
-                    </div>
-                    <span class="text-[#ef4444] font-black text-3xl group-hover:scale-110 transition-transform">⚔️</span>
-                </button>
-
-                <button onclick="buscarPartida2x2()" class="group relative w-full bg-[#1a0f0a]/90 border-2 border-[#d4af37] rounded-lg p-4 flex items-center justify-between shadow-[0_4px_15px_rgba(212,175,55,0.2)] hover:bg-[#3d1f14] hover:scale-105 transition-all active:scale-95">
-    <div class="flex flex-col text-left">
-        <span class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest">DUPLAS 2x2</span>
-        <span class="font-inter text-xs text-white/60 uppercase">Trabalho em equipe</span>
+<!-- Bloco de Modos Ranqueados -->
+<div class="w-full max-w-sm box-ranqueados">
+    <h3 class="font-cinzel text-[#d4af37] text-[10px] uppercase tracking-[3px] text-center mb-4">Modos Ranqueados</h3>
+    <div class="flex flex-col gap-3">
+        <button onclick="buscarPartida1x1()" class="group w-full bg-[#1a0f0a]/90 border border-[#d4af37]/50 rounded-lg p-3 flex items-center justify-between hover:bg-[#3d1f14] transition-all">
+            <span class="font-cinzel font-black text-sm text-[#d4af37]">DUELO 1x1</span>
+            <span class="text-lg">⚔️</span>
+        </button>
+        <button onclick="buscarPartida2x2()" class="group w-full bg-[#1a0f0a]/90 border border-[#d4af37]/50 rounded-lg p-3 flex items-center justify-between hover:bg-[#3d1f14] transition-all">
+            <span class="font-cinzel font-black text-sm text-[#d4af37]">DUPLAS 2x2</span>
+            <span class="text-lg">🛡️</span>
+        </button>
+        <button onclick="buscarPartida3x3()" class="group w-full bg-[#1a0f0a]/90 border border-[#d4af37]/50 rounded-lg p-3 flex items-center justify-between hover:bg-[#3d1f14] transition-all">
+            <span class="font-cinzel font-black text-sm text-[#d4af37]">TRIOS 3x3</span>
+            <span class="text-lg">🔥</span>
+        </button>
     </div>
-    <span class="text-[#3b82f6] font-black text-3xl group-hover:scale-110 transition-transform">🛡️</span>
+</div>
+
+<!-- Botão Mesa de Aposta (Fora da caixa) -->
+<button onclick="abrirMesaAposta()" class="w-full max-w-sm py-4 rounded-lg btn-mesa-aposta flex items-center justify-center gap-3">
+    <span class="text-2xl">🍷</span>
+    <span class="font-cinzel font-black text-lg text-[#d4af37] uppercase tracking-[2px]">Mesa de Aposta</span>
 </button>
 
-<button onclick="buscarPartida3x3()" class="group relative w-full bg-[#1a0f0a]/90 border-2 border-[#d4af37] rounded-lg p-4 flex items-center justify-between shadow-[0_4px_15px_rgba(212,175,55,0.2)] hover:bg-[#3d1f14] hover:scale-105 transition-all active:scale-95">
-    <div class="flex flex-col text-left">
-        <span class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest">TRIOS 3x3</span>
-        <span class="font-inter text-xs text-white/60 uppercase">Guerra de Clãs</span>
-    </div>
-    <span class="text-[#22c55e] font-black text-3xl group-hover:scale-110 transition-transform">🔥</span>
+<!-- Botão Sair da Conta (Novo Design) -->
+<button onclick="sairDoLobby()" class="mt-8 py-3 px-8 font-cinzel font-black text-sm tracking-[3px] rounded border-2 border-[#ef4444] bg-[#0a192f] text-[#ef4444] uppercase shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all hover:bg-[#ef4444] hover:text-[#0a192f] active:scale-95">
+    Sair da Conta
 </button>
-            </div>
-            
-            <button onclick="sairDoLobby()" class="mt-8 py-2 px-8 font-bold text-sm tracking-wider rounded border border-red-900 text-red-500 uppercase transition-transform active:scale-95 hover:bg-red-900/10">
-                Sair da Conta
-            </button>
         </div>
     </div>
 
