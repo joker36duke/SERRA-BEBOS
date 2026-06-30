@@ -2873,14 +2873,12 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
                 : 'bg-[#3b82f6] shadow-[0_0_12px_#3b82f6] animate-pulse';
         }
         
-        const bordaCaixa = isEu ? 'border-[#d4af37]' : 'border-gray-800';
-        
         // 🎯 LÓGICA DE CORES DO UNIVERSO (PRETO E BRANCO)
         let textoPapel = "";
         let corPapel = corEquipe; 
         
         let bgCaixa = "bg-black/70"; 
-        let bordaCaixa = "border-gray-800";
+        let bordaCaixa = isEu ? "border-[#d4af37]" : "border-gray-800"; // Definido apenas uma vez aqui!
         let corNome = "text-white"; 
         let corCartas = "text-gray-200";
         let corCartasLabel = "text-gray-400";
@@ -2904,10 +2902,10 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
 
         if (isEu) {
             textoPapel += " (VOCÊ)";
-            // Se for Você, mas não estiver No Serra, garante a identidade Preto/Branco
+            // Se for Você, mas não estiver No Serra, garante a identidade Preto/Branco com dourado
             if (jogador.uid !== currentSerraUid) {
-                bordaCaixa = "border-white"; 
-                corPapel = "text-white";
+                bordaCaixa = "border-[#d4af37]"; 
+                corPapel = "text-[#d4af37]";
             }
         }
 
