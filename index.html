@@ -2843,7 +2843,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
     if (!grid) return;
     
     grid.innerHTML = ''; 
-    grid.className = 'grid grid-cols-2 gap-x-2 gap-y-1.5 px-2 mt-1';
+    grid.className = 'grid grid-cols-2 gap-x-3 gap-y-2 px-2 mt-1';
 
     const carpinteiros = jogadoresMesa.filter(j => j.equipe === 'Carpinteiros');
     const pedreiros = jogadoresMesa.filter(j => j.equipe === 'Pedreiros');
@@ -2871,8 +2871,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
         let corPapel = corEquipe; 
         
         let bgCaixa = "bg-black/70"; 
-        // 👇 AQUI: Trocamos o Dourado pelo Prateado para não invadir o amarelo
-        let bordaCaixa = isEu ? "border-[#c0c0c0]" : "border-gray-800"; 
+        let bordaCaixa = "border-gray-800";
         let corNome = "text-white"; 
         let corCartas = "text-gray-200";
         let corCartasLabel = "text-gray-400";
@@ -2895,30 +2894,31 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
         }
 
         if (isEu) {
-            textoPapel += " (VOCÊ)";
             if (jogador.uid !== currentSerraUid) {
-                // 👇 AQUI: Garante que a sua caixa, quando for aliada, brilhe em prata neutro
-                bordaCaixa = "border-[#c0c0c0]"; 
-                corPapel = "text-[#c0c0c0]";
+                bordaCaixa = "border-[#cbd5e1] shadow-[0_0_8px_rgba(203,213,225,0.2)]"; 
+                textoPapel += ` <span class="text-[#cbd5e1]">(VOCÊ)</span>`;
+            } else {
+                textoPapel += " (VOCÊ)";
             }
         }
 
+        // --- DESIGN COM FONTES AUMENTADAS PARA MELHORAR LEITURA ---
         return `
-            <div class="relative ${bgCaixa} border ${bordaCaixa} rounded px-2 py-1.5 flex flex-col justify-center shadow-inner backdrop-blur-sm transition-colors duration-500">
+            <div class="relative ${bgCaixa} border ${bordaCaixa} rounded px-3 py-2 flex flex-col justify-center shadow-md backdrop-blur-sm transition-colors duration-500">
                 
-                <div class="flex justify-between items-center mb-0.5">
-                    <span class="font-cinzel ${corNome} uppercase tracking-wider font-black text-[11px] truncate max-w-[80%] drop-shadow-md">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="font-cinzel ${corNome} uppercase tracking-wider font-black text-[13px] truncate max-w-[80%] drop-shadow-md">
                         ${jogador.nome}
                     </span>
-                    <div class="w-2.5 h-2.5 rounded-full ${luzClasse} transition-all duration-300 shrink-0"></div>
+                    <div class="w-3 h-3 rounded-full ${luzClasse} transition-all duration-300 shrink-0"></div>
                 </div>
                 
-                <div class="flex justify-between items-end mt-0.5">
-                    <span class="font-cinzel ${corPapel} font-bold tracking-wider uppercase truncate max-w-[75%] text-[9px]">
+                <div class="flex justify-between items-end">
+                    <span class="font-cinzel ${corPapel} font-bold tracking-wider uppercase truncate max-w-[75%] text-[11px]">
                         ${textoPapel}
                     </span>
-                    <span class="font-inter ${corCartas} text-[10px] font-bold uppercase whitespace-nowrap shrink-0">
-                        ${jogador.cartasNaMao} <span class="text-[8px] font-normal ${corCartasLabel}">cartas</span>
+                    <span class="font-inter ${corCartas} text-[12px] font-bold uppercase whitespace-nowrap shrink-0">
+                        ${jogador.cartasNaMao} <span class="text-[10px] font-normal ${corCartasLabel}">cartas</span>
                     </span>
                 </div>
                 
