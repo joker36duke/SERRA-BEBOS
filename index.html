@@ -2837,35 +2837,29 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
     }
 };
             
-        // ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (COLUNAS TRAVADAS POR EQUIPE)
+// ATUALIZA AS CAIXAS DE JOGADORES NO MULTIPLAYER (COLUNAS TRAVADAS POR EQUIPE)
 window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, currentDonoUid, currentSerraUid) {
     const grid = document.getElementById('multiplayer-players-grid');
     if (!grid) return;
     
     grid.innerHTML = ''; 
-    // Usamos grid-cols-2: Coluna 1 sempre Carpinteiros, Coluna 2 sempre Pedreiros
     grid.className = 'grid grid-cols-2 gap-x-2 gap-y-1.5 px-2 mt-1';
 
-    // 1. O Juiz Separa as Equipes
     const carpinteiros = jogadoresMesa.filter(j => j.equipe === 'Carpinteiros');
     const pedreiros = jogadoresMesa.filter(j => j.equipe === 'Pedreiros');
     
-    // Pega o número máximo de linhas necessárias
     const maxLinhas = Math.max(carpinteiros.length, pedreiros.length);
 
-    // 2. A Fábrica de Caixinhas
     const desenharCaixa = (jogador) => {
-        if (!jogador) return `<div></div>`; // Preenche o espaço vazio se a sala estiver incompleta
+        if (!jogador) return `<div></div>`; 
 
         const isTurno = (jogador.uid === turnoAtualUid);
         const isEu = (typeof auth !== 'undefined' && auth.currentUser && jogador.uid === auth.currentUser.uid);
         
         const isCarpinteiro = (jogador.equipe === 'Carpinteiros');
         
-        // 🎯 NOVAS CORES: Vermelho para Carpinteiros, Azul para Pedreiros
         const corEquipe = isCarpinteiro ? 'text-[#ef4444]' : 'text-[#3b82f6]';
         
-        // 🎯 A luz acompanha a cor da equipe
         let luzClasse = 'bg-black border border-gray-700 shadow-inner';
         if (isTurno) {
             luzClasse = isCarpinteiro 
@@ -2873,12 +2867,12 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
                 : 'bg-[#3b82f6] shadow-[0_0_12px_#3b82f6] animate-pulse';
         }
         
-        // 🎯 LÓGICA DE CORES DO UNIVERSO (PRETO E BRANCO)
         let textoPapel = "";
         let corPapel = corEquipe; 
         
         let bgCaixa = "bg-black/70"; 
-        let bordaCaixa = isEu ? "border-[#d4af37]" : "border-gray-800"; // Definido apenas uma vez aqui!
+        // 👇 AQUI: Trocamos o Dourado pelo Prateado para não invadir o amarelo
+        let bordaCaixa = isEu ? "border-[#c0c0c0]" : "border-gray-800"; 
         let corNome = "text-white"; 
         let corCartas = "text-gray-200";
         let corCartasLabel = "text-gray-400";
@@ -2886,14 +2880,14 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
         if (jogador.uid === currentDonoUid) {
             textoPapel = "DONO DA MESA";
             corPapel = "text-white"; 
-            bgCaixa = "bg-black"; // Preto sólido
-            bordaCaixa = "border-white"; // Borda branca forte
+            bgCaixa = "bg-black"; 
+            bordaCaixa = "border-white"; 
         } else if (jogador.uid === currentSerraUid) {
             textoPapel = "NO SERRA";
             corPapel = "text-black"; 
-            bgCaixa = "bg-white"; // Inversão: Branco sólido para alerta máximo
+            bgCaixa = "bg-white"; 
             bordaCaixa = "border-black"; 
-            corNome = "text-black"; // O nome precisa ficar preto para dar leitura
+            corNome = "text-black"; 
             corCartas = "text-gray-800";
             corCartasLabel = "text-gray-600";
         } else {
@@ -2902,10 +2896,10 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
 
         if (isEu) {
             textoPapel += " (VOCÊ)";
-            // Se for Você, mas não estiver No Serra, garante a identidade Preto/Branco com dourado
             if (jogador.uid !== currentSerraUid) {
-                bordaCaixa = "border-[#d4af37]"; 
-                corPapel = "text-[#d4af37]";
+                // 👇 AQUI: Garante que a sua caixa, quando for aliada, brilhe em prata neutro
+                bordaCaixa = "border-[#c0c0c0]"; 
+                corPapel = "text-[#c0c0c0]";
             }
         }
 
@@ -2932,11 +2926,8 @@ window.renderizarCaixasMultiplayer = function(jogadoresMesa, turnoAtualUid, curr
         `;
     };
 
-    // 3. Imprime as caixas linha por linha
     for (let i = 0; i < maxLinhas; i++) {
-        // Coluna 1: Carpinteiros (Esquerda)
         grid.innerHTML += desenharCaixa(carpinteiros[i]);
-        // Coluna 2: Pedreiros (Direita)
         grid.innerHTML += desenharCaixa(pedreiros[i]);
     }
 };
