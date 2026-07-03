@@ -2716,13 +2716,19 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                     state.eSerraScore = 3;
                 }
             }
+            
         } else {
-            state.isDono = true; state.eSerraScore = 1; state.pSerraScore = 1; 
+            state.eSerraScore = 1; state.pSerraScore = 1; 
             // Rotação segura de turnos
             if (state.isOnline && state.ordemTurnos) {
                 let novaOrdem = [...state.ordemTurnos];
                 novaOrdem.push(novaOrdem.shift()); 
                 state.ordemTurnos = novaOrdem;
+                // 👉 SÓ O PRIMEIRO DA NOVA RODA GANHA A COROA LOCALMENTE
+                const meuUid = auth.currentUser ? auth.currentUser.uid : null;
+                state.isDono = (meuUid === novaOrdem[0]);
+            } else {
+                state.isDono = true;
             }
         }
     } else {
@@ -2746,7 +2752,6 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             }
         }
     }
-
         if (state.isOnline) {
         const meuUid = auth.currentUser.uid;
         if (pWon) {
