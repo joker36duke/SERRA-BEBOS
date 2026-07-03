@@ -2821,7 +2821,6 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
 window.salvarFimDeRodadaEquipes = function(meuUid) {
     let atualizacoesNuvem = {};
     
-    // 🔥 CORREÇÃO: Salva o placar atualizado (2/3, 3/3) para TODOS os membros da equipe
     if (state.jogadoresDefinidos) {
         state.jogadoresDefinidos.forEach(j => {
             if (j.equipe === state.minhaEquipe) {
@@ -2832,11 +2831,12 @@ window.salvarFimDeRodadaEquipes = function(meuUid) {
         });
     }
 
-    // Salva o novo Dono e a Roda (igual ao 1x1, mas blindado na nova função)
-    atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : state.ordemTurnos.find(u => u !== meuUid);
+    // 🔥 O NOVO DONO DA MESA É RIGOROSAMENTE O PRIMEIRO DA ORDEM DE TURNOS!
+    const novoDonoUid = state.ordemTurnos[0];
+
+    atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = novoDonoUid;
     atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
     
-    // Envia tudo para o Firebase
     if (typeof update !== 'undefined' && typeof ref !== 'undefined' && typeof database !== 'undefined') {
         update(ref(database), atualizacoesNuvem).catch(err => console.error("Erro ao salvar equipes:", err));
     }
