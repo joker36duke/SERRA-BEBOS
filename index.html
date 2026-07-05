@@ -2266,12 +2266,35 @@ function confirmGuardian() {
 
                 mostrarAlertaSeringal("Analisando...", "Conferindo seus selos de acesso...");
 
-                signInWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
+            signInWithEmailAndPassword(auth, email, password)
+                .then(async (userCredential) => {
                     const user = userCredential.user;
+                    
                     if(user.emailVerified) {
                         document.getElementById('screen-login').classList.add('hidden');
                         let nomeJogador = user.displayName ? user.displayName.toUpperCase() : user.email.split('@')[0].toUpperCase();
+                        
+                        // ✨ MÁGICA DE RESGATE DE CONTAS ANTIGAS:
+                        // Verifica se o jogador já tem ficha no Ranking. Se não tiver, cria uma agora!
+                        try {
+                            const fichaRef = ref(database, `ranking/${user.uid}`);
+                            const snapFicha = await get(fichaRef);
+                            
+                            if (!snapFicha.exists()) {
+                                await set(fichaRef, {
+                                    nome: user.displayName || nomeJogador,
+                                    avatar: "👤",
+                                    fullImg: "avatar_testurion.webp",
+                                    uvasXP: 0, vPedreiro: 0, vCarpinteiro: 0, 
+                                    capote7S: 0, chuvas: 0, dZebra: 0, dJaca: 0, vinhos: 0,
+                                    eloTitle: "Bebo Iniciante"
+                                });
+                            }
+                        } catch (e) {
+                            console.log("Erro ao checar ficha antiga:", e);
+                        }
+                        // ✨ FIM DO RESGATE
+
                         document.getElementById('lobby-player-name').innerText = nomeJogador;
                         navTo('screen-start', 'screen-lobby');
                         mostrarAlertaSeringal("Portões Abertos!", "Bem-vindo ao Grande Serra, " + nomeJogador + "!");
