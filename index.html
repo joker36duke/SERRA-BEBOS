@@ -2219,70 +2219,79 @@ function confirmGuardian() {
                     return; 
                 }
                 
-         const dobInput = document.getElementById('reg-dob').value;
-            if (dobInput.length < 10) {
-                mostrarAlertaSeringal("Data Inválida", "Preencha a data de nascimento completa (DD/MM/AAAA).");
-                return;
-            }
-            
-            // ✨ TRAVA DE IDADE (MAIOR DE 18 ANOS)
-            const partesData = dobInput.split('/');
-            const dia = parseInt(partesData[0], 10);
-            const mes = parseInt(partesData[1], 10) - 1; // O calendário do JavaScript começa o mês no zero
-            const ano = parseInt(partesData[2], 10);
-            
-            const dataNasc = new Date(ano, mes, dia);
-            const hoje = new Date();
-            
-            let idade = hoje.getFullYear() - dataNasc.getFullYear();
-            const diferencaMes = hoje.getMonth() - dataNasc.getMonth();
-            
-            // Se o mês do aniversário ainda não chegou, ou se estamos no mês mas o dia não chegou, diminui 1 da idade
-            if (diferencaMes < 0 || (diferencaMes === 0 && hoje.getDate() < dataNasc.getDate())) {
-                idade--;
-            }
+        const formRegister = document.getElementById('form-register');
+        if(formRegister) {
+            formRegister.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = document.getElementById('reg-email').value.trim();
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('reg-confirm-password').value; 
+                const nomeGuerra = document.getElementById('reg-username').value.trim() + " " + document.getElementById('reg-guardian-name').innerText;
+                
+                if (password !== confirmPassword) {
+                    mostrarAlertaSeringal("O Bebo-Mor Recusou", "As senhas não coincidem!");
+                    return; 
+                }
+                
+                const dobInput = document.getElementById('reg-dob').value;
+                if (dobInput.length < 10) {
+                    mostrarAlertaSeringal("Data Inválida", "Preencha a data de nascimento completa (DD/MM/AAAA).");
+                    return;
+                }
+                
+                // ✨ TRAVA DE IDADE (MAIOR DE 18 ANOS)
+                const partesData = dobInput.split('/');
+                const dia = parseInt(partesData[0], 10);
+                const mes = parseInt(partesData[1], 10) - 1; // O mês no JS começa em 0
+                const ano = parseInt(partesData[2], 10);
+                
+                const dataNasc = new Date(ano, mes, dia);
+                const hoje = new Date();
+                
+                let idade = hoje.getFullYear() - dataNasc.getFullYear();
+                const diferencaMes = hoje.getMonth() - dataNasc.getMonth();
+                
+                if (diferencaMes < 0 || (diferencaMes === 0 && hoje.getDate() < dataNasc.getDate())) {
+                    idade--;
+                }
 
-            if (idade < 18) {
-                mostrarAlertaSeringal("Acesso Restrito", "A selva é implacável.\n\nApenas lendas com 18 anos ou mais podem sentar à Mesa de Aposta e degustar os vinhos El Dionysos.");
-                return; // Interrompe o código aqui, o Firebase nem é chamado!
-            }
-            // ✨ FIM DA TRAVA DE IDADE
-            
-            mostrarAlertaSeringal("Registrando...", "O Bebo-Mor do Seringal está levando seus selos aos anciões...");
+                if (idade < 18) {
+                    mostrarAlertaSeringal("Acesso Restrito", "A selva é implacável.\n\nApenas lendas com 18 anos ou mais podem sentar à Mesa de Aposta e degustar os vinhos El Dionysos.");
+                    return; // Interrompe o código exatamente aqui. O Firebase não será chamado!
+                }
+                // ✨ FIM DA TRAVA DE IDADE
 
-            // Apenas uma chamada limpa para criar o usuário!
-            createUserWithEmailAndPassword(auth, email, password)
-            .then((userCredential) => {
+                mostrarAlertaSeringal("Registrando...", "O Bebo-Mor do Seringal está levando seus selos aos anciões...");
 
-                updateProfile(userCredential.user, { displayName: nomeGuerra }).then(() => {
-                    
-                    // ✨ A MÁGICA ENTRA AQUI: Cria a ficha do jogador no Ranking com 0 pontos!
-                    set(ref(database, `ranking/${userCredential.user.uid}`), {
-                        nome: nomeGuerra,
-                        avatar: "👤", // Um avatar padrão
-                        fullImg: "avatar_testurion.webp", // Imagem padrão
-                        uvasXP: 0, vPedreiro: 0, vCarpinteiro: 0, 
-                        capote7S: 0, chuvas: 0, dZebra: 0, dJaca: 0, vinhos: 0,
-                        eloTitle: "Bebo Iniciante"
-                    });
-                    // ✨ FIM DA MÁGICA
-
-                    sendEmailVerification(userCredential.user).then(() => {
+                // A função do Firebase agora só existe AQUI, depois que a idade foi aprovada!
+                createUserWithEmailAndPassword(auth, email, password)
+                .then((userCredential) => {
+                    updateProfile(userCredential.user, { displayName: nomeGuerra }).then(() => {
                         
-                        // NOVA MENSAGEM COM AVISO DE SPAM AQUI:
-                        mostrarAlertaSeringal(
-                            "Lenda Registrada!", 
-                            "Bem-vindo, " + nomeGuerra + "!\n\nO Bebo-Mor enviou o seu pergaminho de acesso.\n\nCheque sua caixa de entrada e os cantos escuros do Spam para confirmar seu e-mail!"
-                        );
-                        
-                        formRegister.reset();
-                        document.getElementById('screen-registration').classList.add('hidden');
-                        document.getElementById('screen-login').classList.remove('hidden');
+                        // ✨ A MÁGICA DA ADEGA
+                        set(ref(database, `ranking/${userCredential.user.uid}`), {
+                            nome: nomeGuerra,
+                            avatar: "👤",
+                            fullImg: "avatar_testurion.webp", 
+                            uvasXP: 0, vPedreiro: 0, vCarpinteiro: 0, 
+                            capote7S: 0, chuvas: 0, dZebra: 0, dJaca: 0, vinhos: 0,
+                            eloTitle: "Bebo Iniciante"
+                        });
+
+                        sendEmailVerification(userCredential.user).then(() => {
+                            mostrarAlertaSeringal(
+                                "Lenda Registrada!", 
+                                "Bem-vindo, " + nomeGuerra + "!\n\nO Bebo-Mor enviou o seu pergaminho de acesso.\n\nCheque sua caixa de entrada e os cantos escuros do Spam para confirmar seu e-mail!"
+                            );
+                            
+                            formRegister.reset();
+                            document.getElementById('screen-registration').classList.add('hidden');
+                            document.getElementById('screen-login').classList.remove('hidden');
+                        });
                     });
-                });
-            }).catch((error) => mostrarAlertaSeringal("Erro na Floresta", error.message));
-        });
-    }
+                }).catch((error) => mostrarAlertaSeringal("Erro na Floresta", error.message));
+            });
+        }
 
         const formLogin = document.getElementById('form-login');
         if(formLogin) {
