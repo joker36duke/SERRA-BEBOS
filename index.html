@@ -4364,6 +4364,113 @@ if(trickMsg) {
     </script>
 
     <script>
+    // ==========================================
+    // MOTOR DO RANKING: ADEGA DO MESTRE & PERFIL
+    // ==========================================
+
+    // Dados enriquecidos com a 'fullImg' para a tela de detalhes imersiva
+    const listaRankingMesa = [
+        { nome: "Damião Lentorion", avatar: "🐢", fullImg: "avatar_lentorion.webp", vPedreiro: 45, vCarpinteiro: 38, uvasXP: 2450, capote7S: 12, chuvas: 22, dZebra: 4, dJaca: 8, eloTitle: "Grão-Mestre" },
+        { nome: "Pirarucog Macabro", avatar: "🍄", fullImg: "avatar_testurion.png", vPedreiro: 40, vCarpinteiro: 32, uvasXP: 1980, capote7S: 9, chuvas: 15, dZebra: 7, dJaca: 12, eloTitle: "Guardião Veterano" },
+        { nome: "Aethernox Alado", avatar: "🦅", fullImg: "avatar_aethernox.webp", vPedreiro: 35, vCarpinteiro: 39, uvasXP: 1850, capote7S: 5, chuvas: 10, dZebra: 9, dJaca: 5, eloTitle: "Sentinela" }
+    ];
+
+    // Abre a lista geral
+    window.abrirAdegaMestre = function() {
+        window.renderizarListaRanking();
+        navTo('screen-lobby', 'screen-adega-mestre');
+    };
+
+    // Volta da lista geral pro Lobby
+    window.fecharAdegaMestre = function() {
+        navTo('screen-adega-mestre', 'screen-lobby');
+    };
+
+    // Renderiza a lista limpa (Apenas Info Básica e Poder)
+    window.renderizarListaRanking = function() {
+        const container = document.getElementById('ranking-list-container');
+        if (!container) return;
+        
+        container.innerHTML = '';
+        
+        // Header da Tabela
+        const headerHtml = `
+            <div class="flex justify-between px-2 mb-2 border-b border-[#d4af37]/30 pb-1">
+                <span class="text-[#d4af37]/70 font-cinzel text-[9px] uppercase tracking-widest w-10 text-center">Rank</span>
+                <span class="text-[#d4af37]/70 font-cinzel text-[9px] uppercase tracking-widest flex-1">Guardião</span>
+                <span class="text-[#d4af37]/70 font-cinzel text-[9px] uppercase tracking-widest text-right">Poder</span>
+            </div>
+        `;
+        container.innerHTML = headerHtml;
+
+        listaRankingMesa.forEach((jogador, index) => {
+            let medalhaColor = "text-[#d4af37]"; // Ouro padrão
+            if (index === 1) medalhaColor = "text-gray-300"; // Prata
+            else if (index === 2) medalhaColor = "text-orange-400"; // Bronze
+
+            const item = document.createElement('div');
+            // Barra horizontal simples
+            item.className = "w-full bg-black/60 border border-[#d4af37]/30 rounded flex items-center justify-between p-2 mb-2 shadow-md hover:bg-[#1a0f0a] hover:border-[#d4af37] transition-all cursor-pointer group active:scale-95";
+            
+            // Ao clicar, aciona a tela inteira de detalhes
+            item.onclick = () => window.abrirDetalhesJogador(index);
+            
+            item.innerHTML = `
+                <div class="flex items-center gap-3 w-full">
+                    <!-- Rank -->
+                    <div class="w-8 flex justify-center shrink-0">
+                        <span class="text-lg font-black font-cinzel ${medalhaColor}">${index + 1}</span>
+                    </div>
+                    
+                    <!-- Avatar e Nome -->
+                    <div class="flex items-center gap-3 flex-1 overflow-hidden">
+                        <div class="w-10 h-10 rounded bg-black border border-[#d4af37]/50 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
+                            ${jogador.avatar}
+                        </div>
+                        <div class="flex flex-col truncate">
+                            <span class="font-cinzel text-xs text-white font-black uppercase tracking-wider truncate">${jogador.nome}</span>
+                            <span class="text-[9px] text-[#22c55e] font-bold uppercase tracking-widest truncate">${jogador.eloTitle}</span>
+                        </div>
+                    </div>
+
+                    <!-- Poder de Batalha -->
+                    <div class="flex flex-col items-end shrink-0 pl-2">
+                        <span class="text-sm font-black text-[#d4af37] font-cinzel drop-shadow-md">${jogador.uvasXP.toLocaleString('pt-BR')}</span>
+                    </div>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    };
+
+    // Abre a tela grande de informações do Guardião (Estilo Age of Empires)
+    window.abrirDetalhesJogador = function(index) {
+        const jogador = listaRankingMesa[index];
+        if(!jogador) return;
+
+        // Popula a tela de detalhes com a imagem e os dados reais
+        document.getElementById('detail-player-img').src = jogador.fullImg || 'avatar_testurion.png'; // Fallback de imagem
+        document.getElementById('detail-player-name').innerText = jogador.nome;
+        document.getElementById('detail-player-title').innerText = jogador.eloTitle;
+        document.getElementById('detail-player-xp').innerText = jogador.uvasXP.toLocaleString('pt-BR');
+
+        document.getElementById('detail-v-pedreiro').innerText = jogador.vPedreiro;
+        document.getElementById('detail-v-carpinteiro').innerText = jogador.vCarpinteiro;
+        document.getElementById('detail-v-7serra').innerText = jogador.capote7S;
+        
+        document.getElementById('detail-d-chuva').innerText = jogador.chuvas;
+        document.getElementById('detail-d-zebra').innerText = jogador.dZebra;
+        document.getElementById('detail-d-jaca').innerText = jogador.dJaca;
+
+        // Faz a transição imersiva
+        navTo('screen-adega-mestre', 'screen-player-details');
+    };
+
+    // Volta da tela de detalhes para a lista geral
+    window.fecharDetalhesJogador = function() {
+        navTo('screen-player-details', 'screen-adega-mestre');
+    };
+        
     // --- SISTEMA DE ESCALA DE JOGO PROFISSIONAL (A LENTE DE AUMENTO) ---
     function ajustarTelaDoJogo() {
         const telaJogo = document.querySelector('.phone-screen');
