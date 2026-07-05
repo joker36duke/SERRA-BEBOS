@@ -3535,6 +3535,74 @@ if (qtdJaJogada + 1 < maxJogadores) {
     }
 };
 
+// ==========================================
+// TESOURARIA DO SERINGAL (VERSÃO FINAL)
+// ==========================================
+
+window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, equipeVencedora, motivoFim) {
+    const meuUid = auth.currentUser.uid;
+    const snapSala = await get(ref(database, `salas/${state.salaId}`));
+    if (!snapSala.exists() || snapSala.val().config.criador !== meuUid) return;
+
+    let atualizacoes = {};
+    const ptsParticipacao = 12; // Base fixa para quem termina a partida
+
+    // 1. PROCESSA OS VENCEDORES
+    vencedoresUids.forEach((uid, index) => {
+        let uvasGanhas = ptsParticipacao; 
+        let ganhouVinho = false;
+        let ganhouFerramenta = null;
+
+        // Regras de Vitória (1x1 ou Líder Multi ganham 🍷, Aliados ganham Ferramentas)
+        if (state.tipoJogo === '1v1' || index === 0) {
+            ganhouVinho = true;
+            uvasGanhas += 36; // Bônus de Vitória
+        } else {
+            ganhouFerramenta = (equipeVencedora === 'Pedreiros') ? 'vPedreiro' : 'vCarpinteiro';
+            uvasGanhas += 24; // Bônus de Aliado
+        }
+
+        // Bônus de 7 Serras
+        if (motivoFim === '7 SERRA!') {
+            atualizacoes[`ranking/${uid}/capote7S`] = increment(1);
+            uvasGanhas += 20;
+        }
+
+        atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
+        if (ganhouVinho) atualizacoes[`ranking/${uid}/vinhos`] = increment(1);
+        if (ganhouFerramenta) atualizacoes[`ranking/${uid}/${ganhouFerramenta}`] = increment(1);
+    });
+
+    // 2. PROCESSA OS PERDEDORES
+    perdedoresUids.forEach((uid) => {
+        let uvasGanhas = ptsParticipacao;
+        let punicao = (equipeVencedora === 'Carpinteiros') ? 'dZebra' : 'dJaca';
+
+        // Regra da Chuva (🌧️): Zera as uvas, mas a participação de 12 🍇 já é anulada pela chuva
+        if (motivoFim === '7 SERRA!') {
+            uvasGanhas = 0;
+            atualizacoes[`ranking/${uid}/dJaca`] = increment(1);
+        } else if (motivoFim === 'CHUVA') {
+            uvasGanhas = 0;
+            atualizacoes[`ranking/${uid}/chuvas`] = increment(1);
+        } else {
+            atualizacoes[`ranking/${uid}/${punicao}`] = increment(1);
+        }
+
+        // Se sobreviveu à chuva/capote, recebe as uvas de participação
+        if (uvasGanhas > 0) {
+            atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
+        }
+    });
+
+    try {
+        await update(ref(database), atualizacoes);
+        console.log("Tesouraria Atualizada: Recompensas aplicadas!");
+    } catch (e) {
+        console.error("Erro na distribuição das riquezas:", e);
+    }
+};
+
          // ========================================================
         // O CARTEADOR DA NUVEM (PREPARADO PARA MULTIPLAYER)
         // ========================================================
