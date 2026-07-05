@@ -1045,6 +1045,105 @@
         </div>
     </div>
 </div>
+      <!-- TELA DE DETALHES DO JOGADOR (ESTILO AGE OF EMPIRES) -->
+<div id="screen-player-details" class="screen hidden transparent w-full h-full bg-[#0a0a0a] z-[150]">
+    
+    <!-- Fundo Escuro -->
+    <div class="absolute inset-0 w-full h-full bg-cover bg-center opacity-30 z-0" style="background-image: url('lobby.webp');"></div>
+
+    <!-- Topo: Voltar e Título -->
+    <div class="absolute top-0 w-full flex items-center justify-between p-4 z-30 bg-gradient-to-b from-black via-black/80 to-transparent">
+        <button onclick="fecharDetalhesJogador()" class="text-[#d4af37] flex items-center gap-1 font-cinzel text-xs uppercase tracking-widest hover:text-white transition active:scale-95">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            Voltar
+        </button>
+        <span class="font-cinzel text-white/80 text-[10px] tracking-[3px] uppercase">Guardião</span>
+        <div class="w-16"></div> <!-- Espaçador para manter o título no centro -->
+    </div>
+
+    <!-- Container Principal Rolável -->
+    <div class="absolute inset-0 flex flex-col z-10 w-full h-full overflow-y-auto pb-6 style-2">
+        
+        <!-- Área do Personagem 3D (Ocupa a parte de cima) -->
+        <div class="relative w-full h-[55%] shrink-0 flex items-end justify-center pt-12">
+            <!-- Imagem Grande do Personagem -->
+            <img id="detail-player-img" src="" alt="Personagem" class="h-[90%] object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.8)] z-10 animate-fade-in relative -bottom-2">
+            
+            <!-- Degradê inferior para mesclar com o fundo -->
+            <div class="absolute bottom-0 w-full h-[40%] bg-gradient-to-t from-[#0a0a0a] to-transparent z-20"></div>
+            
+            <!-- Placa flutuante com o Nome e Poder -->
+            <div class="absolute bottom-2 w-full flex flex-col items-center z-30 px-4">
+                <h2 id="detail-player-name" class="font-cinzel text-3xl font-black text-[#d4af37] tracking-widest uppercase text-center drop-shadow-[0_4px_4px_rgba(0,0,0,1)]">Nome</h2>
+                <span id="detail-player-title" class="font-inter text-[#22c55e] text-xs font-bold uppercase tracking-[4px] mb-3 drop-shadow-md">Título</span>
+                
+                <div class="flex items-center gap-3 bg-black/80 border-2 border-[#d4af37]/60 rounded-full px-6 py-2 shadow-[0_0_15px_rgba(212,175,55,0.2)] backdrop-blur-sm">
+                    <span class="text-xl">🍇</span>
+                    <span class="font-cinzel text-sm text-white font-black uppercase tracking-widest">Poder: <span id="detail-player-xp" class="text-[#d4af37]">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Painel Inferior de Atributos e Medalhas -->
+        <div class="w-full px-4 flex flex-col gap-4 mt-6 z-30">
+            
+            <!-- Bloco 1: Conquistas de Combate -->
+            <div class="bg-[#1a0f0a]/90 border border-[#22c55e]/40 rounded-xl p-4 shadow-xl">
+                <h3 class="font-cinzel text-[#22c55e] text-[11px] font-black tracking-[3px] uppercase mb-3 flex items-center gap-2">
+                    <div class="w-full h-[1px] bg-[#22c55e]/30"></div>
+                    Medalhas<br>Oficiais
+                    <div class="w-full h-[1px] bg-[#22c55e]/30"></div>
+                </h3>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-black/60 border border-[#d4af37]/20 rounded-lg p-2.5 flex flex-col items-center justify-center text-center">
+                        <span class="text-3xl mb-1 drop-shadow-md">⛏️</span>
+                        <span id="detail-v-pedreiro" class="font-cinzel font-black text-white text-lg">0</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Defesa</span>
+                    </div>
+                    <div class="bg-black/60 border border-[#d4af37]/20 rounded-lg p-2.5 flex flex-col items-center justify-center text-center">
+                        <span class="text-3xl mb-1 drop-shadow-md">🪚</span>
+                        <span id="detail-v-carpinteiro" class="font-cinzel font-black text-white text-lg">0</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Invasão</span>
+                    </div>
+                    <div class="bg-black/60 border border-[#d4af37]/20 rounded-lg p-2.5 flex flex-col items-center justify-center text-center">
+                        <span class="text-3xl mb-1 drop-shadow-md">🍾</span>
+                        <span id="detail-v-7serra" class="font-cinzel font-black text-[#d4af37] text-lg">0</span>
+                        <span class="text-[9px] text-[#d4af37]/70 font-bold uppercase tracking-wider mt-0.5">7 Serras</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco 2: Marcas e Punições -->
+            <div class="bg-[#1a0f0a]/90 border border-[#ef4444]/40 rounded-xl p-4 shadow-xl">
+                <h3 class="font-cinzel text-[#ef4444] text-[11px] font-black tracking-[3px] uppercase mb-3 flex items-center gap-2">
+                    <div class="w-full h-[1px] bg-[#ef4444]/30"></div>
+                    Marcas<br>Sombrias
+                    <div class="w-full h-[1px] bg-[#ef4444]/30"></div>
+                </h3>
+                
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-black/60 border border-red-900/40 rounded-lg p-2.5 flex flex-col items-center justify-center text-center">
+                        <span class="text-3xl mb-1 drop-shadow-md grayscale opacity-80">🌧️</span>
+                        <span id="detail-d-chuva" class="font-cinzel font-black text-white text-lg">0</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Lavadas</span>
+                    </div>
+                    <div class="bg-black/60 border border-red-900/40 rounded-lg p-2.5 flex flex-col items-center justify-center text-center">
+                        <span class="text-3xl mb-1 drop-shadow-md grayscale opacity-80">🦓</span>
+                        <span id="detail-d-zebra" class="font-cinzel font-black text-white text-lg">0</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Zebras</span>
+                    </div>
+                    <div class="bg-black/60 border border-red-900/40 rounded-lg p-2.5 flex flex-col items-center justify-center text-center">
+                        <span class="text-3xl mb-1 drop-shadow-md grayscale opacity-80">👣</span>
+                        <span id="detail-d-jaca" class="font-cinzel font-black text-white text-lg">0</span>
+                        <span class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mt-0.5">Pé na Jaca</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 
     <script>
         // --- CONSTANTES DO JOGO ---
