@@ -2224,25 +2224,38 @@ function confirmGuardian() {
                 
                 mostrarAlertaSeringal("Registrando...", "O Bebo-Mor do Seringal está levando seus selos aos anciões...");
 
-                                createUserWithEmailAndPassword(auth, email, password)
-                .then((userCredential) => {
-                    updateProfile(userCredential.user, { displayName: nomeGuerra }).then(() => {
-                        sendEmailVerification(userCredential.user).then(() => {
-                            
-                            // NOVA MENSAGEM COM AVISO DE SPAM AQUI:
-                            mostrarAlertaSeringal(
-                                "Lenda Registrada!", 
-                                "Bem-vindo, " + nomeGuerra + "!\n\nO Bebo-Mor enviou o seu pergaminho de acesso.\n\nCheque sua caixa de entrada e os cantos escuros do Spam para confirmar seu e-mail!"
-                            );
-                            
-                            formRegister.reset();
-                            document.getElementById('screen-registration').classList.add('hidden');
-                            document.getElementById('screen-login').classList.remove('hidden');
-                        });
+                createUserWithEmailAndPassword(auth, email, password)
+                 createUserWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                updateProfile(userCredential.user, { displayName: nomeGuerra }).then(() => {
+                    
+                    // ✨ A MÁGICA ENTRA AQUI: Cria a ficha do jogador no Ranking com 0 pontos!
+                    set(ref(database, `ranking/${userCredential.user.uid}`), {
+                        nome: nomeGuerra,
+                        avatar: "👤", // Um avatar padrão
+                        fullImg: "avatar_testurion.webp", // Imagem padrão
+                        uvasXP: 0, vPedreiro: 0, vCarpinteiro: 0, 
+                        capote7S: 0, chuvas: 0, dZebra: 0, dJaca: 0, vinhos: 0,
+                        eloTitle: "Bebo Iniciante"
                     });
-                }).catch((error) => mostrarAlertaSeringal("Erro na Floresta", error.message));
-            });
-        }
+                    // ✨ FIM DA MÁGICA
+
+                    sendEmailVerification(userCredential.user).then(() => {
+                        
+                        // NOVA MENSAGEM COM AVISO DE SPAM AQUI:
+                        mostrarAlertaSeringal(
+                            "Lenda Registrada!", 
+                            "Bem-vindo, " + nomeGuerra + "!\n\nO Bebo-Mor enviou o seu pergaminho de acesso.\n\nCheque sua caixa de entrada e os cantos escuros do Spam para confirmar seu e-mail!"
+                        );
+                        
+                        formRegister.reset();
+                        document.getElementById('screen-registration').classList.add('hidden');
+                        document.getElementById('screen-login').classList.remove('hidden');
+                    });
+                });
+            }).catch((error) => mostrarAlertaSeringal("Erro na Floresta", error.message));
+        });
+    }
 
         const formLogin = document.getElementById('form-login');
         if(formLogin) {
