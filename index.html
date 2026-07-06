@@ -4495,33 +4495,31 @@ if(trickMsg) {
     </script>
 
     <script>
+        
     // ==========================================
     // MOTOR DO RANKING: ADEGA DO MESTRE & PERFIL
     // ==========================================
 
-    // Abre a lista geral buscando da Nuvem
     window.abrirAdegaMestre = async function() {
         navTo('screen-lobby', 'screen-adega-mestre');
         
         const container = document.getElementById('ranking-list-container');
         if (!container) return;
         
-        // Coloca o aviso chique de carregamento enquanto vai na internet
         container.innerHTML = '<p class="text-center text-[#d4af37] mt-10 font-cinzel animate-pulse">Buscando pergaminhos na nuvem...</p>';
 
         try {
-            // Vai no Firebase buscar a pasta 'ranking'
-            const rankingRef = ref(database, 'ranking');
-            const snapshot = await get(rankingRef);
+            // ✨ CORREÇÃO 1: Usando "window." para puxar a ponte do Firebase garantida
+            const rankingRef = window.ref(window.database, 'ranking');
+            const snapshot = await window.get(rankingRef);
 
             if (snapshot.exists()) {
                 const dados = snapshot.val();
                 
-                // Transforma os dados em uma lista e ordena quem tem mais Uvas (XP)
+                // Converte em lista e ordena quem tem mais poder (uvasXP)
                 window.listaRankingMesa = Object.keys(dados).map(uid => dados[uid]);
                 window.listaRankingMesa.sort((a, b) => (b.uvasXP || 0) - (a.uvasXP || 0));
 
-                // Agora sim, manda desenhar a lista com os jogadores reais!
                 window.renderizarListaRanking();
             } else {
                 container.innerHTML = '<p class="text-center text-white/50 mt-10 font-cinzel">A adega está vazia. Seja o primeiro Guardião a pontuar!</p>';
@@ -4532,19 +4530,16 @@ if(trickMsg) {
         }
     };
 
-    // Volta da lista geral pro Lobby
     window.fecharAdegaMestre = function() {
         navTo('screen-adega-mestre', 'screen-lobby');
     };
 
-    // Renderiza a lista limpa (Apenas Info Básica e Poder)
     window.renderizarListaRanking = function() {
         const container = document.getElementById('ranking-list-container');
         if (!container) return;
         
         container.innerHTML = '';
         
-        // Header da Tabela
         const headerHtml = `
             <div class="flex justify-between px-2 mb-2 border-b border-[#d4af37]/30 pb-1">
                 <span class="text-[#d4af37]/70 font-cinzel text-[9px] uppercase tracking-widest w-10 text-center">Rank</span>
@@ -4554,39 +4549,40 @@ if(trickMsg) {
         `;
         container.innerHTML = headerHtml;
 
-        listaRankingMesa.forEach((jogador, index) => {
-            let medalhaColor = "text-[#d4af37]"; // Ouro padrão
-            if (index === 1) medalhaColor = "text-gray-300"; // Prata
-            else if (index === 2) medalhaColor = "text-orange-400"; // Bronze
+        window.listaRankingMesa.forEach((jogador, index) => {
+            let medalhaColor = "text-[#d4af37]"; 
+            if (index === 1) medalhaColor = "text-gray-300"; 
+            else if (index === 2) medalhaColor = "text-orange-400"; 
 
             const item = document.createElement('div');
-            // Barra horizontal simples
             item.className = "w-full bg-black/60 border border-[#d4af37]/30 rounded flex items-center justify-between p-2 mb-2 shadow-md hover:bg-[#1a0f0a] hover:border-[#d4af37] transition-all cursor-pointer group active:scale-95";
             
-            // Ao clicar, aciona a tela inteira de detalhes
             item.onclick = () => window.abrirDetalhesJogador(index);
             
+            // ✨ CORREÇÃO 2: Trava de Segurança (|| 0) para as contas fantasmas!
+            const xpSeguro = (jogador.uvasXP || 0).toLocaleString('pt-BR');
+            const nomeSeguro = jogador.nome || "Lenda Anônima";
+            const tituloSeguro = jogador.eloTitle || "Bebo Iniciante";
+            const avatarSeguro = jogador.avatar || "👤";
+
             item.innerHTML = `
                 <div class="flex items-center gap-3 w-full">
-                    <!-- Rank -->
                     <div class="w-8 flex justify-center shrink-0">
                         <span class="text-lg font-black font-cinzel ${medalhaColor}">${index + 1}</span>
                     </div>
                     
-                    <!-- Avatar e Nome -->
                     <div class="flex items-center gap-3 flex-1 overflow-hidden">
                         <div class="w-10 h-10 rounded bg-black border border-[#d4af37]/50 flex items-center justify-center text-xl shrink-0 group-hover:scale-110 transition-transform">
-                            ${jogador.avatar}
+                            ${avatarSeguro}
                         </div>
                         <div class="flex flex-col truncate">
-                            <span class="font-cinzel text-xs text-white font-black uppercase tracking-wider truncate">${jogador.nome}</span>
-                            <span class="text-[9px] text-[#22c55e] font-bold uppercase tracking-widest truncate">${jogador.eloTitle}</span>
+                            <span class="font-cinzel text-xs text-white font-black uppercase tracking-wider truncate">${nomeSeguro}</span>
+                            <span class="text-[9px] text-[#22c55e] font-bold uppercase tracking-widest truncate">${tituloSeguro}</span>
                         </div>
                     </div>
 
-                    <!-- Poder de Batalha -->
                     <div class="flex flex-col items-end shrink-0 pl-2">
-                        <span class="text-sm font-black text-[#d4af37] font-cinzel drop-shadow-md">${jogador.uvasXP.toLocaleString('pt-BR')}</span>
+                        <span class="text-sm font-black text-[#d4af37] font-cinzel drop-shadow-md">${xpSeguro}</span>
                     </div>
                 </div>
             `;
@@ -4594,30 +4590,26 @@ if(trickMsg) {
         });
     };
 
-    // Abre a tela grande de informações do Guardião (Estilo Age of Empires)
     window.abrirDetalhesJogador = function(index) {
-        const jogador = listaRankingMesa[index];
+        const jogador = window.listaRankingMesa[index];
         if(!jogador) return;
 
-        // Popula a tela de detalhes com a imagem e os dados reais
-        document.getElementById('detail-player-img').src = jogador.fullImg || 'avatar_testurion.png'; // Fallback de imagem
-        document.getElementById('detail-player-name').innerText = jogador.nome;
-        document.getElementById('detail-player-title').innerText = jogador.eloTitle;
-        document.getElementById('detail-player-xp').innerText = jogador.uvasXP.toLocaleString('pt-BR');
-
-        document.getElementById('detail-v-pedreiro').innerText = jogador.vPedreiro;
-        document.getElementById('detail-v-carpinteiro').innerText = jogador.vCarpinteiro;
-        document.getElementById('detail-v-7serra').innerText = jogador.capote7S;
+        document.getElementById('detail-player-img').src = jogador.fullImg || 'avatar_testurion.png'; 
+        document.getElementById('detail-player-name').innerText = jogador.nome || "Lenda Anônima";
+        document.getElementById('detail-player-title').innerText = jogador.eloTitle || "Bebo Iniciante";
         
-        document.getElementById('detail-d-chuva').innerText = jogador.chuvas;
-        document.getElementById('detail-d-zebra').innerText = jogador.dZebra;
-        document.getElementById('detail-d-jaca').innerText = jogador.dJaca;
+        // ✨ CORREÇÃO 3: Protegendo os números das medalhas e punições
+        document.getElementById('detail-player-xp').innerText = (jogador.uvasXP || 0).toLocaleString('pt-BR');
+        document.getElementById('detail-v-pedreiro').innerText = jogador.vPedreiro || 0;
+        document.getElementById('detail-v-carpinteiro').innerText = jogador.vCarpinteiro || 0;
+        document.getElementById('detail-v-7serra').innerText = jogador.capote7S || 0;
+        document.getElementById('detail-d-chuva').innerText = jogador.chuvas || 0;
+        document.getElementById('detail-d-zebra').innerText = jogador.dZebra || 0;
+        document.getElementById('detail-d-jaca').innerText = jogador.dJaca || 0;
 
-        // Faz a transição imersiva
         navTo('screen-adega-mestre', 'screen-player-details');
     };
 
-    // Volta da tela de detalhes para a lista geral
     window.fecharDetalhesJogador = function() {
         navTo('screen-player-details', 'screen-adega-mestre');
     };
