@@ -2188,6 +2188,11 @@ function confirmGuardian() {
         const database = getDatabase(app);
         const auth = getAuth(app); 
 
+        // ✨ A PONTE PARA O RANKING ENXERGAR O BANCO DE DADOS
+        window.database = database;
+        window.ref = ref;
+        window.get = get; 
+
         // ==========================================
         // RECUPERAÇÃO DE SENHA E CADASTRO
         // ==========================================
