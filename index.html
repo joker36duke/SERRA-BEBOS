@@ -2957,13 +2957,13 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
             
-    // === INÍCIO DO BLOCO DE RECOMPENSA E TEXTO DO VEREDITO ===
+        // === INÍCIO DO BLOCO DE RECOMPENSA E VEREDITO DETALHADO ===
     if (state.isOnline && matchOver) {
         let vencedores = [];
         let perdedores = [];
         let equipeGanhadora = pWon ? 'Pedreiros' : 'Carpinteiros';
 
-        // 1. Separa quem ganhou e quem perdeu (Automático para 1x1 e Equipes)
+        // 1. Identifica quem ganhou e quem perdeu
         if (state.jogadoresDefinidos) {
             state.jogadoresDefinidos.forEach(j => {
                 if ((pWon && j.equipe === state.minhaEquipe) || (!pWon && j.equipe !== state.minhaEquipe)) {
@@ -2972,33 +2972,45 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                     perdedores.push(j.uid);
                 }
             });
-            if (state.tipoJogo !== '1v1') {
+            if (state.tipoJogo !== '1x1') {
                 equipeGanhadora = state.jogadoresDefinidos.find(j => j.uid === vencedores[0])?.equipe || 'Pedreiros';
             }
         } else {
             const meuUid = auth.currentUser.uid;
-            const inimigoUid = state.ordemTurnos.find(u => u !== meuUid);
-            if (pWon) { vencedores.push(meuUid); perdedores.push(inimigoUid); } 
-            else { vencedores.push(inimigoUid); perdedores.push(meuUid); }
+            const inimigoUid = state.ordemTurnos ? state.ordemTurnos.find(u => u !== meuUid) : null;
+            if (pWon) { vencedores.push(meuUid); if(inimigoUid) perdedores.push(inimigoUid); } 
+            else { if(inimigoUid) vencedores.push(inimigoUid); perdedores.push(meuUid); }
         }
 
-        // 2. Aciona o banco de dados para salvar os pontos
+        // 2. Grava no Banco de Dados
         window.distribuirRecompensas(vencedores, perdedores, equipeGanhadora, matchEndReason);
 
-        // 3. Calcula os pontos exatos para exibir na tela de Veredito
-        let minhasUvas = 12; // Taxa fixa de participação por terminar o jogo
+        // 3. Monta o Veredito Detalhado para a Tela
+        let minhasUvas = 12; // Participação
+        let ganhouVinho = false;
+        let ganhouFerramenta = "";
+        let textoPlacar = `\n\n📊 PLACAR: Você ${pScore} x ${eScore} Adversário`;
+
         if (pWon) {
-            const souDonoOu1v1 = (state.tipoJogo === '1v1' || state.isDono);
-            minhasUvas += souDonoOu1v1 ? 36 : 24; // 36 para líder/1x1, 24 para aliado
-            if (matchEndReason === '7 SERRA!') minhasUvas += 20; // Bônus de Humilhação
-            matchEndDesc += `\n\n🍇 VITÓRIA! Você faturou +${minhasUvas} UvasXP para o Ranking!`;
+            const souDonoOu1x1 = (state.tipoJogo === '1x1' || state.isDono);
+            minhasUvas += souDonoOu1v1 ? 36 : 24; 
+            if (matchEndReason === '7 SERRA!') minhasUvas += 20;
+            
+            // Define o que ganhou
+            if (souDonoOu1x1) ganhouVinho = true;
+            else ganhouFerramenta = (equipeGanhadora === 'Pedreiros') ? "⛏️ Medalha de Defesa" : "🪚 Medalha de Invasão";
+            
+            matchEndDesc += `${textoPlacar}\n\n🍇 VITÓRIA! +${minhasUvas} UvasXP`;
+            if (ganhouVinho) matchEndDesc += `\n🍷 +1 Vinho de Safra`;
+            if (ganhouFerramenta) matchEndDesc += `\n🏅 +1 ${ganhouFerramenta}`;
         } else {
-            if (matchEndReason === '7 SERRA!' || matchEndReason === 'CHUVA') minhasUvas = 0; // Punição Zera Pontos
-            matchEndDesc += `\n\n🥀 DERROTA... Você recebeu +${minhasUvas} UvasXP de consolação.`;
+            // Regra do Derrotado
+            if (matchEndReason === '7 SERRA!' || matchEndReason === 'CHUVA') minhasUvas = 0;
+            matchEndDesc += `${textoPlacar}\n\n🥀 DERROTA... Você recebeu +${minhasUvas} UvasXP de consolação.`;
         }
     }
-    // ========================================================================
-            
+    // === FIM DO BLOCO DE RECOMPENSA E VEREDITO DETALHADO ===
+ 
         if (state.isOnline) {
         const meuUid = auth.currentUser.uid;
         if (pWon) {
