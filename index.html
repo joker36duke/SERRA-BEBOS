@@ -4606,11 +4606,24 @@ if(trickMsg) {
         });
     };
 
-        window.abrirDetalhesJogador = function(index) {
+            window.abrirDetalhesJogador = function(index) {
         const jogador = window.listaRankingMesa[index];
         if(!jogador) return;
 
-        document.getElementById('detail-player-img').src = jogador.fullImg || 'avatar_testurion.png'; 
+        // ✨ MAGIA DE RECONHECIMENTO DE AVATAR ✨
+        let imagemCorreta = 'avatar_testurion.webp'; // Imagem padrão de segurança
+        const nomeDoJogadorMaiusculo = (jogador.nome || "").toUpperCase();
+
+        if (typeof amazoniaGuardians !== 'undefined') {
+            // Procura na lista de guardiões qual nome bate com o do jogador
+            const guardiaoEncontrado = amazoniaGuardians.find(g => nomeDoJogadorMaiusculo.includes(g.name.toUpperCase()));
+            if (guardiaoEncontrado) {
+                imagemCorreta = guardiaoEncontrado.img;
+            }
+        }
+
+        // Aplica a imagem e os textos
+        document.getElementById('detail-player-img').src = imagemCorreta; 
         document.getElementById('detail-player-name').innerText = jogador.nome || "Lenda Anônima";
         document.getElementById('detail-player-title').innerText = jogador.eloTitle || "Bebo Iniciante";
         
@@ -4630,10 +4643,6 @@ if(trickMsg) {
         document.getElementById('detail-d-jaca').innerText = jogador.dJaca || 0;
 
         navTo('screen-adega-mestre', 'screen-player-details');
-    };
-
-    window.fecharDetalhesJogador = function() {
-        navTo('screen-player-details', 'screen-adega-mestre');
     };
         
     // --- SISTEMA DE ESCALA DE JOGO PROFISSIONAL (A LENTE DE AUMENTO) ---
