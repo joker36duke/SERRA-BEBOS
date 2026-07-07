@@ -4649,6 +4649,9 @@ if(trickMsg) {
 
         navTo('screen-adega-mestre', 'screen-player-details');
     };
+        window.fecharDetalhesJogador = function() {
+    navTo('screen-player-details', 'screen-adega-mestre');
+};
         
     // --- SISTEMA DE ESCALA DE JOGO PROFISSIONAL (A LENTE DE AUMENTO) ---
     function ajustarTelaDoJogo() {
