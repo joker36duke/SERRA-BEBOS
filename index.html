@@ -2957,8 +2957,10 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
             
-        // === INÍCIO DO BLOCO DE RECOMPENSA E VEREDITO DETALHADO ===
-    if (state.isOnline && matchOver) {
+ // === INÍCIO DO BLOCO DE RECOMPENSA E VEREDITO DETALHADO ===
+    const jogoDecidido = matchOver || (state.pSerraScore >= 3 || state.eSerraScore >= 3);
+    
+    if (state.isOnline && jogoDecidido) {
         let vencedores = [];
         let perdedores = [];
         let equipeGanhadora = pWon ? 'Pedreiros' : 'Carpinteiros';
@@ -2972,7 +2974,8 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                     perdedores.push(j.uid);
                 }
             });
-            if (state.tipoJogo !== '1x1') {
+            // 🔥 CORREÇÃO: Lê '1v1' com a letra 'v' minúscula, como está no Firebase
+            if (state.tipoJogo !== '1v1') {
                 equipeGanhadora = state.jogadoresDefinidos.find(j => j.uid === vencedores[0])?.equipe || 'Pedreiros';
             }
         } else {
@@ -2982,7 +2985,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             else { if(inimigoUid) vencedores.push(inimigoUid); perdedores.push(meuUid); }
         }
 
-        // 2. Grava no Banco de Dados
+        // 2. Grava no Banco de Dados (Só o Dono distribui, mas ambos lêem a tela)
         window.distribuirRecompensas(vencedores, perdedores, equipeGanhadora, matchEndReason);
 
         // 3. Monta o Veredito Detalhado para a Tela
@@ -2992,12 +2995,13 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         let textoPlacar = `\n\n📊 PLACAR: Você ${pScore} x ${eScore} Adversário`;
 
         if (pWon) {
-            const souDonoOu1x1 = (state.tipoJogo === '1x1' || state.isDono);
-            minhasUvas += souDonoOu1v1 ? 36 : 24; 
+            // 🔥 CORREÇÃO DUPLA: Escrita padronizada e checagem perfeita do modo de jogo
+            const ehDonoOu1v1 = (state.tipoJogo === '1v1' || state.isDono);
+            minhasUvas += ehDonoOu1v1 ? 36 : 24; 
             if (matchEndReason === '7 SERRA!') minhasUvas += 20;
             
             // Define o que ganhou
-            if (souDonoOu1x1) ganhouVinho = true;
+            if (ehDonoOu1v1) ganhouVinho = true;
             else ganhouFerramenta = (equipeGanhadora === 'Pedreiros') ? "⛏️ Medalha de Defesa" : "🪚 Medalha de Invasão";
             
             matchEndDesc += `${textoPlacar}\n\n🍇 VITÓRIA! +${minhasUvas} UvasXP`;
@@ -3009,24 +3013,27 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             matchEndDesc += `${textoPlacar}\n\n🥀 DERROTA... Você recebeu +${minhasUvas} UvasXP de consolação.`;
         }
     }
-    // === FIM DO BLOCO DE RECOMPENSA E VEREDITO DETALHADO ===
- 
-        if (state.isOnline) {
+
+    // === INÍCIO DA SINCRONIA DE PLACAR NA NUVEM ===
+    if (state.isOnline) {
         const meuUid = auth.currentUser.uid;
         if (pWon) {
-            
             if (state.tipoJogo === '1v1') {
-                // 🚧 CÓDIGO ORIGINAL DO 1x1 (100% INTOCADO) 🚧
                 let atualizacoesNuvem = {};
+                const inimigoUid = state.ordemTurnos.find(u => u !== meuUid);
+                
+                // 🔥 O SEGREDO: Salva o placar de serras dos DOIS jogadores simultaneamente
                 atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${meuUid}`] = state.pSerraScore;
-                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : state.ordemTurnos.find(u => u !== meuUid);
+                if (inimigoUid) {
+                    atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/placarSerras/${inimigoUid}`] = state.eSerraScore;
+                }
+                
+                atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/donoDaMesa`] = state.isDono ? meuUid : inimigoUid;
                 atualizacoesNuvem[`salas/${state.salaId}/mesa_jogo/estado/ordemTurnosSegura`] = state.ordemTurnos;
                 update(ref(database), atualizacoesNuvem).catch(err => console.error(err));
             } else {
-                // ⚔️ SE FOR EQUIPE, USA A FUNÇÃO NOVA
                 window.salvarFimDeRodadaEquipes(meuUid);
             }
-            
         }
     }
 
