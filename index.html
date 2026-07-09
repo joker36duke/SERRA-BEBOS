@@ -3026,9 +3026,9 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                 else resumoRecompensa += " + 1 👣 (Pé na Jaca!)";
             }
         }
-
         matchEndDesc = `PLACAR: ${pScore} x ${eScore}\n\n${resumoRecompensa}`;
-
+    }
+        
     // === INÍCIO DA SINCRONIA DE PLACAR NA NUVEM ===
     if (state.isOnline) {
         const meuUid = auth.currentUser.uid;
