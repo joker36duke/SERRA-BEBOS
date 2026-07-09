@@ -2988,31 +2988,46 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         // 2. Grava no Banco de Dados (Só o Dono distribui, mas ambos lêem a tela)
         window.distribuirRecompensas(vencedores, perdedores, equipeGanhadora, matchEndReason);
 
-        // 3. Monta o Veredito Detalhado para a Tela
-        let minhasUvas = 12; // Participação
-        let ganhouVinho = false;
-        let ganhouFerramenta = "";
-        let textoPlacar = `\n\n📊 PLACAR: Você ${pScore} x ${eScore} Adversário`;
-
+        // 3. Monta o Veredito Detalhado (O Veredito da Adega)
+        let resumoRecompensa = "";
+        
         if (pWon) {
-            // 🔥 CORREÇÃO DUPLA: Escrita padronizada e checagem perfeita do modo de jogo
             const ehDonoOu1v1 = (state.tipoJogo === '1v1' || state.isDono);
-            minhasUvas += ehDonoOu1v1 ? 36 : 24; 
-            if (matchEndReason === '7 SERRA!') minhasUvas += 20;
+            let ganho = ehDonoOu1v1 ? 36 : 24; 
             
-            // Define o que ganhou
-            if (ehDonoOu1v1) ganhouVinho = true;
-            else ganhouFerramenta = (equipeGanhadora === 'Pedreiros') ? "⛏️ Medalha de Defesa" : "🪚 Medalha de Invasão";
+            // Bônus específico se foi um "7 Serras"
+            if (matchEndReason === '7 SERRA!') {
+                ganho += 20;
+                resumoRecompensa = `DOMINAÇÃO DE 7 SERRAS! +${ganho} 🍇XP`;
+            } else {
+                const frasesVitoria = ["A SAFRA É TODA SUA!", "QUE MÃO DE MESTRE!", "O SERRA TE REVERENCIA!"];
+                const fraseEscolhida = frasesVitoria[Math.floor(Math.random() * frasesVitoria.length)];
+                resumoRecompensa = `${fraseEscolhida} +${ganho} 🍇XP`;
+            }
             
-            matchEndDesc += `${textoPlacar}\n\n🍇 VITÓRIA! +${minhasUvas} UvasXP`;
-            if (ganhouVinho) matchEndDesc += `\n🍷 +1 Vinho de Safra`;
-            if (ganhouFerramenta) matchEndDesc += `\n🏅 +1 ${ganhouFerramenta}`;
+            // Adiciona o brinde final
+            resumoRecompensa += ehDonoOu1v1 ? " + 1 🍷 de Safra" : (equipeGanhadora === 'Pedreiros' ? " + 1 ⛏️" : " + 1 🪚");
+            
         } else {
-            // Regra do Derrotado
-            if (matchEndReason === '7 SERRA!' || matchEndReason === 'CHUVA') minhasUvas = 0;
-            matchEndDesc += `${textoPlacar}\n\n🥀 DERROTA... Você recebeu +${minhasUvas} UvasXP de consolação.`;
+            // Lógica separada para o Derrotado: Chuva vs 7 Serras vs Normal
+            if (matchEndReason === '7 SERRA!') {
+                resumoRecompensa = `DERROTA... 7 SERRAS! (Esmagado no 7!) 0 🍇XP`;
+            } else if (matchEndReason === 'CHUVA') {
+                resumoRecompensa = `DERROTA... LAVADA! 0 🍇XP + 1 🌧️`;
+            } else {
+                let ganho = 12; // Participação normal
+                const frasesDerrota = ["A ÁGUA SUBIU...", "DEU ZEBU NA SERRA!", "HOJE O SERRA TE ENGOLIU."];
+                const fraseEscolhida = frasesDerrota[Math.floor(Math.random() * frasesDerrota.length)];
+                
+                resumoRecompensa = `${fraseEscolhida} +${ganho} 🍇XP`;
+                
+                // Adiciona a marca conforme a equipe vencedora
+                if (equipeGanhadora === 'Carpinteiros') resumoRecompensa += " + 1 🦓 (Deu Zebra!)";
+                else resumoRecompensa += " + 1 👣 (Pé na Jaca!)";
+            }
         }
-    }
+
+        matchEndDesc = `PLACAR: ${pScore} x ${eScore}\n\n${resumoRecompensa}`;
 
     // === INÍCIO DA SINCRONIA DE PLACAR NA NUVEM ===
     if (state.isOnline) {
