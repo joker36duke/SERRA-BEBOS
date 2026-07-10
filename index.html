@@ -4000,10 +4000,22 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
                 state.isDono = (meuUid === uidDonoNuvem);
             }
 
-            if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza && !isGameOver && !state.distribuindoCartas) {
+        if (estadoSeguro.placarSerras && !state.roundEnded && !state.resolvendoVaza && !isGameOver && !state.distribuindoCartas) {
+            if (state.tipoJogo === '1v1') {
                 state.pSerraScore = estadoSeguro.placarSerras[meuUid] || 1;
                 state.eSerraScore = inimigoUid ? (estadoSeguro.placarSerras[inimigoUid] || 1) : 1;
+            } else if (state.jogadoresDefinidos) {
+                // 🔥 CORREÇÃO: Garante que os Aliados absorvam a pontuação da equipe (Evita Bisca acidental)
+                const meuTime = state.jogadoresDefinidos.filter(j => j.equipe === state.minhaEquipe);
+                const outroTime = state.jogadoresDefinidos.filter(j => j.equipe !== state.minhaEquipe);
+                
+                const meuPlacar = meuTime.find(j => estadoSeguro.placarSerras[j.uid]);
+                const inimigoPlacar = outroTime.find(j => estadoSeguro.placarSerras[j.uid]);
+                
+                if (meuPlacar) state.pSerraScore = estadoSeguro.placarSerras[meuPlacar.uid];
+                if (inimigoPlacar) state.eSerraScore = estadoSeguro.placarSerras[inimigoPlacar.uid];
             }
+        }
             if (estadoSeguro.ordemTurnosSegura && !state.roundEnded && !state.resolvendoVaza && !isGameOver && !state.distribuindoCartas) {
                 state.ordemTurnos = turnosSalvos; 
             }
