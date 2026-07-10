@@ -3470,19 +3470,19 @@ window.getImagemArena = function(enemyName) {
                 let ptsCarpinteiros = 0, ptsPedreiros = 0;
                 let serrasCarpinteiros = 0, serrasPedreiros = 0;
                 
-                if (state.jogadoresDefinidos) {
+                     if (state.jogadoresDefinidos) {
                     state.jogadoresDefinidos.forEach(j => {
                         const pts = (state.pontosGlobais && state.pontosGlobais[j.uid]) ? state.pontosGlobais[j.uid] : 0;
                         if (j.equipe === 'Carpinteiros') ptsCarpinteiros += pts;
                         else ptsPedreiros += pts;
-                        
-                        // Captura as serras do Dono ou NoSerra de cada equipe
-                        if (j.papel === 'Dono' || j.papel === 'NoSerra') {
-                            const ss = (state.serrasGlobais && state.serrasGlobais[j.uid]) ? state.serrasGlobais[j.uid] : 1;
-                            if (j.equipe === 'Carpinteiros') serrasCarpinteiros = ss;
-                            else serrasPedreiros = ss;
-                        }
                     });
+                    
+                    // 🔥 CORREÇÃO: Busca as serras de QUALQUER membro ativo na nuvem (Evita o placar congelar)
+                    const carpAtivo = state.jogadoresDefinidos.find(j => j.equipe === 'Carpinteiros' && state.serrasGlobais && state.serrasGlobais[j.uid]);
+                    if (carpAtivo) serrasCarpinteiros = state.serrasGlobais[carpAtivo.uid]; else serrasCarpinteiros = 1;
+
+                    const pedAtivo = state.jogadoresDefinidos.find(j => j.equipe === 'Pedreiros' && state.serrasGlobais && state.serrasGlobais[j.uid]);
+                    if (pedAtivo) serrasPedreiros = state.serrasGlobais[pedAtivo.uid]; else serrasPedreiros = 1;
                 }
                 
                  // Aplica nos painéis do HTML
