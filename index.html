@@ -3011,9 +3011,16 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             "🍂 HOJE O SERRA TE ENGOLIU... Descanse, tome um gole d'água e volte mais forte."
         ];
 
-        if (pWon) {
-            const ehDonoOu1v1 = (state.tipoJogo === '1v1' || state.isDono);
-            let ganho = ehDonoOu1v1 ? 36 : 24; 
+                if (pWon) {
+            // 🔥 CORREÇÃO 2: Lê o papel exato do jogador para dar Medalha aos Aliados
+            let meuPapel = 'Membro';
+            if (state.jogadoresDefinidos && typeof auth !== 'undefined' && auth.currentUser) {
+                const meuPerfil = state.jogadoresDefinidos.find(j => j.uid === auth.currentUser.uid);
+                if (meuPerfil) meuPapel = meuPerfil.papel;
+            }
+
+            const ganhaVinho = (state.tipoJogo === '1v1' || meuPapel === 'Dono');
+            let ganho = ganhaVinho ? 36 : 24; 
             
             // Título e XP
             if (matchEndReason === '7 SERRA!') {
@@ -3025,10 +3032,10 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             }
             
             // Adiciona o brinde final (Vinho ou Medalhas)
-            if (ehDonoOu1v1) {
+            if (ganhaVinho) {
                 resumoRecompensa += `\n+ 1 🍷 Brinde de Safra (El Dionysos)`;
             } else {
-                resumoRecompensa += equipeGanhadora === 'Pedreiros' 
+                resumoRecompensa += (equipeGanhadora === 'Pedreiros') 
                     ? `\n+ 1 ⛏️ Medalha de Defesa` 
                     : `\n+ 1 🪚 Medalha de Invasão`;
             }
