@@ -2958,7 +2958,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     }
             
  // === INÍCIO DO BLOCO DE RECOMPENSA E VEREDITO DETALHADO ===
-    const jogoDecidido = matchOver || (state.pSerraScore >= 3 || state.eSerraScore >= 3);
+    const jogoDecidido = matchOver;
     
     if (state.isOnline && jogoDecidido) {
         let vencedores = [];
