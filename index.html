@@ -2842,24 +2842,12 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     let pVazas = pTricks !== null ? pTricks : state.pTricksWon;
     let eVazas = eTricks !== null ? eTricks : state.eTricksWon;
 
-     // ⚖️ O JUIZ SUPREMO UNIVERSAL: Ajuste automático para Duelo ou Equipes
+         // ⚖️ O JUIZ SUPREMO UNIVERSAL: Ajuste automático para Duelo ou Equipes
     if (state.isOnline && (state.tipoJogo === '2v2' || state.tipoJogo === '3v3') && state.jogadoresDefinidos) {
         pScore = 0;
         eScore = 0;
         pVazas = 0; // 🔥 Zera as vazas locais
         eVazas = 0; // 🔥 Zera as vazas locais
-
-             // 🔥 CORREÇÃO: Leitura avançada para as serras avançarem para 2/3 e 3/3 perfeitamente!
-            if (state.serrasGlobais) {
-                const meuTime = state.jogadoresDefinidos.filter(j => j.equipe === state.minhaEquipe);
-                const outroTime = state.jogadoresDefinidos.filter(j => j.equipe !== state.minhaEquipe);
-                
-                const meuPlacar = meuTime.find(j => state.serrasGlobais[j.uid]);
-                const inimigoPlacar = outroTime.find(j => state.serrasGlobais[j.uid]);
-                
-                if (meuPlacar) state.pSerraScore = state.serrasGlobais[meuPlacar.uid];
-                if (inimigoPlacar) state.eSerraScore = state.serrasGlobais[inimigoPlacar.uid];
-            }
 
         // Varre a mesa e soma pontos e vazas da equipe
         state.jogadoresDefinidos.forEach(j => {
