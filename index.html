@@ -4594,7 +4594,31 @@ if(trickMsg) {
             if (window.updateArenaUI) window.updateArenaUI();
         }
     };
+      // === NOVA FUNÇÃO: SAIR DA MESA DIRETO PARA O RANKING ===
+    window.irParaRanking = function() {
+        window.pontuacaoJaContada = false;
+        state.roundEnded = false;
+        state.salaId = null;
+        state.listenerAtivo = false;
+        
+        if (typeof closeModal === 'function') closeModal();
 
+        const telaBatalha = document.getElementById('screen-battle');
+        const telaLobby = document.getElementById('screen-lobby');
+
+        if (telaBatalha) telaBatalha.classList.add('transparent');
+        
+        setTimeout(() => {
+            if (telaBatalha) telaBatalha.classList.add('hidden');
+            if (telaLobby) {
+                telaLobby.classList.remove('hidden');
+                telaLobby.classList.remove('transparent');
+            }
+            if (typeof window.abrirAdegaMestre === 'function') {
+                window.abrirAdegaMestre();
+            }
+        }, 600);
+    };
                 
     </script>
 
