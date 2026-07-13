@@ -3098,7 +3098,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
 
-    if (matchOver) {
+        if (matchOver) {
         const btnContinue = document.getElementById('btn-continue');
         const btnGoOnline = document.getElementById('btn-go-online');
 
@@ -3110,8 +3110,8 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             if (btnGoOnline) btnGoOnline.classList.add('hidden');
         }
         
-        showModal(matchEndReason, matchEndDesc, "Voltar ao Início", () => { 
-            window.pontuacaoJaContada = false; state.roundEnded = false; location.reload(); 
+        showModal(matchEndReason, matchEndDesc, "Ir para a Adega", () => { 
+            window.irParaRanking(); 
         });
     } else {
         if (state.isOnline) {
