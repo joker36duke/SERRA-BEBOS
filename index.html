@@ -2869,12 +2869,32 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         ? window.verificarDominioDaEquipe() 
         : state.isDono;
     
-    if (pScore === 60 && eScore === 60) {
-        showModal("EMPATE NA MESA!", "A rodada terminou em 60 a 60. Cartas redistribuídas!", "Repetir Rodada", () => { 
-            window.pontuacaoJaContada = false; state.roundEnded = false; 
-            state.isOnline ? window.startSeringalGameOnline() : (window.startSeringalGame || startSeringalGame)(); 
-        });
-        return; 
+        if (pScore === 60 && eScore === 60) {
+        if (state.isOnline) {
+            const btn = document.getElementById('btn-continue');
+            if (state.isDono) {
+                if (btn) {
+                    btn.classList.remove('hidden');
+                    btn.innerText = "Dar as Cartas";
+                    btn.onclick = () => {
+                        closeModal();
+                        window.pontuacaoJaContada = false;
+                        state.roundEnded = false;
+                        window.startSeringalGameOnline();
+                    };
+                }
+                showModal("EMPATE 60x60!", "A rodada empatou e a guerra continua. A coroa de Dono permanece com você!", null, null);
+            } else {
+                if (btn) btn.classList.add('hidden');
+                showModal("EMPATE 60x60!", "A rodada empatou.\n\n⏳ Aguardando o Dono da mesa dar as cartas novamente...", null, null);
+            }
+        } else {
+            showModal("EMPATE NA MESA!", "A rodada terminou em 60 a 60. Cartas redistribuídas!", "Repetir Rodada", () => {
+                window.pontuacaoJaContada = false; state.roundEnded = false;
+                (window.startSeringalGame || startSeringalGame)();
+            });
+        }
+        return;
     }
 
     let pWon = forcedWinner === 'p' ? true : pScore > eScore;
