@@ -3751,14 +3751,17 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
     let atualizacoes = {};
     const ptsParticipacao = 12; // Base fixa para quem termina a partida
 
-    // 1. PROCESSA OS VENCEDORES
-    vencedoresUids.forEach((uid, index) => {
+        // 1. PROCESSA OS VENCEDORES
+    vencedoresUids.forEach((uid) => {
         let uvasGanhas = ptsParticipacao; 
         let ganhouVinho = false;
         let ganhouFerramenta = null;
 
+        // 🔥 CORREÇÃO: A Tesouraria também localiza o verdadeiro Dono Atual da coroa
+        const ehDonoAtual = (state.ordemTurnos && state.ordemTurnos[0] === uid);
+
         // Regras de Vitória (1x1 ou Líder Multi ganham 🍷, Aliados ganham Ferramentas)
-        if (state.tipoJogo === '1v1' || index === 0) {
+        if (state.tipoJogo === '1v1' || ehDonoAtual) {
             ganhouVinho = true;
             uvasGanhas += 36; // Bônus de Vitória
         } else {
@@ -3769,7 +3772,7 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
         // Bônus de 7 Serras
         if (motivoFim === '7 SERRA!') {
             atualizacoes[`ranking/${uid}/capote7S`] = increment(1);
-            uvasGanhas += 20;
+            uvasGanhas += 36;
         }
 
         atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
