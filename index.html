@@ -2929,18 +2929,16 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     let matchEndReason = "";
     let matchEndDesc = "";
 
-    if (pWon) {
-        if (eraDonoNoInicio) {
-            if (state.eSerraScore === 1 && eVazas === 0) {
-                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, os adversários sofreram derrota instantânea!`;
-            } else {
-                state.eSerraScore++; 
-                if (state.eSerraScore > 3) { 
-                    matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `Os adversários foram derrotados 3 vezes! O Seringal é seu!`;
-                    state.eSerraScore = 3;
-                }
+        if (pWon) {
+        // 🔥 CORREÇÃO: Se o adversário ficou zerado, é 7 SERRA! (Não importa se você era Dono ou Invasor)
+        if (eScore === 0 || eVazas === 0) {
+            matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, os adversários sofreram derrota instantânea!`;
+        } else if (eraDonoNoInicio) {
+            state.eSerraScore++; 
+            if (state.eSerraScore > 3) { 
+                matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `Os adversários foram derrotados 3 vezes! O Seringal é seu!`;
+                state.eSerraScore = 3;
             }
-            
         } else {
             state.eSerraScore = 1; state.pSerraScore = 1; 
             // Rotação segura de turnos
@@ -2949,22 +2947,21 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                 novaOrdem.push(novaOrdem.shift()); 
                 state.ordemTurnos = novaOrdem;
                 // 👉 SÓ O PRIMEIRO DA NOVA RODA GANHA A COROA LOCALMENTE
-                const meuUid = auth.currentUser ? auth.currentUser.uid : null;
+                const meuUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
                 state.isDono = (meuUid === novaOrdem[0]);
             } else {
                 state.isDono = true;
             }
         }
     } else {
-        if (!eraDonoNoInicio) {
-            if (state.pSerraScore === 1 && pVazas === 0) {
-                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você sofreu derrota instantânea!`;
-            } else {
-                state.pSerraScore++;
-                if (state.pSerraScore > 3) {
-                    matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `Você foi derrotado 3 vezes na Serra.`;
-                    state.pSerraScore = 3;
-                }
+        // 🔥 CORREÇÃO: Se VOCÊ ficou zerado, sofreu 7 SERRA! (Não importa o seu papel)
+        if (pScore === 0 || pVazas === 0) {
+            matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você sofreu derrota instantânea!`;
+        } else if (!eraDonoNoInicio) {
+            state.pSerraScore++;
+            if (state.pSerraScore > 3) {
+                matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `Você foi derrotado 3 vezes na Serra.`;
+                state.pSerraScore = 3;
             }
         } else {
             state.isDono = false; state.eSerraScore = 1; state.pSerraScore = 1; 
