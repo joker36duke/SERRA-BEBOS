@@ -3023,15 +3023,12 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             "🍂 HOJE O SERRA TE ENGOLIU... Descanse, tome um gole d'água e volte mais forte."
         ];
 
-                if (pWon) {
-            // 🔥 CORREÇÃO 2: Lê o papel exato do jogador para dar Medalha aos Aliados
-            let meuPapel = 'Membro';
-            if (state.jogadoresDefinidos && typeof auth !== 'undefined' && auth.currentUser) {
-                const meuPerfil = state.jogadoresDefinidos.find(j => j.uid === auth.currentUser.uid);
-                if (meuPerfil) meuPapel = meuPerfil.papel;
-            }
+            if (pWon) {
+            // 🔥 CORREÇÃO: O jogo agora confere quem é o Dono da Mesa olhando para a roda real!
+            const meuUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
+            const souODono = (state.ordemTurnos && state.ordemTurnos[0] === meuUid) || state.isDono;
 
-            const ganhaVinho = (state.tipoJogo === '1v1' || meuPapel === 'Dono');
+            const ganhaVinho = (state.tipoJogo === '1v1' || souODono);
             let ganho = ganhaVinho ? 36 : 24; 
             
             // Título e XP
