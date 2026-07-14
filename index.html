@@ -3748,28 +3748,26 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
     let atualizacoes = {};
     const ptsParticipacao = 12; // Base fixa para quem termina a partida
 
-        // 1. PROCESSA OS VENCEDORES
+    // 1. PROCESSA OS VENCEDORES
     vencedoresUids.forEach((uid) => {
         let uvasGanhas = ptsParticipacao; 
         let ganhouVinho = false;
         let ganhouFerramenta = null;
 
-        // 🔥 CORREÇÃO: A Tesouraria também localiza o verdadeiro Dono Atual da coroa
         const ehDonoAtual = (state.ordemTurnos && state.ordemTurnos[0] === uid);
 
-        // Regras de Vitória (1x1 ou Líder Multi ganham 🍷, Aliados ganham Ferramentas)
         if (state.tipoJogo === '1v1' || ehDonoAtual) {
             ganhouVinho = true;
-            uvasGanhas += 36; // Bônus de Vitória
+            uvasGanhas += 36; 
         } else {
             ganhouFerramenta = (equipeVencedora === 'Pedreiros') ? 'vPedreiro' : 'vCarpinteiro';
-            uvasGanhas += 24; // Bônus de Aliado
+            uvasGanhas += 24; 
         }
 
-        // Bônus de 7 Serras
+        // 🔥 CORREÇÃO: Garante que o banco de dados grave exatamente a variável 'capote7S'
         if (motivoFim === '7 SERRA!') {
             atualizacoes[`ranking/${uid}/capote7S`] = increment(1);
-            uvasGanhas += 36;
+            uvasGanhas += 36; // Bônus de massacre!
         }
 
         atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
@@ -3782,10 +3780,10 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
         let uvasGanhas = ptsParticipacao;
         let punicao = (equipeVencedora === 'Carpinteiros') ? 'dZebra' : 'dJaca';
 
-        // Regra da Chuva (🌧️): Zera as uvas, mas a participação de 12 🍇 já é anulada pela chuva
+        // 🔥 O TOQUE DE MESTRE: 7 Serra agora aplica a impiedosa "Lavada" (Chuva)!
         if (motivoFim === '7 SERRA!') {
             uvasGanhas = 0;
-            atualizacoes[`ranking/${uid}/dJaca`] = increment(1);
+            atualizacoes[`ranking/${uid}/chuvas`] = increment(1); // 👉 AQUI FOI AJUSTADO PARA CHUVAS!
         } else if (motivoFim === 'CHUVA') {
             uvasGanhas = 0;
             atualizacoes[`ranking/${uid}/chuvas`] = increment(1);
@@ -3793,7 +3791,6 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
             atualizacoes[`ranking/${uid}/${punicao}`] = increment(1);
         }
 
-        // Se sobreviveu à chuva/capote, recebe as uvas de participação
         if (uvasGanhas > 0) {
             atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
         }
