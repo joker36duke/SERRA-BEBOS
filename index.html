@@ -3047,9 +3047,9 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             }
             
         } else {
-            // Lógica do Derrotado: Capote, Chuva ou Normal
+             // Lógica do Derrotado: Capote, Chuva ou Normal
             if (matchEndReason === '7 SERRA!') {
-                resumoRecompensa = `☠️ ESMAGADO NO 7! Não deu nem pra anotar a placa...\n\n🥀 RESULTADO:\n+ 0 🍇 XP`;
+                resumoRecompensa = `☠️ ESMAGADO NO 7! Uma enchente lavou a sua equipe da mesa...\n\n🥀 RESULTADO:\n+ 0 🍇 XP\n+ 1 🌧️ Lavada (Chuva)`;
             } else if (matchEndReason === 'CHUVA') {
                 resumoRecompensa = `🌊 DERROTA POR LAVADA! A enchente levou tudo que você tinha...\n\n🥀 RESULTADO:\n+ 0 🍇 XP\n+ 1 🌧️ Marca da Chuva`;
             } else {
