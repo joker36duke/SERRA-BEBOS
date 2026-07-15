@@ -4751,8 +4751,8 @@ if(trickMsg) {
             const xpSeguro = (jogador.uvasXP || 0).toLocaleString('pt-BR');
             const nomeSeguro = jogador.nome || "Lenda Anônima";
             const tituloSeguro = jogador.eloTitle || "Bebo Iniciante";
-            const avatarSeguro = jogador.avatar || "👤";
-
+            const avatarSeguro = window.obterEmojiGuardiao(nomeSeguro);
+            
             item.innerHTML = `
                 <div class="flex items-center gap-3 w-full">
                     <div class="w-8 flex justify-center shrink-0">
