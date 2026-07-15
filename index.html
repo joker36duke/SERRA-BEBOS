@@ -4703,6 +4703,20 @@ if(trickMsg) {
             container.innerHTML = '<p class="text-center text-red-500 mt-10 font-cinzel">O Bebo-Mor perdeu os registros na mata.</p>';
         }
     };
+        
+     // FUNÇÃO QUE IDENTIFICA O EMOJI PELO NOME DO GUARDIÃO
+    window.obterEmojiGuardiao = function(nome) {
+        if (!nome) return "👤";
+        const n = nome.toUpperCase();
+        if (n.includes("TESTÚRION") || n.includes("TESTURION")) return "🐢";
+        if (n.includes("LENTORION")) return "🦥";
+        if (n.includes("CAIMÃ-KAY") || n.includes("CAIMA-KAY")) return "🐊";
+        if (n.includes("ZÉ BIGODE") || n.includes("ZE BIGODE")) return "🐒";
+        if (n.includes("BACCARENA")) return "🐆";
+        if (n.includes("AETHERNOX")) return "🦅";
+        if (n.includes("YARA")) return "🦦";
+        return "👤"; // Caso dê algum erro, mantém o bonequinho padrão
+    };
 
     window.fecharAdegaMestre = function() {
         navTo('screen-adega-mestre', 'screen-lobby');
