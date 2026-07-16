@@ -3802,22 +3802,21 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
         if (ganhouFerramenta) atualizacoes[`ranking/${uid}/${ganhouFerramenta}`] = increment(1);
     });
 
-    // 2. PROCESSA OS PERDEDORES
+        // 2. PROCESSA OS PERDEDORES
     perdedoresUids.forEach((uid) => {
-        let uvasGanhas = ptsParticipacao;
+        // 🔥 REGRA DA LAVADA: 
+        // Se foi 'CHUVA' ou '7 SERRA!', uvasGanhas é 0 e ganha a marca de chuva.
+        let uvasGanhas = (motivoFim === '7 SERRA!' || motivoFim === 'CHUVA') ? 0 : ptsParticipacao;
         let punicao = (equipeVencedora === 'Carpinteiros') ? 'dZebra' : 'dJaca';
 
-        // 🔥 O TOQUE DE MESTRE: 7 Serra agora aplica a impiedosa "Lavada" (Chuva)!
-        if (motivoFim === '7 SERRA!') {
-            uvasGanhas = 0;
-            atualizacoes[`ranking/${uid}/chuvas`] = increment(1); // 👉 AQUI FOI AJUSTADO PARA CHUVAS!
-        } else if (motivoFim === 'CHUVA') {
-            uvasGanhas = 0;
-            atualizacoes[`ranking/${uid}/chuvas`] = increment(1);
+        // Aplica a marca sombria: Se foi Chuva, marca Chuva. Se não, marca Zebra/Jaca.
+        if (motivoFim === '7 SERRA!' || motivoFim === 'CHUVA') {
+            atualizacoes[`ranking/${uid}/chuvas`] = increment(1); 
         } else {
             atualizacoes[`ranking/${uid}/${punicao}`] = increment(1);
         }
 
+        // Só salva pontos XP se eles forem maiores que zero (bloqueia o ganho em caso de Lavada)
         if (uvasGanhas > 0) {
             atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
         }
