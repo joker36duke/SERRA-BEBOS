@@ -2750,12 +2750,6 @@ function confirmGuardian() {
             }
         };
 
-                /** 
- * MOTOR DE EQUIPES E RENDERIZAÇÃO DE MESA 
- * 1. O Juiz (Processa o resultado do sorteio)
- * 2. O Artista (Desenha as caixas na tela na ordem correta)
- */
-
 // 1. O JUIZ: Define Pedreiros, Carpinteiros, Dono e No Serra
 window.processarEquipesMultiplayer = function(jogadores, mesaSorteio) {
     // Transforma o Firebase em uma lista organizada
@@ -2930,24 +2924,42 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     let matchEndReason = "";
     let matchEndDesc = "";
 
-        if (pWon) {
-        // 🔥 CORREÇÃO: Se o adversário ficou zerado, é 7 SERRA! (Não importa se você era Dono ou Invasor)
-        if (eScore === 0 || eVazas === 0) {
-            matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, os adversários sofreram derrota instantânea!`;
-        } else if (eraDonoNoInicio) {
-            state.eSerraScore++; 
-            if (state.eSerraScore > 3) { 
-                matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `Os adversários foram derrotados 3 vezes! O Seringal é seu!`;
-                state.eSerraScore = 3;
+    // "Juízes" para saber se alguém sofreu uma Lavada (Capote) nesta mão
+    const inimigoZerado = (eScore === 0 || eVazas === 0);
+    const euZerado = (pScore === 0 || pVazas === 0);
+
+    if (pWon) {
+        if (eraDonoNoInicio) {
+            // 🔥 DONO DA MESA VENCEU (Sua equipe defendeu a coroa)
+            if (inimigoZerado && state.eSerraScore === 1) {
+                // 7 SERRA: Dono deu capote na 1/3 (Fim de jogo)
+                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, os invasores sofreram derrota instantânea!`;
+            } else {
+                // CHUVA: Dono deu capote, mas foi na 2/3 ou 3/3
+                if (inimigoZerado && state.eSerraScore > 1) {
+                    matchEndReason = "CHUVA"; 
+                }
+                
+                // Em ambos os casos, o placar do Dono sobe
+                state.eSerraScore++; 
+                if (state.eSerraScore > 3) { 
+                    matchOver = true; matchEndReason = "DOMÍNIO TOTAL"; matchEndDesc = `Os adversários foram derrotados 3 vezes! O Seringal é seu!`;
+                    state.eSerraScore = 3;
+                }
             }
         } else {
+            // ⚔️ INVASOR VENCEU (Sua equipe NÃO era a dona e acabou de tomar a mesa)
+            if (inimigoZerado) {
+                // CHUVA: Invasor deu capote e lavou o dono
+                matchEndReason = "CHUVA"; 
+            }
+
             state.eSerraScore = 1; state.pSerraScore = 1; 
-            // Rotação segura de turnos
+            // Rotação segura de turnos (A mesa vira para o Invasor)
             if (state.isOnline && state.ordemTurnos) {
                 let novaOrdem = [...state.ordemTurnos];
                 novaOrdem.push(novaOrdem.shift()); 
                 state.ordemTurnos = novaOrdem;
-                // 👉 SÓ O PRIMEIRO DA NOVA RODA GANHA A COROA LOCALMENTE
                 const meuUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
                 state.isDono = (meuUid === novaOrdem[0]);
             } else {
@@ -2955,18 +2967,32 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             }
         }
     } else {
-        // 🔥 CORREÇÃO: Se VOCÊ ficou zerado, sofreu 7 SERRA! (Não importa o seu papel)
-        if (pScore === 0 || pVazas === 0) {
-            matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você sofreu derrota instantânea!`;
-        } else if (!eraDonoNoInicio) {
-            state.pSerraScore++;
-            if (state.pSerraScore > 3) {
-                matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `Você foi derrotado 3 vezes na Serra.`;
-                state.pSerraScore = 3;
+        if (!eraDonoNoInicio) {
+            // ☠️ INVASOR PERDEU (Sua equipe NÃO era a dona e falhou no ataque)
+            if (euZerado && state.pSerraScore === 1) {
+                // Sofreu 7 SERRA do Dono na 1/3
+                matchOver = true; matchEndReason = "7 SERRA!"; matchEndDesc = `Pela Regra do 7, você sofreu derrota instantânea!`;
+            } else {
+                // Sofreu CHUVA do Dono na 2/3 ou 3/3
+                if (euZerado && state.pSerraScore > 1) {
+                    matchEndReason = "CHUVA";
+                }
+
+                state.pSerraScore++;
+                if (state.pSerraScore > 3) {
+                    matchOver = true; matchEndReason = "FIM DE JOGO"; matchEndDesc = `Você foi derrotado 3 vezes na Serra.`;
+                    state.pSerraScore = 3;
+                }
             }
         } else {
+            // 🌧️ DONO DA MESA PERDEU (Sua equipe era a dona e tomou um golpe)
+            if (euZerado) {
+                // Sofreu CHUVA do Invasor
+                matchEndReason = "CHUVA";
+            }
+
             state.isDono = false; state.eSerraScore = 1; state.pSerraScore = 1; 
-            // Rotação segura de turnos
+            // Rotação segura de turnos (A mesa vai para as mãos do inimigo)
             if (state.isOnline && state.ordemTurnos) {
                 let novaOrdem = [...state.ordemTurnos];
                 novaOrdem.push(novaOrdem.shift()); 
