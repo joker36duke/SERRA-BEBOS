@@ -3007,7 +3007,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     }
             
  // === INÍCIO DO BLOCO DE RECOMPENSA E VEREDITO DETALHADO ===
-    const jogoDecidido = matchOver;
+        const jogoDecidido = matchOver;
     
     if (state.isOnline && jogoDecidido) {
         let vencedores = [];
@@ -3023,7 +3023,6 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                     perdedores.push(j.uid);
                 }
             });
-            // 🔥 CORREÇÃO: Lê '1v1' com a letra 'v' minúscula, como está no Firebase
             if (state.tipoJogo !== '1v1') {
                 equipeGanhadora = state.jogadoresDefinidos.find(j => j.uid === vencedores[0])?.equipe || 'Pedreiros';
             }
@@ -3034,13 +3033,15 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             else { if(inimigoUid) vencedores.push(inimigoUid); perdedores.push(meuUid); }
         }
 
-        // 2. Grava no Banco de Dados (Só o Dono distribui, mas ambos lêem a tela)
-        window.distribuirRecompensas(vencedores, perdedores, equipeGanhadora, matchEndReason);
+        // 🔥 CORREÇÃO 1: Identifica se a equipe derrotada tomou Chuva nesta partida
+        const perdedoresSofreramLavada = pWon ? state.historicoLavada.e : state.historicoLavada.p;
 
-         // 3. Monta o Veredito Detalhado (A Nova Resenha da Adega)
+        // 2. Grava no Banco de Dados enviando a flag de lavada
+        window.distribuirRecompensas(vencedores, perdedores, equipeGanhadora, matchEndReason, perdedoresSofreramLavada);
+
+        // 3. Monta o Veredito Detalhado
         let resumoRecompensa = "";
         
-        // Frases de boteco para dar vida ao jogo
         let dialogosVitoria = [
             "🍾 A SAFRA É TODA SUA! O Seringal inteiro vai brindar ao seu nome hoje!",
             "🔥 QUE MÃO DE MESTRE! Jogou com a frieza de um verdadeiro veterano da mata.",
@@ -3052,24 +3053,22 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             "🍂 HOJE O SERRA TE ENGOLIU... Descanse, tome um gole d'água e volte mais forte."
         ];
 
-            if (pWon) {
+        if (pWon) {
             const meuUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
             const souODono = (state.ordemTurnos && state.ordemTurnos[0] === meuUid) || state.isDono;
 
             const ganhaVinho = (state.tipoJogo === '1v1' || souODono);
-            // Vencedor ganha o Poder em Uvas e a Participação em Rosas
             let ganhoXP = ganhaVinho ? 36 : 24; 
-            let ganhoRosas = 12; 
+            let ganhoRosas = 12; // 🌹 12 Rosas fixas de participação
             
             if (matchEndReason === '7 SERRA!') {
-                ganhoXP += 36; // Bônus do capote vai para o Poder (Uvas)
+                ganhoXP += 36; // Bônus de massacre em XP
                 resumoRecompensa = `💥 DOMINAÇÃO DE 7 SERRAS! Um massacre absoluto na mesa!\n\n🏆 RECOMPENSAS:\n+ ${ganhoXP} 🍇 XP\n+ ${ganhoRosas} 🌹 Rosas`;
             } else {
                 const fraseEscolhida = dialogosVitoria[Math.floor(Math.random() * dialogosVitoria.length)];
                 resumoRecompensa = `${fraseEscolhida}\n\n🏆 RECOMPENSAS:\n+ ${ganhoXP} 🍇 XP\n+ ${ganhoRosas} 🌹 Rosas`;
             }
             
-            // Adiciona as ferramentas e as bebidas
             if (ganhaVinho) {
                 resumoRecompensa += `\n+ 1 🍷 Brinde de Safra (El Dionysos)`;
             } 
@@ -3081,7 +3080,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             }
             
         } else {
-             // Lógica do Derrotado: Não mostra mais Uvas (já que é zero), foca nas Rosas!
+            // Lógica do Derrotado (foca nas Rosas e esconde o XP zerado)
             if (matchEndReason === '7 SERRA!') {
                 resumoRecompensa = `☠️ ESMAGADO NO 7! Uma enchente lavou a sua equipe da mesa...\n\n🥀 RESULTADO:\n+ 0 🌹 Rosas\n+ 1 🌧️ Lavada (Chuva)`;
             } else if (matchEndReason === 'CHUVA') {
@@ -3096,7 +3095,6 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                     resumoRecompensa = `${fraseEscolhida}\n\n🥀 CONSOLAÇÃO:\n+ ${ganhoRosas} 🌹 Rosas`;
                 }
                 
-                // Marcas sombrias
                 if (equipeGanhadora === 'Carpinteiros') {
                     resumoRecompensa += `\n+ 1 🦓 Silvestre Exótico (Fica esperto!)`;
                 } else {
@@ -3104,6 +3102,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                 }
             }
         }
+
         matchEndDesc = `PLACAR FINAL: Você ${pScore} x ${eScore} Adversário\n\n${resumoRecompensa}`;
     }
         
