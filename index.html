@@ -3778,38 +3778,38 @@ if (qtdJaJogada + 1 < maxJogadores) {
 // TESOURARIA DO SERINGAL (VERSÃO FINAL)
 // ==========================================
 
-window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, equipeVencedora, motivoFim) {
 window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, equipeVencedora, motivoFim, sofreuLavadaNaPartida = false) {
     const meuUid = auth.currentUser.uid;
     const snapSala = await get(ref(database, `salas/${state.salaId}`));
     if (!snapSala.exists() || snapSala.val().config.criador !== meuUid) return;
 
     let atualizacoes = {};
-    const rosasParticipacao = 12; // 🌹 Rosas de participação padrão
+    const rosasParticipacao = 12; // 🌹 12 Rosas fixas para quem termina a partida
 
-        // 1. PROCESSA OS VENCEDORES
+    // 1. PROCESSA OS VENCEDORES
     vencedoresUids.forEach((uid) => {
-        let uvasGanhas = 36; // Poder de XP bruto para o ranking
-        let rosasGanhas = rosasParticipacao; // Sempre 12 🌹 de participação!
+        let uvasGanhas = 0; // O poder do ranking começa zerado para cálculo
+        let rosasGanhas = rosasParticipacao; // 12 🌹
         let ganhouVinho = false;
         let ganhouFerramenta = null;
 
         const ehDonoAtual = (state.ordemTurnos && state.ordemTurnos[0] === uid);
 
+        // Define as Uvas (XP) da Vitória
         if (state.tipoJogo === '1v1' || ehDonoAtual) {
             ganhouVinho = true;
-            uvasGanhas += 36; 
+            uvasGanhas = 36; 
         } else {
             ganhouFerramenta = (equipeVencedora === 'Pedreiros') ? 'vPedreiro' : 'vCarpinteiro';
-            uvasGanhas += 24; 
+            uvasGanhas = 24; 
         }
 
         if (motivoFim === '7 SERRA!') {
             atualizacoes[`ranking/${uid}/capote7S`] = increment(1);
-            uvasGanhas += 36; // O bônus de massacre vai todo para o XP (uvas)
+            uvasGanhas += 36; // Bônus de massacre vai para as Uvas
         }
 
-        // Grava Uvas (XP) e Rosas (12 de participação)
+        // Grava Uvas e Rosas
         atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
         atualizacoes[`ranking/${uid}/rosas`] = increment(rosasGanhas);
         
@@ -3819,23 +3819,30 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
 
     // 2. PROCESSA OS PERDEDORES
     perdedoresUids.forEach((uid) => {
-        // 🔥 REGRA DA LAVADA: Se tomou Chuva ou 7 Serra, perde as 12 🌹 de participação!
+        // 🔥 Perdedores NÃO ganham Uvas! Apenas as Rosas de participação, SE não tomarem Lavada.
         let perdeuConsolacao = (motivoFim === '7 SERRA!' || motivoFim === 'CHUVA' || sofreuLavadaNaPartida);
         let rosasGanhas = perdeuConsolacao ? 0 : rosasParticipacao;
         let punicao = (equipeVencedora === 'Carpinteiros') ? 'dZebra' : 'dJaca';
 
-        // Aplica a marca sombria correspondente
         if (motivoFim === '7 SERRA!' || motivoFim === 'CHUVA') {
             atualizacoes[`ranking/${uid}/chuvas`] = increment(1); 
         } else {
             atualizacoes[`ranking/${uid}/${punicao}`] = increment(1);
         }
 
-        // Se escapou da lavada, ganha as 12 🌹 de consolação
+        // Salva as Rosas (se tiver escapado da lavada)
         if (rosasGanhas > 0) {
             atualizacoes[`ranking/${uid}/rosas`] = increment(rosasGanhas);
         }
     });
+
+    try {
+        await update(ref(database), atualizacoes);
+        console.log("Tesouraria Atualizada: Uvas e Rosas distribuídas com rigor!");
+    } catch (e) {
+        console.error("Erro na distribuição das riquezas:", e);
+    }
+};
 
     try {
         await update(ref(database), atualizacoes);
