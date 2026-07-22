@@ -3781,10 +3781,10 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
     let atualizacoes = {};
     const rosasParticipacao = 12; // 🌹 Rosas de participação padrão
 
-    // 1. PROCESSA OS VENCEDORES
+        // 1. PROCESSA OS VENCEDORES
     vencedoresUids.forEach((uid) => {
         let uvasGanhas = 36; // Poder de XP bruto para o ranking
-        let rosasGanhas = rosasParticipacao; 
+        let rosasGanhas = rosasParticipacao; // Sempre 12 🌹 de participação!
         let ganhouVinho = false;
         let ganhouFerramenta = null;
 
@@ -3800,11 +3800,10 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
 
         if (motivoFim === '7 SERRA!') {
             atualizacoes[`ranking/${uid}/capote7S`] = increment(1);
-            uvasGanhas += 36; // Bônus de massacre em XP
-            rosasGanhas += 24; // Bônus de rosas na dominação
+            uvasGanhas += 36; // O bônus de massacre vai todo para o XP (uvas)
         }
 
-        // Grava Uvas (XP do Ranking) e Rosas (Participação/Glória) separadamente
+        // Grava Uvas (XP) e Rosas (12 de participação)
         atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
         atualizacoes[`ranking/${uid}/rosas`] = increment(rosasGanhas);
         
