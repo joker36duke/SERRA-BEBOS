@@ -3843,14 +3843,6 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
     }
 };
 
-    try {
-        await update(ref(database), atualizacoes);
-        console.log("Tesouraria Atualizada: Uvas e Rosas distribuídas com rigor!");
-    } catch (e) {
-        console.error("Erro na distribuição das riquezas:", e);
-    }
-};
-
          // ========================================================
         // O CARTEADOR DA NUVEM (PREPARADO PARA MULTIPLAYER)
         // ========================================================
