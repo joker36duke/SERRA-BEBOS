@@ -1078,9 +1078,21 @@
                 <h2 id="detail-player-name" class="font-cinzel text-3xl font-black text-[#d4af37] tracking-widest uppercase text-center drop-shadow-[0_4px_4px_rgba(0,0,0,1)]">Nome</h2>
                 <span id="detail-player-title" class="font-inter text-[#22c55e] text-xs font-bold uppercase tracking-[4px] mb-3 drop-shadow-md">Título</span>
                 
-                <div class="flex items-center gap-3 bg-black/80 border-2 border-[#d4af37]/60 rounded-full px-6 py-2 shadow-[0_0_15px_rgba(212,175,55,0.2)] backdrop-blur-sm">
-                    <span class="text-xl">🍇</span>
-                    <span class="font-cinzel text-sm text-white font-black uppercase tracking-widest">Poder: <span id="detail-player-xp" class="text-[#d4af37]">0</span></span>
+                 <!-- PÍLULAS DE STATUS (PODER E GLÓRIA) -->
+                <div class="flex items-center justify-center gap-3 w-full mt-1">
+                    
+                    <!-- Pílula do Poder (Uvas) -->
+                    <div class="flex items-center gap-2 bg-black/80 border-2 border-[#d4af37]/60 rounded-full px-4 py-1.5 shadow-[0_0_15px_rgba(212,175,55,0.2)] backdrop-blur-sm">
+                        <span class="text-lg">🍇</span>
+                        <span class="font-cinzel text-xs text-white font-black uppercase tracking-widest">Poder: <span id="detail-player-xp" class="text-[#d4af37]">0</span></span>
+                    </div>
+
+                    <!-- Pílula da Glória/Participação (Rosas) -->
+                    <div class="flex items-center gap-2 bg-black/80 border-2 border-[#f43f5e]/60 rounded-full px-4 py-1.5 shadow-[0_0_15px_rgba(244,63,94,0.2)] backdrop-blur-sm">
+                        <span class="text-lg">🌹</span>
+                        <span class="font-cinzel text-xs text-white font-black uppercase tracking-widest">Glória: <span id="detail-player-rosas" class="text-[#f43f5e]">0</span></span>
+                    </div>
+
                 </div>
             </div>
         </div>
