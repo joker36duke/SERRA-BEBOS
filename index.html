@@ -2924,9 +2924,14 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     let matchEndReason = "";
     let matchEndDesc = "";
 
-    // "Juízes" para saber se alguém sofreu uma Lavada (Capote) nesta mão
+        // "Juízes" para saber se alguém sofreu uma Lavada (Capote) nesta mão
     const inimigoZerado = (eScore === 0 || eVazas === 0);
     const euZerado = (pScore === 0 || pVazas === 0);
+
+    // 🔥 MEMÓRIA DA LAVADA: Registra se alguém tomou Chuva nesta partida para anular a consolação no fim!
+    if (!state.historicoLavada) state.historicoLavada = { p: false, e: false };
+    if (inimigoZerado) state.historicoLavada.e = true;
+    if (euZerado) state.historicoLavada.p = true;
 
     if (pWon) {
         if (eraDonoNoInicio) {
