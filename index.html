@@ -3053,50 +3053,56 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         ];
 
             if (pWon) {
-            // 🔥 CORREÇÃO: O jogo agora confere quem é o Dono da Mesa olhando para a roda real!
             const meuUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
             const souODono = (state.ordemTurnos && state.ordemTurnos[0] === meuUid) || state.isDono;
 
             const ganhaVinho = (state.tipoJogo === '1v1' || souODono);
-            let ganho = ganhaVinho ? 36 : 24; 
+            // Vencedor ganha o Poder em Uvas e a Participação em Rosas
+            let ganhoXP = ganhaVinho ? 36 : 24; 
+            let ganhoRosas = 12; 
             
-            // Título e XP
             if (matchEndReason === '7 SERRA!') {
-                ganho += 36;
-                resumoRecompensa = `💥 DOMINAÇÃO DE 7 SERRAS! Um massacre absoluto na mesa!\n\n🏆 RECOMPENSAS:\n+ ${ganho} 🍇 XP`;
+                ganhoXP += 36; // Bônus do capote vai para o Poder (Uvas)
+                resumoRecompensa = `💥 DOMINAÇÃO DE 7 SERRAS! Um massacre absoluto na mesa!\n\n🏆 RECOMPENSAS:\n+ ${ganhoXP} 🍇 XP\n+ ${ganhoRosas} 🌹 Rosas`;
             } else {
                 const fraseEscolhida = dialogosVitoria[Math.floor(Math.random() * dialogosVitoria.length)];
-                resumoRecompensa = `${fraseEscolhida}\n\n🏆 RECOMPENSAS:\n+ ${ganho} 🍇 XP`;
+                resumoRecompensa = `${fraseEscolhida}\n\n🏆 RECOMPENSAS:\n+ ${ganhoXP} 🍇 XP\n+ ${ganhoRosas} 🌹 Rosas`;
             }
             
-            // Adiciona o brinde final (Vinho ou Medalhas)
+            // Adiciona as ferramentas e as bebidas
             if (ganhaVinho) {
                 resumoRecompensa += `\n+ 1 🍷 Brinde de Safra (El Dionysos)`;
-            } else {
+            } 
+            
+            if (state.tipoJogo !== '1v1') {
                 resumoRecompensa += (equipeGanhadora === 'Pedreiros') 
                     ? `\n+ 1 ⛏️ Medalha de Defesa` 
                     : `\n+ 1 🪚 Medalha de Invasão`;
             }
             
         } else {
-             // Lógica do Derrotado: Capote, Chuva ou Normal
+             // Lógica do Derrotado: Não mostra mais Uvas (já que é zero), foca nas Rosas!
             if (matchEndReason === '7 SERRA!') {
-                resumoRecompensa = `☠️ ESMAGADO NO 7! Uma enchente lavou a sua equipe da mesa...\n\n🥀 RESULTADO:\n+ 0 🍇 XP\n+ 1 🌧️ Lavada (Chuva)`;
+                resumoRecompensa = `☠️ ESMAGADO NO 7! Uma enchente lavou a sua equipe da mesa...\n\n🥀 RESULTADO:\n+ 0 🌹 Rosas\n+ 1 🌧️ Lavada (Chuva)`;
             } else if (matchEndReason === 'CHUVA') {
-                resumoRecompensa = `🌊 DERROTA POR LAVADA! A enchente levou tudo que você tinha...\n\n🥀 RESULTADO:\n+ 0 🍇 XP\n+ 1 🌧️ Marca da Chuva`;
+                resumoRecompensa = `🌊 DERROTA POR LAVADA! A enchente levou tudo que você tinha...\n\n🥀 RESULTADO:\n+ 0 🌹 Rosas\n+ 1 🌧️ Marca da Chuva`;
             } else {
-                let ganho = 12; // Consolação
+                let ganhoRosas = perdedoresSofreramLavada ? 0 : 12; 
                 const fraseEscolhida = dialogosDerrota[Math.floor(Math.random() * dialogosDerrota.length)];
-                resumoRecompensa = `${fraseEscolhida}\n\n🥀 CONSOLAÇÃO:\n+ ${ganho} 🍇 XP`;
                 
-                // Marcas sombrias com quantidade na frente
+                if (perdedoresSofreramLavada) {
+                    resumoRecompensa = `${fraseEscolhida}\n\n🥀 CONSOLAÇÃO ZERADA (Sofreu Chuva Anteriormente):\n+ 0 🌹 Rosas`;
+                } else {
+                    resumoRecompensa = `${fraseEscolhida}\n\n🥀 CONSOLAÇÃO:\n+ ${ganhoRosas} 🌹 Rosas`;
+                }
+                
+                // Marcas sombrias
                 if (equipeGanhadora === 'Carpinteiros') {
                     resumoRecompensa += `\n+ 1 🦓 Silvestre Exótico (Fica esperto!)`;
                 } else {
                     resumoRecompensa += `\n+ 1 👣 Pé na Jaca (Escorregou feio!)`;
                 }
             }
-       
         }
         matchEndDesc = `PLACAR FINAL: Você ${pScore} x ${eScore} Adversário\n\n${resumoRecompensa}`;
     }
