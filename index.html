@@ -4845,12 +4845,13 @@ if(trickMsg) {
             }
         }
 
-        // Aplica a imagem e os textos
+         // Aplica a imagem e os textos
         document.getElementById('detail-player-img').src = imagemCorreta; 
         document.getElementById('detail-player-name').innerText = jogador.nome || "Lenda Anônima";
         document.getElementById('detail-player-title').innerText = jogador.eloTitle || "Bebo Iniciante";
         
         document.getElementById('detail-player-xp').innerText = (jogador.uvasXP || 0).toLocaleString('pt-BR');
+        document.getElementById('detail-player-rosas').innerText = (jogador.rosas || 0).toLocaleString('pt-BR');
         
         // Torre Bebo-Mor
         document.getElementById('detail-v-7serra').innerText = jogador.capote7S || 0; 
