@@ -3808,16 +3808,21 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
 
     // 1. PROCESSA OS VENCEDORES
     vencedoresUids.forEach((uid) => {
-        let uvasGanhas = 0; // O poder do ranking começa zerado para cálculo
+        let uvasGanhas = 0; 
         let rosasGanhas = rosasParticipacao; // 12 🌹
         let ganhouVinho = false;
+        let ganhouChampagne = false;
         let ganhouFerramenta = null;
 
         const ehDonoAtual = (state.ordemTurnos && state.ordemTurnos[0] === uid);
 
-        // Define as Uvas (XP) da Vitória
+        // 🔥 Define as Uvas (XP) e a Bebida Suprema (🍾 ou 🍷)
         if (state.tipoJogo === '1v1' || ehDonoAtual) {
-            ganhouVinho = true;
+            if (motivoFim === '7 SERRA!') {
+                ganhouChampagne = true; // Se for massacre, estoura o Champagne!
+            } else {
+                ganhouVinho = true; // Se for normal, toma o Vinho!
+            }
             uvasGanhas = 36; 
         } else {
             ganhouFerramenta = (equipeVencedora === 'Pedreiros') ? 'vPedreiro' : 'vCarpinteiro';
@@ -3825,15 +3830,16 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
         }
 
         if (motivoFim === '7 SERRA!') {
-            atualizacoes[`ranking/${uid}/capote7S`] = increment(1);
-            uvasGanhas += 36; // Bônus de massacre vai para as Uvas
+            uvasGanhas += 36; // Bônus de massacre vai todo para as Uvas
         }
 
         // Grava Uvas e Rosas
         atualizacoes[`ranking/${uid}/uvasXP`] = increment(uvasGanhas);
         atualizacoes[`ranking/${uid}/rosas`] = increment(rosasGanhas);
         
-        if (ganhouVinho) atualizacoes[`ranking/${uid}/vinhos`] = increment(1);
+        // Grava as Bebidas e Medalhas corretas
+        if (ganhouChampagne) atualizacoes[`ranking/${uid}/capote7S`] = increment(1); // 🍾
+        if (ganhouVinho) atualizacoes[`ranking/${uid}/vinhos`] = increment(1); // 🍷
         if (ganhouFerramenta) atualizacoes[`ranking/${uid}/${ganhouFerramenta}`] = increment(1);
     });
 
