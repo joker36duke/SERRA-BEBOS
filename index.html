@@ -3069,8 +3069,11 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             const meuUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
             const souODono = (state.ordemTurnos && state.ordemTurnos[0] === meuUid) || state.isDono;
 
-            const ganhaVinho = (state.tipoJogo === '1v1' || souODono);
-            let ganhoXP = ganhaVinho ? 36 : 24; 
+            // 🔥 A NOVA REGRA DAS BEBIDAS: Champagne para o 7 Serra, Vinho para o normal!
+            const ganhaChampagne = (state.tipoJogo === '1v1' || souODono) && matchEndReason === '7 SERRA!';
+            const ganhaVinho = (state.tipoJogo === '1v1' || souODono) && matchEndReason !== '7 SERRA!';
+            
+            let ganhoXP = (state.tipoJogo === '1v1' || souODono) ? 36 : 24; 
             let ganhoRosas = 12; // 🌹 12 Rosas fixas de participação
             
             if (matchEndReason === '7 SERRA!') {
@@ -3081,15 +3084,21 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                 resumoRecompensa = `${fraseEscolhida}\n\n🏆 RECOMPENSAS:\n+ ${ganhoXP} 🍇 XP\n+ ${ganhoRosas} 🌹 Rosas`;
             }
             
-            if (ganhaVinho) {
+            // Adiciona a bebida certa na tela
+            if (ganhaChampagne) {
+                resumoRecompensa += `\n+ 1 🍾 Bebo-Mor (7 Serras)`;
+            } else if (ganhaVinho) {
                 resumoRecompensa += `\n+ 1 🍷 Brinde de Safra (El Dionysos)`;
             } 
             
+            // Medalhas de Clã
             if (state.tipoJogo !== '1v1') {
                 resumoRecompensa += (equipeGanhadora === 'Pedreiros') 
                     ? `\n+ 1 ⛏️ Medalha de Defesa` 
                     : `\n+ 1 🪚 Medalha de Invasão`;
             }
+            
+        }
             
         } else {
             // Lógica do Derrotado (foca nas Rosas e esconde o XP zerado)
