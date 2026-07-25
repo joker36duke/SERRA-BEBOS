@@ -3065,7 +3065,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             "🍂 HOJE O SERRA TE ENGOLIU... Descanse, tome um gole d'água e volte mais forte."
         ];
 
-        if (pWon) {
+         if (pWon) {
             const meuUid = (typeof auth !== 'undefined' && auth.currentUser) ? auth.currentUser.uid : null;
             const souODono = (state.ordemTurnos && state.ordemTurnos[0] === meuUid) || state.isDono;
 
@@ -3097,8 +3097,6 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                     ? `\n+ 1 ⛏️ Medalha de Defesa` 
                     : `\n+ 1 🪚 Medalha de Invasão`;
             }
-            
-        }
             
         } else {
             // Lógica do Derrotado (foca nas Rosas e esconde o XP zerado)
