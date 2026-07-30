@@ -2451,7 +2451,18 @@ function confirmGuardian() {
         window.buscarPartida1x1 = () => window.buscarPartida('1v1');
         window.buscarPartida2x2 = () => window.buscarPartida('2v2');
         window.buscarPartida3x3 = () => window.buscarPartida('3v3');
-
+                
+        // MESA DE APOSTA (EM CONSTRUÇÃO)
+        window.abrirMesaAposta = function() {
+            // Como a tela de apostas ainda não existe, chamamos o Sansão para avisar o jogador!
+            if (typeof mostrarAlertaSeringal === 'function') {
+                mostrarAlertaSeringal(
+                    "Mesa Reservada", 
+                    "O Sansão ainda está polindo a madeira da Mesa de Aposta e descendo as melhores safras de El Dionysos da adega...\n\nEm breve, você poderá apostar suas preciosas Uvas e Rosas aqui. Fique de olho!"
+                );
+            }
+        };
+                
         window.gerar8CartasSorteio = function() {
             let d = [];
             suits.forEach(s => { rankMap.forEach(r => { d.push({ suit: s, rank: r.id, power: r.power, pts: r.pts }); }); });
