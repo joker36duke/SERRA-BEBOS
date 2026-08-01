@@ -4757,6 +4757,35 @@ if(trickMsg) {
         </div>
     </div>
 
+        <!-- MODAL: ESCRITÓRIO DA ADEGA -->
+    <div id="modal-escritorio" class="hidden fixed inset-0 z-[3000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+        <div class="w-full max-w-sm bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-8 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col items-center text-center relative">
+            
+            <!-- Botão de Fechar no Canto -->
+            <button onclick="fecharEscritorio()" class="absolute top-3 right-4 text-[#d4af37] hover:text-white font-bold text-2xl transition-colors">&times;</button>
+            
+            <h2 class="font-cinzel font-black text-2xl text-[#d4af37] tracking-widest uppercase mb-2 drop-shadow-md">
+                Escritório
+            </h2>
+            <p class="font-cinzel text-white/70 text-[10px] uppercase tracking-wider mb-6">Administração El Dionysos</p>
+            
+            <div class="w-full flex flex-col gap-4">
+                <!-- Botão 1: Gerenciar Vendas -->
+                <button onclick="acaoGerenciarVendas()" class="w-full py-4 font-bold text-sm tracking-wider rounded border border-[#d4af37] bg-[#001f3f] text-[#d4af37] uppercase transition-transform active:scale-95 hover:bg-[#d4af37] hover:text-[#001f3f] shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center gap-3">
+                    <span class="text-xl">💳</span>
+                    Gerenciar Vendas
+                </button>
+                
+                <!-- Botão 2: Editar Catálogo -->
+                <button onclick="acaoEditarCatalogo()" class="w-full py-4 font-bold text-sm tracking-wider rounded border border-[#d4af37] bg-[#722f1b] text-[#d4af37] uppercase transition-transform active:scale-95 hover:bg-[#d4af37] hover:text-[#722f1b] shadow-[0_4px_10px_rgba(0,0,0,0.5)] flex items-center justify-center gap-3">
+                    <span class="text-xl">🍷</span>
+                    Editar Catálogo
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
             <div id="custom-alert-modal" class="hidden fixed inset-0 z-[3000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
         <div class="w-full max-w-sm bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-8 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col items-center text-center">
             
