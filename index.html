@@ -2241,20 +2241,42 @@ function confirmGuardian() {
 window.abrirEscritorio = function() {
     document.getElementById('modal-escritorio').classList.remove('hidden');
 };
-
 window.fecharEscritorio = function() {
     document.getElementById('modal-escritorio').classList.add('hidden');
 };
 
-// Ações dos botões dentro do escritório
+// AÇÕES DO ESCRITÓRIO
 window.acaoGerenciarVendas = function() {
     fecharEscritorio();
-    mostrarAlertaSeringal("Conexão Stripe", "Em breve, este botão abrirá o painel de recebimentos de apostas da sua conta Stripe.");
+    mostrarAlertaSeringal("Conexão Stripe", "Em breve, este botão redirecionará você para o painel administrativo do Stripe.");
 };
-
 window.acaoEditarCatalogo = function() {
     fecharEscritorio();
-    mostrarAlertaSeringal("Catálogo do Sansão", "Em breve, este botão abrirá a tela para você adicionar novos vinhos El Dionysos e marcas parceiras para os jogadores apostarem.");
+    document.getElementById('modal-editar-catalogo').classList.remove('hidden');
+};
+window.fecharEditarCatalogo = function() {
+    document.getElementById('modal-editar-catalogo').classList.add('hidden');
+};
+
+window.salvarNovoProduto = function() {
+    // Aqui no futuro faremos o push para o Firebase
+    mostrarAlertaSeringal("Catálogo Atualizado!", "Produto salvo com sucesso! Ele agora está disponível para compra no Stand do Sansão e para ser usado nas Mesas de Aposta.");
+    fecharEditarCatalogo();
+};
+
+// ==========================================
+// O CATÁLOGO E A MESA DE APOSTA
+// ==========================================
+window.abrirCatalogoSansao = function() {
+    document.getElementById('screen-catalogo').classList.remove('hidden');
+};
+window.fecharCatalogo = function() {
+    document.getElementById('screen-catalogo').classList.add('hidden');
+};
+
+// Quando o jogador clica em MESA DE APOSTA, ele abre o catálogo!
+window.abrirMesaAposta = function() {
+    abrirCatalogoSansao();
 };
 
         // ==========================================
