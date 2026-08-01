@@ -4786,6 +4786,113 @@ if(trickMsg) {
         </div>
     </div>
 
+        <!-- TELA: CATÁLOGO DO SANSÃO (LOJA E APOSTAS) -->
+    <div id="screen-catalogo" class="hidden fixed inset-0 z-[2500] bg-black/95 backdrop-blur-md flex flex-col items-center justify-start p-4 transition-opacity overflow-y-auto style-2">
+        
+        <!-- Cabeçalho -->
+        <div class="w-full flex items-center justify-between mb-6 mt-4 max-w-2xl">
+            <button onclick="fecharCatalogo()" class="text-[#d4af37] font-bold text-xs border border-[#d4af37] px-4 py-2 rounded uppercase tracking-widest hover:bg-[#d4af37] hover:text-black transition-colors active:scale-95">
+                &lt; Voltar
+            </button>
+            <div class="text-center">
+                <!-- IDs ADICIONADOS AQUI -->
+                <h2 id="catalogo-titulo" class="font-cinzel font-black text-2xl text-[#d4af37] tracking-widest uppercase drop-shadow-md">Catálogo do Sansão</h2>
+                <p id="catalogo-subtitulo" class="font-cinzel text-white/70 text-[10px] uppercase tracking-wider">Comércio & Produtos Oficiais</p>
+            </div>
+            <div class="w-[75px]"></div> <!-- Espaçador para centralizar -->
+        </div>
+
+        <!-- Grid de Produtos (Vitrine) -->
+        <div id="catalogo-grid" class="w-full max-w-2xl grid grid-cols-1 gap-4 pb-10">
+            
+            <!-- Produto Exemplo 1: Vinho -->
+            <div class="bg-[#1a0f0a] border-2 border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+                <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
+                    <span class="text-5xl drop-shadow-md">🍷</span>
+                </div>
+                <div class="flex flex-col justify-between w-full">
+                    <div>
+                        <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">El Dionysos Malbec</h3>
+                        <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">Safra especial do Seringal. Perfeito para apostas de alto nível. (Frete calculado no checkout).</p>
+                    </div>
+                    <div class="flex items-end justify-between mt-2">
+                        <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ 149,90</span>
+                        <div class="flex gap-2">
+                            <!-- CLASSES ADICIONADAS AQUI -->
+                            <button class="btn-comprar bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
+                            <button class="btn-apostar bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Produto Exemplo 2: Vestuário / Parceria -->
+            <div class="bg-[#1a0f0a] border-2 border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+                <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
+                    <span class="text-5xl drop-shadow-md">👕</span>
+                </div>
+                <div class="flex flex-col justify-between w-full">
+                    <div>
+                        <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">Camisa Oficial Seringal</h3>
+                        <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">Edição limitada em parceria com marcas locais. Estilo rústico e confortável.</p>
+                    </div>
+                    <div class="flex items-end justify-between mt-2">
+                        <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ 89,90</span>
+                        <div class="flex gap-2">
+                            <!-- CLASSES ADICIONADAS AQUI -->
+                            <button class="btn-comprar bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
+                            <button class="btn-apostar bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR CATÁLOGO (ÁREA DO MESTRE) -->
+    <div id="modal-editar-catalogo" class="hidden fixed inset-0 z-[3500] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+        <div class="w-full max-w-md bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-6 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col items-center relative">
+            
+            <button onclick="fecharEditarCatalogo()" class="absolute top-3 right-4 text-[#d4af37] hover:text-white font-bold text-2xl transition-colors">&times;</button>
+            
+            <h2 class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest uppercase mb-4 drop-shadow-md text-center">
+                Adicionar ao Catálogo
+            </h2>
+            
+            <form id="form-novo-produto" class="w-full flex flex-col gap-3">
+                <div class="flex flex-col">
+                    <label class="font-cinzel text-[#d4af37] text-xs font-bold tracking-wider mb-1">Nome do Produto</label>
+                    <input type="text" id="prod-nome" placeholder="Ex: El Dionysos Cabernet" required class="w-full bg-black border border-[#d4af37]/50 rounded px-3 py-2 text-white font-cinzel text-sm focus:outline-none focus:border-[#d4af37]">
+                </div>
+                
+                <div class="flex gap-3">
+                    <div class="flex flex-col w-1/2">
+                        <label class="font-cinzel text-[#d4af37] text-xs font-bold tracking-wider mb-1">Preço (R$)</label>
+                        <input type="number" step="0.01" id="prod-preco" placeholder="149.90" required class="w-full bg-black border border-[#d4af37]/50 rounded px-3 py-2 text-white font-cinzel text-sm focus:outline-none focus:border-[#d4af37]">
+                    </div>
+                    <div class="flex flex-col w-1/2">
+                        <label class="font-cinzel text-[#d4af37] text-xs font-bold tracking-wider mb-1">Categoria</label>
+                        <select id="prod-tipo" class="w-full bg-black border border-[#d4af37]/50 rounded px-3 py-2 text-white font-cinzel text-sm focus:outline-none focus:border-[#d4af37]">
+                            <option value="vinho">🍷 Vinho</option>
+                            <option value="vestuario">👕 Vestuário</option>
+                            <option value="outro">📦 Produto Local</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col">
+                    <label class="font-cinzel text-[#d4af37] text-xs font-bold tracking-wider mb-1">Descrição & Frete</label>
+                    <textarea id="prod-desc" rows="2" placeholder="Detalhes do produto e opções de envio..." class="w-full bg-black border border-[#d4af37]/50 rounded px-3 py-2 text-white font-cinzel text-sm focus:outline-none focus:border-[#d4af37] resize-none"></textarea>
+                </div>
+
+                <button type="button" onclick="salvarNovoProduto()" class="mt-2 w-full py-3 font-bold text-sm tracking-wider rounded border-2 border-[#22c55e] bg-[#0a192f] text-[#22c55e] uppercase transition-transform active:scale-95 hover:bg-[#22c55e] hover:text-black shadow-[0_4px_10px_rgba(0,0,0,0.5)]">
+                    Salvar Produto
+                </button>
+            </form>
+        </div>
+    </div>
+
             <div id="custom-alert-modal" class="hidden fixed inset-0 z-[3000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
         <div class="w-full max-w-sm bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-8 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col items-center text-center">
             
