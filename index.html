@@ -2239,7 +2239,22 @@ function confirmGuardian() {
 // A PORTA SECRETA DO MESTRE
 // ==========================================
 window.abrirEscritorio = function() {
-    alert("Bem-vindo ao Escritório da Adega, Mestre Damião!\nAqui você administrará as vendas e os pagamentos.");
+    document.getElementById('modal-escritorio').classList.remove('hidden');
+};
+
+window.fecharEscritorio = function() {
+    document.getElementById('modal-escritorio').classList.add('hidden');
+};
+
+// Ações dos botões dentro do escritório
+window.acaoGerenciarVendas = function() {
+    fecharEscritorio();
+    mostrarAlertaSeringal("Conexão Stripe", "Em breve, este botão abrirá o painel de recebimentos de apostas da sua conta Stripe.");
+};
+
+window.acaoEditarCatalogo = function() {
+    fecharEscritorio();
+    mostrarAlertaSeringal("Catálogo do Sansão", "Em breve, este botão abrirá a tela para você adicionar novos vinhos El Dionysos e marcas parceiras para os jogadores apostarem.");
 };
 
         // ==========================================
