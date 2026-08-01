@@ -2370,9 +2370,23 @@ window.abrirEscritorio = function() {
                         }
                         // ✨ FIM DO RESGATE
 
-                        document.getElementById('lobby-player-name').innerText = nomeJogador;
+                         document.getElementById('lobby-player-name').innerText = nomeJogador;
+                        
+                        // ==========================================
+                        // A CHAVE DA PORTA SECRETA (ESCRITÓRIO DA ADEGA)
+                        // ==========================================
+                        const btnEscritorio = document.getElementById('btn-escritorio');
+                        if (btnEscritorio) {
+                            if (user.email === "joker36duke@gmail.com") {
+                                btnEscritorio.style.display = 'inline-block'; // Porta se abre pro Mestre
+                            } else {
+                                btnEscritorio.style.display = 'none'; // Escondida dos forasteiros
+                            }
+                        }
+                        
                         navTo('screen-start', 'screen-lobby');
                         mostrarAlertaSeringal("Portões Abertos!", "Bem-vindo ao Grande Serra, " + nomeJogador + "!");
+
                     } else {
                         sendEmailVerification(user).then(() => {
                             mostrarAlertaSeringal("Pergaminho Faltando!", "Seu pergaminho não foi assinado! Verifique seu e-mail.");
