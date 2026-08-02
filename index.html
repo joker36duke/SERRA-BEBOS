@@ -4849,67 +4849,68 @@ if(trickMsg) {
         </div>
     </div>
 
-        <!-- TELA: CATÁLOGO DO SANSÃO (LOJA E APOSTAS) -->
-    <div id="screen-catalogo" class="hidden fixed inset-0 z-[2500] bg-black/95 backdrop-blur-md flex flex-col items-center justify-start p-4 transition-opacity overflow-y-auto style-2">
+            <!-- TELA: CARROSSEL DE PRÊMIOS DA MESA DE APOSTA -->
+    <div id="screen-catalogo" class="hidden fixed inset-0 z-[2500] bg-black/95 backdrop-blur-md flex flex-col items-center justify-between p-6 transition-opacity">
         
         <!-- Cabeçalho -->
-        <div class="w-full flex items-center justify-between mb-6 mt-4 max-w-2xl">
+        <div class="w-full flex items-center justify-between max-w-md mt-2">
             <button onclick="fecharCatalogo()" class="text-[#d4af37] font-bold text-xs border border-[#d4af37] px-4 py-2 rounded uppercase tracking-widest hover:bg-[#d4af37] hover:text-black transition-colors active:scale-95">
                 &lt; Voltar
             </button>
             <div class="text-center">
-                <!-- IDs ADICIONADOS AQUI -->
-                <h2 id="catalogo-titulo" class="font-cinzel font-black text-2xl text-[#d4af37] tracking-widest uppercase drop-shadow-md">Catálogo do Sansão</h2>
-                <p id="catalogo-subtitulo" class="font-cinzel text-white/70 text-[10px] uppercase tracking-wider">Comércio & Produtos Oficiais</p>
+                <h2 class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest uppercase drop-shadow-md">Mesa de Aposta</h2>
+                <p class="font-cinzel text-white/70 text-[9px] uppercase tracking-wider">Escolha o Prêmio da Disputa</p>
             </div>
-            <div class="w-[75px]"></div> <!-- Espaçador para centralizar -->
+            <div class="w-[75px]"></div>
         </div>
 
-        <!-- Grid de Produtos (Vitrine) -->
-        <div id="catalogo-grid" class="w-full max-w-2xl grid grid-cols-1 gap-4 pb-10">
+        <!-- O Carrossel Central -->
+        <div class="relative w-full max-w-sm flex items-center justify-center my-auto">
             
-            <!-- Produto Exemplo 1: Vinho -->
-            <div class="bg-[#1a0f0a] border-2 border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-                <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
-                    <span class="text-5xl drop-shadow-md">🍷</span>
+            <!-- Botão Esquerda -->
+            <button onclick="mudarItemAposta(-1)" class="absolute left-0 z-30 bg-black/60 border border-[#d4af37] text-[#d4af37] p-3 rounded-full hover:bg-[#d4af37] hover:text-black transition-all active:scale-95 shadow-lg">
+                <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            </button>
+
+            <!-- Card do Produto em Destaque -->
+            <div id="carrossel-card-container" class="w-[280px] bg-[#1a0f0a] border-2 border-[#d4af37] rounded-2xl p-6 shadow-[0_0_30px_rgba(212,175,55,0.3)] flex flex-col items-center text-center relative">
+                
+                <!-- Ícone / Imagem -->
+                <div id="aposta-produto-icone" class="w-28 h-28 bg-black rounded-xl border border-[#d4af37]/40 flex items-center justify-center text-6xl shadow-inner mb-4">
+                    🍷
                 </div>
-                <div class="flex flex-col justify-between w-full">
-                    <div>
-                        <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">El Dionysos Malbec</h3>
-                        <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">Safra especial do Seringal. Perfeito para apostas de alto nível. (Frete calculado no checkout).</p>
-                    </div>
-                    <div class="flex items-end justify-between mt-2">
-                        <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ 149,90</span>
-                        <div class="flex gap-2">
-                            <!-- CLASSES ADICIONADAS AQUI -->
-                            <button class="btn-comprar bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
-                            <button class="btn-apostar bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
-                        </div>
-                    </div>
+
+                <!-- Nome do Produto -->
+                <h3 id="aposta-produto-nome" class="font-cinzel text-white font-black text-lg tracking-wider uppercase mb-1">
+                    El Dionysos Malbec
+                </h3>
+
+                <!-- Descrição -->
+                <p id="aposta-produto-desc" class="font-inter text-gray-400 text-xs mb-4 h-12 flex items-center justify-center line-clamp-2">
+                    Safra especial do Seringal. Perfeito para apostas de alto nível.
+                </p>
+
+                <!-- Valor Real do Prêmio -->
+                <div class="w-full bg-black/60 border border-[#d4af37]/30 rounded-lg py-2 mb-4 flex items-center justify-around">
+                    <span class="font-cinzel text-xs text-[#d4af37] uppercase tracking-widest font-bold">Valor do Prêmio:</span>
+                    <span id="aposta-produto-preco" class="font-cinzel text-[#22c55e] font-black text-lg">R$ 149,90</span>
                 </div>
+
+                <!-- Botão de Ação -->
+                <button onclick="confirmarApostaComProduto()" class="w-full py-4 font-bold text-xs tracking-[2px] rounded border border-[#d4af37] bg-[#722f1b] text-white uppercase transition-transform active:scale-95 hover:bg-[#d4af37] hover:text-black shadow-[0_4px_15px_rgba(0,0,0,0.6)] flex items-center justify-center gap-2">
+                    <span>⚔️</span> Iniciar Disputa Valendo Este Prêmio
+                </button>
             </div>
 
-            <!-- Produto Exemplo 2: Vestuário / Parceria -->
-            <div class="bg-[#1a0f0a] border-2 border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
-                <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
-                    <span class="text-5xl drop-shadow-md">👕</span>
-                </div>
-                <div class="flex flex-col justify-between w-full">
-                    <div>
-                        <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">Camisa Oficial Seringal</h3>
-                        <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">Edição limitada em parceria com marcas locais. Estilo rústico e confortável.</p>
-                    </div>
-                    <div class="flex items-end justify-between mt-2">
-                        <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ 89,90</span>
-                        <div class="flex gap-2">
-                            <!-- CLASSES ADICIONADAS AQUI -->
-                            <button class="btn-comprar bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
-                            <button class="btn-apostar bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- Botão Direita -->
+            <button onclick="mudarItemAposta(1)" class="absolute right-0 z-30 bg-black/60 border border-[#d4af37] text-[#d4af37] p-3 rounded-full hover:bg-[#d4af37] hover:text-black transition-all active:scale-95 shadow-lg">
+                <svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>
+            </button>
+        </div>
 
+        <!-- Indicadores (Pontinhos do Carrossel) -->
+        <div id="carrossel-dots" class="flex gap-2 mb-4">
+            <!-- Gerado dinamicamente via JS -->
         </div>
     </div>
 
