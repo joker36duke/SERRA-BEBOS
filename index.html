@@ -2562,16 +2562,12 @@ window.abrirMesaAposta = function() {
         window.buscarPartida2x2 = () => window.buscarPartida('2v2');
         window.buscarPartida3x3 = () => window.buscarPartida('3v3');
                 
-        // MESA DE APOSTA (EM CONSTRUÇÃO)
-        window.abrirMesaAposta = function() {
-            // Como a tela de apostas ainda não existe, chamamos o Sansão para avisar o jogador!
-            if (typeof mostrarAlertaSeringal === 'function') {
-                mostrarAlertaSeringal(
-                    "Mesa Reservada", 
-                    "O Sansão ainda está polindo a madeira da Mesa de Aposta e descendo as melhores safras de El Dionysos da adega...\n\nEm breve, você poderá apostar suas preciosas Uvas e Rosas aqui. Fique de olho!"
-                );
-            }
-        };
+        // MESA DE APOSTA (O CATÁLOGO)
+    window.abrirMesaAposta = function() {
+        if (typeof abrirCatalogo === 'function') {
+            abrirCatalogo('aposta');
+        }
+    };
                 
         window.gerar8CartasSorteio = function() {
             let d = [];
