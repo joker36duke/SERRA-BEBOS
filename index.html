@@ -2258,9 +2258,55 @@ window.fecharEditarCatalogo = function() {
 };
 
 window.salvarNovoProduto = function() {
-    // Aqui no futuro faremos o push para o Firebase
-    mostrarAlertaSeringal("Catálogo Atualizado!", "Produto salvo com sucesso! Ele agora está disponível para compra no Stand do Sansão e para ser usado nas Mesas de Aposta.");
+    // 1. Pega os valores que você digitou no formulário
+    const nome = document.getElementById('prod-nome').value;
+    let preco = document.getElementById('prod-preco').value;
+    const tipo = document.getElementById('prod-tipo').value;
+    const desc = document.getElementById('prod-desc').value;
+
+    if (!nome || !preco) {
+        mostrarAlertaSeringal("Aviso", "Preencha o nome e o preço do produto!");
+        return;
+    }
+
+    // Formata o preço para o padrão brasileiro (R$ 00,00)
+    preco = parseFloat(preco).toFixed(2).replace('.', ',');
+
+    // 2. Define o ícone de luxo baseado na categoria
+    let emoji = "📦";
+    if (tipo === "vinho") emoji = "🍷";
+    if (tipo === "vestuario") emoji = "👕";
+
+    // 3. Monta o visual da caixinha igualzinha às outras do catálogo
+    const novoProdutoHTML = `
+        <div class="bg-[#1a0f0a] border-2 border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+            <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
+                <span class="text-5xl drop-shadow-md">${emoji}</span>
+            </div>
+            <div class="flex flex-col justify-between w-full">
+                <div>
+                    <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">${nome}</h3>
+                    <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">${desc}</p>
+                </div>
+                <div class="flex items-end justify-between mt-2">
+                    <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ ${preco}</span>
+                    <div class="flex gap-2">
+                        <button class="btn-comprar bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
+                        <button class="btn-apostar bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // 4. Injeta o produto no topo do catálogo
+    const grid = document.getElementById('catalogo-grid');
+    grid.insertAdjacentHTML('afterbegin', novoProdutoHTML);
+
+    // 5. Limpa o formulário e avisa que deu certo
+    document.getElementById('form-novo-produto').reset();
     fecharEditarCatalogo();
+    mostrarAlertaSeringal("Catálogo Atualizado!", "Produto salvo com sucesso! Ele agora está disponível para compra no Stand do Sansão e para ser usado nas Mesas de Aposta.");
 };
 
 // ==========================================
