@@ -2310,18 +2310,99 @@ window.salvarNovoProduto = function() {
 };
 
 // ==========================================
-// O CATÁLOGO E A MESA DE APOSTA
+// CARROSSEL INTELIGENTE DA MESA DE APOSTA
 // ==========================================
-window.abrirCatalogoSansao = function() {
+
+// Lista padrão de prêmios
+window.produtosCatalogo = [
+    { nome: "El Dionysos Malbec", preco: "149,90", tipo: "vinho", desc: "Safra especial do Seringal. Perfeito para apostas de alto nível." },
+    { nome: "Camisa Oficial Seringal", preco: "89,90", tipo: "vestuario", desc: "Edição limitada em parceria com marcas locais. Estilo rústico." }
+];
+
+window.indiceCarrosselAtual = 0;
+
+window.abrirMesaAposta = function() {
+    window.indiceCarrosselAtual = 0;
+    window.atualizarVisualCarrossel();
     document.getElementById('screen-catalogo').classList.remove('hidden');
 };
+
 window.fecharCatalogo = function() {
     document.getElementById('screen-catalogo').classList.add('hidden');
 };
 
-// Quando o jogador clica em MESA DE APOSTA, ele abre o catálogo!
-window.abrirMesaAposta = function() {
-    abrirCatalogoSansao();
+window.mudarItemAposta = function(direcao) {
+    if (!window.produtosCatalogo || window.produtosCatalogo.length === 0) return;
+    
+    window.indiceCarrosselAtual += direcao;
+    
+    if (window.indiceCarrosselAtual < 0) {
+        window.indiceCarrosselAtual = window.produtosCatalogo.length - 1;
+    } else if (window.indiceCarrosselAtual >= window.produtosCatalogo.length) {
+        window.indiceCarrosselAtual = 0;
+    }
+    
+    window.atualizarVisualCarrossel();
+};
+
+window.atualizarVisualCarrossel = function() {
+    const p = window.produtosCatalogo[window.indiceCarrosselAtual];
+    if (!p) return;
+
+    let emoji = "📦";
+    if (p.tipo === "vinho") emoji = "🍷";
+    if (p.tipo === "vestuario") emoji = "👕";
+
+    const icone = document.getElementById('aposta-produto-icone');
+    const nome = document.getElementById('aposta-produto-nome');
+    const desc = document.getElementById('aposta-produto-desc');
+    const preco = document.getElementById('aposta-produto-preco');
+    const dotsContainer = document.getElementById('carrossel-dots');
+
+    if (icone) icone.innerText = emoji;
+    if (nome) nome.innerText = p.nome;
+    if (desc) desc.innerText = p.desc || "Produto oficial do Seringal.";
+    if (preco) preco.innerText = `R$ ${p.preco}`;
+
+    if (dotsContainer) {
+        dotsContainer.innerHTML = '';
+        window.produtosCatalogo.forEach((_, idx) => {
+            const dot = document.createElement('div');
+            dot.className = `h-2 rounded-full transition-all duration-300 ${idx === window.indiceCarrosselAtual ? 'w-6 bg-[#d4af37]' : 'w-2 bg-white/30'}`;
+            dotsContainer.appendChild(dot);
+        });
+    }
+};
+
+window.confirmarApostaComProduto = function() {
+    const p = window.produtosCatalogo[window.indiceCarrosselAtual];
+    window.fecharCatalogo();
+    mostrarAlertaSeringal("Mesa Armada!", `A disputa foi aberta valendo o prêmio:\n\n${p.nome} (R$ ${p.preco})\n\nQue vença o melhor Guardião!`);
+};
+
+// ==========================================
+// INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL
+// ==========================================
+window.salvarNovoProdutoOriginal = window.salvarNovoProduto;
+window.salvarNovoProduto = function() {
+    const nome = document.getElementById('prod-nome').value;
+    let preco = document.getElementById('prod-preco').value;
+    const tipo = document.getElementById('prod-tipo').value;
+    const desc = document.getElementById('prod-desc').value;
+
+    if (!nome || !preco) {
+        mostrarAlertaSeringal("Aviso", "Preencha o nome e o preço do produto!");
+        return;
+    }
+
+    preco = parseFloat(preco).toFixed(2).replace('.', ',');
+
+    // Adiciona na lista do carrossel automaticamente
+    window.produtosCatalogo.unshift({ nome, preco, tipo, desc });
+
+    document.getElementById('form-novo-produto').reset();
+    window.fecharEditarCatalogo();
+    mostrarAlertaSeringal("Catálogo Atualizado!", "Produto adicionado ao Carrossel da Mesa de Aposta com sucesso!");
 };
 
         // ==========================================
