@@ -2258,55 +2258,83 @@ window.fecharEditarCatalogo = function() {
 };
 
 window.salvarNovoProduto = function() {
-    // 1. Pega os valores que você digitou no formulário
-    const nome = document.getElementById('prod-nome').value;
-    let preco = document.getElementById('prod-preco').value;
-    const tipo = document.getElementById('prod-tipo').value;
-    const desc = document.getElementById('prod-desc').value;
+    // 1. Capturar os valores digitados no formulário do modal
+    // Certifique-se de que os IDs abaixo correspondem aos IDs dos <input> no seu HTML
+    const nome = document.getElementById('input-nome-produto').value || 'Novo Produto';
+    const preco = document.getElementById('input-preco-produto').value || '0,00';
+    const categoria = document.getElementById('select-categoria-produto').value; 
+    const descricao = document.getElementById('input-desc-produto').value || 'Sem descrição.';
 
-    if (!nome || !preco) {
-        mostrarAlertaSeringal("Aviso", "Preencha o nome e o preço do produto!");
-        return;
-    }
+    // Definir o emoji com base na categoria escolhida
+    let icone = '📦';
+    if (categoria.toLowerCase().includes('vinho')) icone = '🍷';
+    if (categoria.toLowerCase().includes('roupa') || categoria.toLowerCase().includes('camisa')) icone = '👕';
 
-    // Formata o preço para o padrão brasileiro (R$ 00,00)
-    preco = parseFloat(preco).toFixed(2).replace('.', ',');
-
-    // 2. Define o ícone de luxo baseado na categoria
-    let emoji = "📦";
-    if (tipo === "vinho") emoji = "🍷";
-    if (tipo === "vestuario") emoji = "👕";
-
-    // 3. Monta o visual da caixinha igualzinha às outras do catálogo
-    const novoProdutoHTML = `
-        <div class="bg-[#1a0f0a] border-2 border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]">
+    // ==========================================
+    // 2. INJETAR NO STAND DO SANSÃO (Formato Lista)
+    // ==========================================
+    const htmlStand = `
+        <div class="bg-[#1a0f0a] border border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)] animate-fade-in">
             <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
-                <span class="text-5xl drop-shadow-md">${emoji}</span>
+                <span class="text-5xl drop-shadow-md">${icone}</span>
             </div>
             <div class="flex flex-col justify-between w-full">
                 <div>
                     <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">${nome}</h3>
-                    <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">${desc}</p>
+                    <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">${descricao}</p>
                 </div>
                 <div class="flex items-end justify-between mt-2">
                     <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ ${preco}</span>
                     <div class="flex gap-2">
-                        <button class="btn-comprar bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
-                        <button class="btn-apostar bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-2 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
+                        <button class="bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
+                        <button class="bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
                     </div>
                 </div>
             </div>
         </div>
     `;
+    
+    // Insere no topo da lista do Stand
+    const gridCatalogo = document.getElementById('catalogo-grid');
+    if (gridCatalogo) {
+        gridCatalogo.insertAdjacentHTML('afterbegin', htmlStand);
+    }
 
-    // 4. Injeta o produto no topo do catálogo
-    const grid = document.getElementById('catalogo-grid');
-    grid.insertAdjacentHTML('afterbegin', novoProdutoHTML);
+    // ==========================================
+    // 3. INJETAR NA MESA DE APOSTA (Formato Carrossel)
+    // ==========================================
+    const htmlCarrossel = `
+        <div class="slide-aposta flex-col items-center justify-center w-full hidden">
+            <div class="w-32 h-32 bg-black rounded-2xl border border-[#d4af37]/30 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
+                <span class="text-7xl drop-shadow-xl">${icone}</span>
+            </div>
+            <h3 class="font-cinzel text-white font-black text-xl tracking-widest uppercase text-center w-4/5 leading-tight shadow-black drop-shadow-md">${nome}</h3>
+            <p class="font-inter text-gray-400 text-xs mt-3 text-center w-4/5 leading-relaxed">${descricao}</p>
+            <div class="mt-6 bg-[#0a0604] border border-[#d4af37]/30 rounded-lg px-6 py-3 w-4/5 flex justify-between items-center">
+                <span class="font-cinzel text-[#d4af37] text-[10px] font-bold tracking-widest uppercase">Valor do<br>Prêmio:</span>
+                <span class="font-cinzel text-[#22c55e] font-black text-2xl tracking-wider">R$ ${preco}</span>
+            </div>
+            <button class="mt-4 w-4/5 bg-gradient-to-r from-[#5a2211] to-[#722f1b] border border-[#d4af37] text-white font-cinzel font-bold text-xs uppercase py-4 rounded shadow-[0_4px_15px_rgba(0,0,0,0.6)] active:scale-95 transition-all flex items-center justify-center gap-2">
+                <span class="text-[#d4af37]">⚔</span> Iniciar Disputa Valendo Este Prêmio
+            </button>
+        </div>
+    `;
 
-    // 5. Limpa o formulário e avisa que deu certo
-    document.getElementById('form-novo-produto').reset();
-    fecharEditarCatalogo();
-    mostrarAlertaSeringal("Catálogo Atualizado!", "Produto salvo com sucesso! Ele agora está disponível para compra no Stand do Sansão e para ser usado nas Mesas de Aposta.");
+    // Insere como o último item no container do carrossel
+    // Importante: Coloque o ID correto da div que guarda os slides do seu carrossel aqui
+    const containerCarrossel = document.getElementById('container-do-carrossel'); 
+    if (containerCarrossel) {
+        containerCarrossel.insertAdjacentHTML('beforeend', htmlCarrossel);
+        
+        // Se você tiver uma função que atualiza as bolinhas indicadoras do carrossel, chame-a aqui:
+        // window.atualizarBolinhasCarrossel();
+    }
+
+    // 4. Fechar o modal e limpar os campos
+    document.getElementById('modal-adicionar-produto').classList.add('hidden');
+    document.getElementById('input-nome-produto').value = '';
+    document.getElementById('input-preco-produto').value = '';
+    document.getElementById('input-desc-produto').value = '';
 };
 
 // ==========================================
