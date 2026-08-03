@@ -2257,6 +2257,20 @@ window.fecharEditarCatalogo = function() {
     document.getElementById('modal-editar-catalogo').classList.add('hidden');
 };
 
+ // ==========================================
+// ABRIR E FECHAR O STAND DO SANSÃO
+// ==========================================
+window.abrirCatalogo = function(tipo) {
+    document.getElementById('screen-loja-sansao').classList.remove('hidden');
+};
+
+window.fecharLojaSansao = function() {
+    document.getElementById('screen-loja-sansao').classList.add('hidden');
+};
+
+// ==========================================
+// SALVAR NOVO PRODUTO (STAND + CARROSSEL)
+// ==========================================
 window.salvarNovoProduto = function() {
     // 1. Capturar os valores digitados no formulário do modal
     // Certifique-se de que os IDs abaixo correspondem aos IDs dos <input> no seu HTML
