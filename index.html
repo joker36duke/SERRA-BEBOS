@@ -2643,13 +2643,6 @@ window.salvarNovoProduto = function() {
         window.buscarPartida2x2 = () => window.buscarPartida('2v2');
         window.buscarPartida3x3 = () => window.buscarPartida('3v3');
                 
-        // MESA DE APOSTA (O CATÁLOGO)
-    window.abrirMesaAposta = function() {
-        if (typeof abrirCatalogo === 'function') {
-            abrirCatalogo('aposta');
-        }
-    };
-                
         window.gerar8CartasSorteio = function() {
             let d = [];
             suits.forEach(s => { rankMap.forEach(r => { d.push({ suit: s, rank: r.id, power: r.power, pts: r.pts }); }); });
