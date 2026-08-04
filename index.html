@@ -2269,88 +2269,121 @@ window.fecharLojaSansao = function() {
 };
 
 // ==========================================
-// SALVAR NOVO PRODUTO (STAND + CARROSSEL)
+// SALVAR NOVO PRODUTO NO FIREBASE (COM ESTOQUE)
 // ==========================================
 window.salvarNovoProduto = function() {
-    // 1. Capturar os valores digitados no formulário do modal
-    // Certifique-se de que os IDs abaixo correspondem aos IDs dos <input> no seu HTML
-    const nome = document.getElementById('input-nome-produto').value || 'Novo Produto';
-    const preco = document.getElementById('input-preco-produto').value || '0,00';
-    const categoria = document.getElementById('select-categoria-produto').value; 
-    const descricao = document.getElementById('input-desc-produto').value || 'Sem descrição.';
-
-    // Definir o emoji com base na categoria escolhida
-    let icone = '📦';
-    if (categoria.toLowerCase().includes('vinho')) icone = '🍷';
-    if (categoria.toLowerCase().includes('roupa') || categoria.toLowerCase().includes('camisa')) icone = '👕';
-
-    // ==========================================
-    // 2. INJETAR NO STAND DO SANSÃO (Formato Lista)
-    // ==========================================
-    const htmlStand = `
-        <div class="bg-[#1a0f0a] border border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)] animate-fade-in">
-            <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
-                <span class="text-5xl drop-shadow-md">${icone}</span>
-            </div>
-            <div class="flex flex-col justify-between w-full">
-                <div>
-                    <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">${nome}</h3>
-                    <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">${descricao}</p>
-                </div>
-                <div class="flex items-end justify-between mt-2">
-                    <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ ${preco}</span>
-                    <div class="flex gap-2">
-                        <button class="bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
-                        <button class="bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
+    const nome = document.getElementById('prod-nome').value;
+    let preco = document.getElementById('prod-preco').value;
+    const tipo = document.getElementById('prod-tipo').value;
+    const desc = document.getElementById('prod-desc').value || 'Sem descrição.';
     
-    // Insere no topo da lista do Stand
-    const gridCatalogo = document.getElementById('catalogo-grid');
-    if (gridCatalogo) {
-        gridCatalogo.insertAdjacentHTML('afterbegin', htmlStand);
+    // Captura o estoque do HTML (se não existir, o padrão será 1)
+    const campoEstoque = document.getElementById('prod-estoque');
+    const estoque = campoEstoque ? parseInt(campoEstoque.value) : 1;
+
+    if (!nome || !preco) {
+        mostrarAlertaSeringal("Aviso", "Preencha o nome e o preço do produto.");
+        return;
     }
 
-    // ==========================================
-    // 3. INJETAR NA MESA DE APOSTA (Formato Carrossel)
-    // ==========================================
-    const htmlCarrossel = `
-        <div class="slide-aposta flex-col items-center justify-center w-full hidden">
-            <div class="w-32 h-32 bg-black rounded-2xl border border-[#d4af37]/30 flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(212,175,55,0.15)]">
-                <span class="text-7xl drop-shadow-xl">${icone}</span>
-            </div>
-            <h3 class="font-cinzel text-white font-black text-xl tracking-widest uppercase text-center w-4/5 leading-tight shadow-black drop-shadow-md">${nome}</h3>
-            <p class="font-inter text-gray-400 text-xs mt-3 text-center w-4/5 leading-relaxed">${descricao}</p>
-            <div class="mt-6 bg-[#0a0604] border border-[#d4af37]/30 rounded-lg px-6 py-3 w-4/5 flex justify-between items-center">
-                <span class="font-cinzel text-[#d4af37] text-[10px] font-bold tracking-widest uppercase">Valor do<br>Prêmio:</span>
-                <span class="font-cinzel text-[#22c55e] font-black text-2xl tracking-wider">R$ ${preco}</span>
-            </div>
-            <button class="mt-4 w-4/5 bg-gradient-to-r from-[#5a2211] to-[#722f1b] border border-[#d4af37] text-white font-cinzel font-bold text-xs uppercase py-4 rounded shadow-[0_4px_15px_rgba(0,0,0,0.6)] active:scale-95 transition-all flex items-center justify-center gap-2">
-                <span class="text-[#d4af37]">⚔</span> Iniciar Disputa Valendo Este Prêmio
-            </button>
-        </div>
-    `;
+    preco = parseFloat(preco.replace(',', '.')).toFixed(2).replace('.', ',');
 
-    // Insere como o último item no container do carrossel
-    // Importante: Coloque o ID correto da div que guarda os slides do seu carrossel aqui
-    const containerCarrossel = document.getElementById('container-do-carrossel'); 
-    if (containerCarrossel) {
-        containerCarrossel.insertAdjacentHTML('beforeend', htmlCarrossel);
-        
-        // Se você tiver uma função que atualiza as bolinhas indicadoras do carrossel, chame-a aqui:
-        // window.atualizarBolinhasCarrossel();
-    }
-
-    // 4. Fechar o modal e limpar os campos
-    document.getElementById('modal-adicionar-produto').classList.add('hidden');
-    document.getElementById('input-nome-produto').value = '';
-    document.getElementById('input-preco-produto').value = '';
-    document.getElementById('input-desc-produto').value = '';
+    // ENVIA PARA O FIREBASE NA PASTA 'catalogo'
+    const novoProdutoRef = firebase.database().ref('catalogo').push();
+    
+    novoProdutoRef.set({
+        nome: nome,
+        preco: preco,
+        tipo: tipo,
+        desc: desc,
+        estoque: estoque
+    }).then(() => {
+        // Limpa o formulário e avisa
+        document.getElementById('form-novo-produto').reset();
+        window.fecharEditarCatalogo();
+        mostrarAlertaSeringal("Sucesso!", "Produto registrado no servidor!");
+    }).catch((error) => {
+        mostrarAlertaSeringal("Erro", "Falha ao salvar: " + error.message);
+    });
 };
 
+// ==========================================
+// ESCUTAR O FIREBASE E MONTAR A LOJA AUTOMATICAMENTE
+// ==========================================
+window.escutarCatalogoFirebase = function() {
+    const catalogoRef = firebase.database().ref('catalogo');
+    
+    // O 'on' faz o jogo atualizar sozinho toda vez que o estoque mudar ou algo for adicionado
+    catalogoRef.on('value', (snapshot) => {
+        const gridCatalogo = document.getElementById('catalogo-grid');
+        if (!gridCatalogo) return;
+        
+        gridCatalogo.innerHTML = ''; // Limpa a loja atual
+        window.produtosCatalogo = []; // Limpa o carrossel atual
+
+        snapshot.forEach((childSnapshot) => {
+            const produtoId = childSnapshot.key;
+            const prod = childSnapshot.val();
+
+            // A MÁGICA DO ESTOQUE: Só desenha na tela se o estoque for maior que zero
+            if (prod.estoque > 0) {
+                let emoji = "📦";
+                if (prod.tipo === "vinho") emoji = "🍷";
+                if (prod.tipo === "vestuario") emoji = "👕";
+
+                // Adiciona no Stand do Sansão (agora com tag de estoque)
+                const htmlStand = `
+                    <div class="bg-[#1a0f0a] border border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]" id="prod-${produtoId}">
+                        <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
+                            <span class="text-5xl drop-shadow-md">${emoji}</span>
+                        </div>
+                        <div class="flex flex-col justify-between w-full">
+                            <div>
+                                <div class="flex justify-between items-start">
+                                    <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">${prod.nome}</h3>
+                                    <span class="bg-[#d4af37] text-black text-[9px] px-1.5 py-0.5 rounded font-bold">ESTOQUE: ${prod.estoque}</span>
+                                </div>
+                                <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">${prod.desc}</p>
+                            </div>
+                            <div class="flex items-end justify-between mt-2">
+                                <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ ${prod.preco}</span>
+                                <div class="flex gap-2">
+                                    <button onclick="comprarProduto('${produtoId}')" class="bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
+                                    <button class="bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                gridCatalogo.insertAdjacentHTML('afterbegin', htmlStand);
+
+                // Adiciona na memória do Carrossel da Mesa de Apostas
+                window.produtosCatalogo.push({
+                    id: produtoId,
+                    nome: prod.nome,
+                    preco: prod.preco,
+                    tipo: prod.tipo,
+                    desc: prod.desc,
+                    estoque: prod.estoque
+                });
+            }
+        });
+
+        // Atualiza a visualização do carrossel para garantir que o item sumiu ou apareceu
+        window.indiceCarrosselAtual = 0;
+        if (typeof window.atualizarVisualCarrossel === 'function') {
+            window.atualizarVisualCarrossel();
+        }
+    });
+};
+
+// Inicia a escuta assim que o banco de dados e o HTML estiverem carregados
+setTimeout(() => {
+    if (typeof firebase !== 'undefined') {
+        window.escutarCatalogoFirebase();
+    }
+}, 1500);
+                
 // ==========================================
 // CARROSSEL INTELIGENTE DA MESA DE APOSTA
 // ==========================================
