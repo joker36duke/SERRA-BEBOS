@@ -2257,6 +2257,87 @@ window.fecharEditarCatalogo = function() {
     document.getElementById('modal-editar-catalogo').classList.add('hidden');
 };
 
+// ==========================================
+// CONTROLE DAS ABAS DO MODAL
+// ==========================================
+window.mudarAbaCatalogo = function(aba) {
+    const btnAdd = document.getElementById('tab-add');
+    const btnRemove = document.getElementById('tab-remove');
+    const conteudoAdd = document.getElementById('conteudo-add-catalogo');
+    const conteudoRemove = document.getElementById('conteudo-remove-catalogo');
+
+    if (aba === 'add') {
+        // Ativa visual da Aba Add
+        btnAdd.className = "flex-1 py-2 text-[#d4af37] font-cinzel text-sm font-bold border-b-2 border-[#d4af37] transition-colors";
+        btnRemove.className = "flex-1 py-2 text-gray-500 font-cinzel text-sm font-bold border-b-2 border-transparent hover:text-[#d4af37]/70 transition-colors";
+        conteudoAdd.classList.remove('hidden');
+        conteudoRemove.classList.add('hidden');
+    } else {
+        // Ativa visual da Aba Remove
+        btnRemove.className = "flex-1 py-2 text-[#d4af37] font-cinzel text-sm font-bold border-b-2 border-[#d4af37] transition-colors";
+        btnAdd.className = "flex-1 py-2 text-gray-500 font-cinzel text-sm font-bold border-b-2 border-transparent hover:text-[#d4af37]/70 transition-colors";
+        conteudoRemove.classList.remove('hidden');
+        conteudoAdd.classList.add('hidden');
+        
+        // Sempre que abrir a aba remover, busca a lista atualizada do Firebase
+        carregarListaRemocao();
+    }
+};
+
+// ==========================================
+// CARREGAR LISTA PARA REMOÇÃO
+// ==========================================
+window.carregarListaRemocao = function() {
+    const listaDiv = document.getElementById('lista-remover-produtos');
+    listaDiv.innerHTML = '<p class="text-center text-[#d4af37] text-sm py-4">Procurando produtos no estoque...</p>';
+
+    // Vai no Firebase buscar o que tem no catálogo
+    firebase.database().ref('catalogo').once('value').then((snapshot) => {
+        listaDiv.innerHTML = '';
+        
+        if (!snapshot.exists()) {
+            listaDiv.innerHTML = '<p class="text-center text-gray-500 text-sm py-4 font-inter">O catálogo está vazio.</p>';
+            return;
+        }
+
+        // Monta a lista item por item
+        snapshot.forEach((child) => {
+            const prod = child.val();
+            const id = child.key;
+            
+            const itemHtml = `
+                <div class="flex justify-between items-center bg-black/60 border border-[#d4af37]/30 p-3 rounded-lg">
+                    <div class="flex flex-col">
+                        <span class="text-white font-cinzel text-xs font-bold uppercase truncate w-40">${prod.nome}</span>
+                        <span class="text-gray-400 text-[10px] font-inter mt-1">Estoque: ${prod.estoque} | R$ ${prod.preco}</span>
+                    </div>
+                    <button onclick="removerProdutoFirebase('${id}')" class="bg-[#722f1b] hover:bg-red-900 text-white border border-[#d4af37]/50 text-[9px] px-3 py-1.5 rounded font-bold uppercase transition-colors shadow-md active:scale-95">
+                        Excluir
+                    </button>
+                </div>
+            `;
+            listaDiv.insertAdjacentHTML('beforeend', itemHtml);
+        });
+    });
+};
+
+// ==========================================
+// DELETAR PRODUTO DO FIREBASE
+// ==========================================
+window.removerProdutoFirebase = function(id) {
+    // Pede confirmação antes de apagar
+    if (confirm("ATENÇÃO: Deseja apagar este produto permanentemente? Ele sumirá das lojas de todos os jogadores.")) {
+        firebase.database().ref('catalogo/' + id).remove()
+            .then(() => {
+                mostrarAlertaSeringal("Sucesso!", "O produto foi removido do sistema.");
+                carregarListaRemocao(); // Atualiza a lista da tela na mesma hora
+            })
+            .catch((error) => {
+                mostrarAlertaSeringal("Erro", "Não foi possível remover: " + error.message);
+            });
+    }
+};
+
  // ==========================================
 // ABRIR E FECHAR O STAND DO SANSÃO
 // ==========================================
