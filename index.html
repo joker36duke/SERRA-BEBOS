@@ -5124,16 +5124,28 @@ if(trickMsg) {
         </div>
     </div>
 
-    <!-- MODAL: EDITAR CATÁLOGO (ÁREA DO MESTRE) -->
-    <div id="modal-editar-catalogo" class="hidden fixed inset-0 z-[3500] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
-        <div class="w-full max-w-md bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-6 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col items-center relative">
-            
-            <button onclick="fecharEditarCatalogo()" class="absolute top-3 right-4 text-[#d4af37] hover:text-white font-bold text-2xl transition-colors">&times;</button>
-            
-            <h2 class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest uppercase mb-4 drop-shadow-md text-center">
-                Adicionar ao Catálogo
+    <!-- MODAL: GERENCIAR CATÁLOGO (ÁREA DO MESTRE) -->
+<div id="modal-editar-catalogo" class="hidden fixed inset-0 z-[3500] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
+    <div class="w-full max-w-md bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-6 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col relative">
+        
+        <!-- Cabeçalho e Botão Fechar -->
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest uppercase drop-shadow-md">
+                Gerenciar Catálogo
             </h2>
-            
+            <button onclick="fecharEditarCatalogo()" class="text-[#d4af37] hover:text-white font-bold text-2xl transition-colors">&times;</button>
+        </div>
+        
+        <!-- Botões das Abas -->
+        <div class="flex border-b border-[#d4af37]/30 mb-5">
+            <button id="tab-add" onclick="mudarAbaCatalogo('add')" class="flex-1 py-2 text-[#d4af37] font-cinzel text-sm font-bold border-b-2 border-[#d4af37] transition-colors">ADICIONAR</button>
+            <button id="tab-remove" onclick="mudarAbaCatalogo('remove')" class="flex-1 py-2 text-gray-500 font-cinzel text-sm font-bold border-b-2 border-transparent hover:text-[#d4af37]/70 transition-colors">REMOVER</button>
+        </div>
+
+        <!-- ========================================= -->
+        <!-- ABA 1: ADICIONAR PRODUTO -->
+        <!-- ========================================= -->
+        <div id="conteudo-add-catalogo">
             <form id="form-novo-produto" class="w-full flex flex-col gap-3">
                 <div class="flex flex-col">
                     <label class="font-cinzel text-[#d4af37] text-xs font-bold tracking-wider mb-1">Nome do Produto</label>
@@ -5155,6 +5167,12 @@ if(trickMsg) {
                     </div>
                 </div>
 
+                <!-- CAMPO: ESTOQUE -->
+                <div class="flex flex-col">
+                    <label class="font-cinzel text-[#d4af37] text-xs font-bold tracking-wider mb-1">Estoque (Unidades)</label>
+                    <input type="number" id="prod-estoque" min="1" value="10" required class="w-full bg-black border border-[#d4af37]/50 rounded px-3 py-2 text-white font-cinzel text-sm focus:outline-none focus:border-[#d4af37]">
+                </div>
+
                 <div class="flex flex-col">
                     <label class="font-cinzel text-[#d4af37] text-xs font-bold tracking-wider mb-1">Descrição & Frete</label>
                     <textarea id="prod-desc" rows="2" placeholder="Detalhes do produto e opções de envio..." class="w-full bg-black border border-[#d4af37]/50 rounded px-3 py-2 text-white font-cinzel text-sm focus:outline-none focus:border-[#d4af37] resize-none"></textarea>
@@ -5165,7 +5183,19 @@ if(trickMsg) {
                 </button>
             </form>
         </div>
+
+        <!-- ========================================= -->
+        <!-- ABA 2: REMOVER PRODUTO -->
+        <!-- ========================================= -->
+        <div id="conteudo-remove-catalogo" class="hidden flex-col w-full">
+            <p class="text-gray-400 text-xs mb-3 font-inter text-center">Selecione um produto para apagá-lo do servidor de todos os jogadores.</p>
+            <div id="lista-remover-produtos" class="max-h-64 overflow-y-auto pr-2 space-y-2 flex flex-col gap-2 w-full">
+                <!-- Itens aparecerão aqui via JavaScript -->
+            </div>
+        </div>
+
     </div>
+</div>
 
             <div id="custom-alert-modal" class="hidden fixed inset-0 z-[3000] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 transition-opacity">
         <div class="w-full max-w-sm bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-8 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col items-center text-center">
