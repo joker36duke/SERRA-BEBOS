@@ -2562,7 +2562,7 @@ window.confirmarApostaComProduto = function() {
 };
 
 // ==========================================
-// INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL E FIREBASE (CORRIGIDO)
+// INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL E FIREBASE (V9 MODULAR)
 // ==========================================
 window.salvarNovoProduto = function() {
     const nome = document.getElementById('prod-nome').value;
@@ -2581,24 +2581,39 @@ window.salvarNovoProduto = function() {
 
     preco = parseFloat(preco.replace(',', '.')).toFixed(2).replace('.', ',');
 
-    // 1. Salva no Firebase primeiro
-    const novoProdutoRef = firebase.database().ref('catalogo').push();
+    // 1. Sintaxe moderna do Firebase (V9)
+    const catalogoRef = ref(database, 'catalogo');
+    const novoProdutoRef = push(catalogoRef);
     
-    novoProdutoRef.set({
+    set(novoProdutoRef, {
         nome: nome,
         preco: preco,
         tipo: tipo,
         desc: desc,
         estoque: estoque
     }).then(() => {
-        // 2. Se salvou no Firebase, adiciona no Carrossel Localmente
-        window.produtosCatalogo.unshift({ id: novoProdutoRef.key, nome, preco, tipo, desc, estoque });
+        // 2. Salva na memória RAM (Carrossel Local)
+        window.produtosCatalogo.unshift({ 
+            id: novoProdutoRef.key, 
+            nome: nome, 
+            preco: preco, 
+            tipo: tipo, 
+            desc: desc, 
+            estoque: estoque 
+        });
 
         document.getElementById('form-novo-produto').reset();
         window.fecharEditarCatalogo();
         mostrarAlertaSeringal("Catálogo Atualizado!", "Produto adicionado ao Estoque e ao Carrossel com sucesso!");
+        
+        // Força a atualização da imagem do carrossel na mesma hora
+        window.indiceCarrosselAtual = 0;
+        if (typeof window.atualizarVisualCarrossel === 'function') {
+            window.atualizarVisualCarrossel();
+        }
+
     }).catch((error) => {
-        mostrarAlertaSeringal("Erro", "Falha ao salvar no servidor: " + error.message);
+        mostrarAlertaSeringal("Erro na Floresta", "Falha ao salvar no servidor: " + error.message);
     });
 };
 
