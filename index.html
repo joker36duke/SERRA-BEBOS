@@ -2537,28 +2537,44 @@ window.confirmarApostaComProduto = function() {
 };
 
 // ==========================================
-// INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL
+// INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL E FIREBASE (CORRIGIDO)
 // ==========================================
-window.salvarNovoProdutoOriginal = window.salvarNovoProduto;
 window.salvarNovoProduto = function() {
     const nome = document.getElementById('prod-nome').value;
     let preco = document.getElementById('prod-preco').value;
     const tipo = document.getElementById('prod-tipo').value;
-    const desc = document.getElementById('prod-desc').value;
+    const desc = document.getElementById('prod-desc').value || 'Sem descrição.';
+    
+    // Captura o estoque corretamente
+    const campoEstoque = document.getElementById('prod-estoque');
+    const estoque = campoEstoque ? parseInt(campoEstoque.value) : 1;
 
     if (!nome || !preco) {
         mostrarAlertaSeringal("Aviso", "Preencha o nome e o preço do produto!");
         return;
     }
 
-    preco = parseFloat(preco).toFixed(2).replace('.', ',');
+    preco = parseFloat(preco.replace(',', '.')).toFixed(2).replace('.', ',');
 
-    // Adiciona na lista do carrossel automaticamente
-    window.produtosCatalogo.unshift({ nome, preco, tipo, desc });
+    // 1. Salva no Firebase primeiro
+    const novoProdutoRef = firebase.database().ref('catalogo').push();
+    
+    novoProdutoRef.set({
+        nome: nome,
+        preco: preco,
+        tipo: tipo,
+        desc: desc,
+        estoque: estoque
+    }).then(() => {
+        // 2. Se salvou no Firebase, adiciona no Carrossel Localmente
+        window.produtosCatalogo.unshift({ id: novoProdutoRef.key, nome, preco, tipo, desc, estoque });
 
-    document.getElementById('form-novo-produto').reset();
-    window.fecharEditarCatalogo();
-    mostrarAlertaSeringal("Catálogo Atualizado!", "Produto adicionado ao Carrossel da Mesa de Aposta com sucesso!");
+        document.getElementById('form-novo-produto').reset();
+        window.fecharEditarCatalogo();
+        mostrarAlertaSeringal("Catálogo Atualizado!", "Produto adicionado ao Estoque e ao Carrossel com sucesso!");
+    }).catch((error) => {
+        mostrarAlertaSeringal("Erro", "Falha ao salvar no servidor: " + error.message);
+    });
 };
 
         // ==========================================
