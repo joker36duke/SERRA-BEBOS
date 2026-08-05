@@ -2464,6 +2464,31 @@ setTimeout(() => {
         window.escutarCatalogoFirebase();
     }
 }, 1500);
+
+// ==========================================
+// SISTEMA DE COMPRA E BAIXA DE ESTOQUE
+// ==========================================
+window.comprarProduto = function(produtoId) {
+    const produtoRef = firebase.database().ref('catalogo/' + produtoId);
+    
+    // Faz uma transação segura no Firebase para evitar bugs se duas pessoas comprarem ao mesmo tempo
+    produtoRef.transaction((produtoAtual) => {
+        if (produtoAtual) {
+            if (produtoAtual.estoque > 0) {
+                produtoAtual.estoque -= 1;
+            }
+        }
+        return produtoAtual;
+    }, (error, committed, snapshot) => {
+        if (error) {
+            mostrarAlertaSeringal("Erro", "Falha na transação da compra.");
+        } else if (!committed) {
+            mostrarAlertaSeringal("Aviso", "Produto esgotado ou indisponível!");
+        } else {
+            mostrarAlertaSeringal("Compra Aprovada!", "A transação foi um sucesso e o estoque foi atualizado no Seringal.");
+        }
+    });
+};
                 
 // ==========================================
 // CARROSSEL INTELIGENTE DA MESA DE APOSTA
