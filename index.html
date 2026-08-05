@@ -2466,28 +2466,33 @@ setTimeout(() => {
 }, 1500);
 
 // ==========================================
-// SISTEMA DE COMPRA E BAIXA DE ESTOQUE
+// SISTEMA DE COMPRA E BAIXA DE ESTOQUE (V9 MODULAR)
 // ==========================================
-window.comprarProduto = function(produtoId) {
-    const produtoRef = firebase.database().ref('catalogo/' + produtoId);
+window.comprarProduto = async function(produtoId) {
+    const produtoRef = ref(database, 'catalogo/' + produtoId);
     
-    // Faz uma transação segura no Firebase para evitar bugs se duas pessoas comprarem ao mesmo tempo
-    produtoRef.transaction((produtoAtual) => {
-        if (produtoAtual) {
-            if (produtoAtual.estoque > 0) {
-                produtoAtual.estoque -= 1;
+    try {
+        const resultado = await runTransaction(produtoRef, (produtoAtual) => {
+            if (produtoAtual) {
+                // Só permite a compra se houver estoque
+                if (produtoAtual.estoque > 0) {
+                    produtoAtual.estoque -= 1;
+                    return produtoAtual;
+                } else {
+                    return; // Aborta a transação (estoque zerado)
+                }
             }
-        }
-        return produtoAtual;
-    }, (error, committed, snapshot) => {
-        if (error) {
-            mostrarAlertaSeringal("Erro", "Falha na transação da compra.");
-        } else if (!committed) {
-            mostrarAlertaSeringal("Aviso", "Produto esgotado ou indisponível!");
-        } else {
+            return produtoAtual;
+        });
+
+        if (resultado.committed) {
             mostrarAlertaSeringal("Compra Aprovada!", "A transação foi um sucesso e o estoque foi atualizado no Seringal.");
+        } else {
+            mostrarAlertaSeringal("Aviso", "Produto esgotado ou indisponível na adega!");
         }
-    });
+    } catch (error) {
+        mostrarAlertaSeringal("Erro", "A transação falhou devido a um erro de conexão.");
+    }
 };
                 
 // ==========================================
