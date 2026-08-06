@@ -2389,66 +2389,68 @@ window.salvarNovoProduto = function() {
 };
 
 // ==========================================
-// ESCUTAR O FIREBASE E MONTAR A LOJA AUTOMATICAMENTE
+// ESCUTAR O FIREBASE E MONTAR A LOJA AUTOMATICAMENTE (V9 MODULAR)
 // ==========================================
 window.escutarCatalogoFirebase = function() {
-    const catalogoRef = firebase.database().ref('catalogo');
+    const catalogoRef = ref(database, 'catalogo');
     
-    // O 'on' faz o jogo atualizar sozinho toda vez que o estoque mudar ou algo for adicionado
-    catalogoRef.on('value', (snapshot) => {
+    // O 'onValue' faz o jogo atualizar sozinho toda vez que o estoque mudar ou algo for adicionado
+    onValue(catalogoRef, (snapshot) => {
         const gridCatalogo = document.getElementById('catalogo-grid');
         if (!gridCatalogo) return;
         
         gridCatalogo.innerHTML = ''; // Limpa a loja atual
         window.produtosCatalogo = []; // Limpa o carrossel atual
 
-        snapshot.forEach((childSnapshot) => {
-            const produtoId = childSnapshot.key;
-            const prod = childSnapshot.val();
+        if (snapshot.exists()) {
+            snapshot.forEach((childSnapshot) => {
+                const produtoId = childSnapshot.key;
+                const prod = childSnapshot.val();
 
-            // A MÁGICA DO ESTOQUE: Só desenha na tela se o estoque for maior que zero
-            if (prod.estoque > 0) {
-                let emoji = "📦";
-                if (prod.tipo === "vinho") emoji = "🍷";
-                if (prod.tipo === "vestuario") emoji = "👕";
+                // A MÁGICA DO ESTOQUE: Só desenha na tela se o estoque for maior que zero
+                if (prod.estoque > 0) {
+                    let emoji = "📦";
+                    if (prod.tipo === "vinho") emoji = "🍷";
+                    if (prod.tipo === "vestuario") emoji = "👕";
 
-                // Adiciona no Stand do Sansão (agora com tag de estoque)
-                const htmlStand = `
-                    <div class="bg-[#1a0f0a] border border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]" id="prod-${produtoId}">
-                        <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
-                            <span class="text-5xl drop-shadow-md">${emoji}</span>
-                        </div>
-                        <div class="flex flex-col justify-between w-full">
-                            <div>
-                                <div class="flex justify-between items-start">
-                                    <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">${prod.nome}</h3>
-                                    <span class="bg-[#d4af37] text-black text-[9px] px-1.5 py-0.5 rounded font-bold">ESTOQUE: ${prod.estoque}</span>
-                                </div>
-                                <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">${prod.desc}</p>
+                    // Adiciona no Stand do Sansão (agora com tag de estoque)
+                    const htmlStand = `
+                        <div class="bg-[#1a0f0a] border border-[#d4af37]/60 rounded-xl p-4 flex gap-4 shadow-[0_4px_15px_rgba(0,0,0,0.5)]" id="prod-${produtoId}">
+                            <div class="w-24 h-24 bg-black rounded-lg border border-[#d4af37]/30 flex items-center justify-center shrink-0">
+                                <span class="text-5xl drop-shadow-md">${emoji}</span>
                             </div>
-                            <div class="flex items-end justify-between mt-2">
-                                <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ ${prod.preco}</span>
-                                <div class="flex gap-2">
-                                    <button onclick="comprarProduto('${produtoId}')" class="bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
-                                    <button class="bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
+                            <div class="flex flex-col justify-between w-full">
+                                <div>
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="font-cinzel text-white font-bold text-sm tracking-wider uppercase">${prod.nome}</h3>
+                                        <span class="bg-[#d4af37] text-black text-[9px] px-1.5 py-0.5 rounded font-bold">ESTOQUE: ${prod.estoque}</span>
+                                    </div>
+                                    <p class="font-inter text-gray-400 text-[10px] mt-1 line-clamp-2">${prod.desc}</p>
+                                </div>
+                                <div class="flex items-end justify-between mt-2">
+                                    <span class="font-cinzel text-[#22c55e] font-black text-lg">R$ ${prod.preco}</span>
+                                    <div class="flex gap-2">
+                                        <button onclick="comprarProduto('${produtoId}')" class="bg-[#001f3f] border border-[#d4af37] text-[#d4af37] text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Comprar</button>
+                                        <button class="bg-[#722f1b] border border-[#d4af37] text-white text-[9px] font-bold uppercase px-3 py-1.5 rounded active:scale-95 transition-transform shadow-md">Criar Mesa</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
-                gridCatalogo.insertAdjacentHTML('afterbegin', htmlStand);
+                    `;
+                    gridCatalogo.insertAdjacentHTML('afterbegin', htmlStand);
 
-                // Adiciona na memória do Carrossel da Mesa de Apostas
-                window.produtosCatalogo.push({
-                    id: produtoId,
-                    nome: prod.nome,
-                    preco: prod.preco,
-                    tipo: prod.tipo,
-                    desc: prod.desc,
-                    estoque: prod.estoque
-                });
-            }
-        });
+                    // Adiciona na memória do Carrossel da Mesa de Apostas
+                    window.produtosCatalogo.push({
+                        id: produtoId,
+                        nome: prod.nome,
+                        preco: prod.preco,
+                        tipo: prod.tipo,
+                        desc: prod.desc,
+                        estoque: prod.estoque
+                    });
+                }
+            });
+        }
 
         // Atualiza a visualização do carrossel para garantir que o item sumiu ou apareceu
         window.indiceCarrosselAtual = 0;
@@ -2460,7 +2462,8 @@ window.escutarCatalogoFirebase = function() {
 
 // Inicia a escuta assim que o banco de dados e o HTML estiverem carregados
 setTimeout(() => {
-    if (typeof firebase !== 'undefined') {
+    // Atualizado para verificar 'database' na versão Modular
+    if (typeof database !== 'undefined') {
         window.escutarCatalogoFirebase();
     }
 }, 1500);
