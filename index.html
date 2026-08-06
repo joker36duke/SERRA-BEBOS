@@ -2499,12 +2499,8 @@ window.comprarProduto = async function(produtoId) {
 // CARROSSEL INTELIGENTE DA MESA DE APOSTA
 // ==========================================
 
-// Lista padrão de prêmios
-window.produtosCatalogo = [
-    { nome: "El Dionysos Malbec", preco: "149,90", tipo: "vinho", desc: "Safra especial do Seringal. Perfeito para apostas de alto nível." },
-    { nome: "Camisa Oficial Seringal", preco: "89,90", tipo: "vestuario", desc: "Edição limitada em parceria com marcas locais. Estilo rústico." }
-];
-
+// Lista vazia: será preenchida automaticamente pelo Firebase!
+window.produtosCatalogo = [];
 window.indiceCarrosselAtual = 0;
 
 window.abrirMesaAposta = function() {
