@@ -2559,7 +2559,14 @@ window.atualizarVisualCarrossel = function() {
 };
 
 window.confirmarApostaComProduto = function() {
+    if (!window.produtosCatalogo || window.produtosCatalogo.length === 0) {
+        mostrarAlertaSeringal("Aviso", "Não há prêmios disponíveis na Adega no momento! Adicione produtos pelo Escritório.");
+        return;
+    }
+    
     const p = window.produtosCatalogo[window.indiceCarrosselAtual];
+    if (!p) return;
+    
     window.fecharCatalogo();
     mostrarAlertaSeringal("Mesa Armada!", `A disputa foi aberta valendo o prêmio:\n\n${p.nome} (R$ ${p.preco})\n\nQue vença o melhor Guardião!`);
 };
