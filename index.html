@@ -2318,7 +2318,7 @@ window.carregarListaRemocao = async function() {
             listaDiv.insertAdjacentHTML('beforeend', itemHtml);
         });
     } catch (error) {
-        listaDiv.innerHTML = '<p class="text-center text-red-500 text-sm py-4 font-inter">Erro de conexão ao buscar produtos.</p>';
+        listaDiv.innerHTML = '<p class="text-center text-red-500 text-sm py-4 font-inter">Erro ao carregar estoque.</p>';
     }
 };
 
@@ -2330,7 +2330,7 @@ window.removerProdutoFirebase = async function(id) {
         try {
             await remove(ref(database, 'catalogo/' + id));
             mostrarAlertaSeringal("Sucesso!", "O produto foi removido do sistema.");
-            window.carregarListaRemocao(); 
+            window.carregarListaRemocao(); // Atualiza a lista na hora
         } catch (error) {
             mostrarAlertaSeringal("Erro", "Não foi possível remover: " + error.message);
         }
