@@ -2285,14 +2285,14 @@ window.mudarAbaCatalogo = function(aba) {
 };
 
 // ==========================================
-// CARREGAR LISTA PARA REMOÇÃO
+// CARREGAR LISTA PARA REMOÇÃO (V9 MODULAR)
 // ==========================================
-window.carregarListaRemocao = function() {
+window.carregarListaRemocao = async function() {
     const listaDiv = document.getElementById('lista-remover-produtos');
     listaDiv.innerHTML = '<p class="text-center text-[#d4af37] text-sm py-4">Procurando produtos no estoque...</p>';
 
-    // Vai no Firebase buscar o que tem no catálogo
-    firebase.database().ref('catalogo').once('value').then((snapshot) => {
+    try {
+        const snapshot = await get(ref(database, 'catalogo'));
         listaDiv.innerHTML = '';
         
         if (!snapshot.exists()) {
@@ -2300,7 +2300,6 @@ window.carregarListaRemocao = function() {
             return;
         }
 
-        // Monta a lista item por item
         snapshot.forEach((child) => {
             const prod = child.val();
             const id = child.key;
@@ -2318,23 +2317,23 @@ window.carregarListaRemocao = function() {
             `;
             listaDiv.insertAdjacentHTML('beforeend', itemHtml);
         });
-    });
+    } catch (error) {
+        listaDiv.innerHTML = '<p class="text-center text-red-500 text-sm py-4 font-inter">Erro de conexão ao buscar produtos.</p>';
+    }
 };
 
 // ==========================================
-// DELETAR PRODUTO DO FIREBASE
+// DELETAR PRODUTO DO FIREBASE (V9 MODULAR)
 // ==========================================
-window.removerProdutoFirebase = function(id) {
-    // Pede confirmação antes de apagar
+window.removerProdutoFirebase = async function(id) {
     if (confirm("ATENÇÃO: Deseja apagar este produto permanentemente? Ele sumirá das lojas de todos os jogadores.")) {
-        firebase.database().ref('catalogo/' + id).remove()
-            .then(() => {
-                mostrarAlertaSeringal("Sucesso!", "O produto foi removido do sistema.");
-                carregarListaRemocao(); // Atualiza a lista da tela na mesma hora
-            })
-            .catch((error) => {
-                mostrarAlertaSeringal("Erro", "Não foi possível remover: " + error.message);
-            });
+        try {
+            await remove(ref(database, 'catalogo/' + id));
+            mostrarAlertaSeringal("Sucesso!", "O produto foi removido do sistema.");
+            window.carregarListaRemocao(); 
+        } catch (error) {
+            mostrarAlertaSeringal("Erro", "Não foi possível remover: " + error.message);
+        }
     }
 };
 
