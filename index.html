@@ -2555,17 +2555,62 @@ window.atualizarVisualCarrossel = function() {
     }
 };
 
-window.confirmarApostaComProduto = function() {
+// ==========================================
+// GERAR MESA DE APOSTA E CONVITE COM PRODUTO
+// ==========================================
+window.gerarConviteMesa = async function() {
+    // Valida se há produtos carregados no carrossel
     if (!window.produtosCatalogo || window.produtosCatalogo.length === 0) {
-        mostrarAlertaSeringal("Aviso", "Não há prêmios disponíveis na Adega no momento! Adicione produtos pelo Escritório.");
+        mostrarAlertaSeringal("Aviso", "Nenhum prêmio selecionado na Adega.");
         return;
     }
     
+    // Pega o produto que está aparecendo agora na tela do carrossel
     const p = window.produtosCatalogo[window.indiceCarrosselAtual];
     if (!p) return;
-    
-    window.fecharCatalogo();
-    mostrarAlertaSeringal("Mesa Armada!", `A disputa foi aberta valendo o prêmio:\n\n${p.nome} (R$ ${p.preco})\n\nQue vença o melhor Guardião!`);
+
+    try {
+        // 1. Registra a mesa aberta no Firebase na aba 'salas'
+        const novaMesaRef = push(ref(database, 'salas'));
+        const mesaId = novaMesaRef.key;
+
+        const dadosMesa = {
+            premioId: p.id || "produto",
+            premioNome: p.nome,
+            premioPreco: p.preco,
+            premioDesc: p.desc || "Safra especial do Seringal.",
+            criador: window.nomeUsuarioAtual || "Guardião do Seringal",
+            status: "aguardando_oponente",
+            criadoEm: Date.now()
+        };
+
+        await set(novaMesaRef, dadosMesa);
+        window.fecharCatalogo();
+
+        // 2. Monta o link da partida com o ID da sala
+        const linkPartida = `${window.location.origin}?sala=${mesaId}`;
+
+        // 3. Cria a mensagem detalhada com as informações do prêmio selecionado
+        const textoConvite = `🃏 *DESAFIO NO SERRABEBOS* 🃏\n\n` +
+            `Fui pra mesa e armei um duelo valendo um prêmio de respeito da nossa Adega!\n\n` +
+            `🏆 *Prêmio:* ${p.nome}\n` +
+            `📝 *Detalhes:* ${p.desc || 'Safra especial do Seringal'}\n` +
+            `💰 *Valor:* R$ ${p.preco}\n\n` +
+            `Tem coragem de peitar essa roda? Entre na mesa por aqui:\n${linkPartida}`;
+
+        // 4. Copia automaticamente para a área de transferência do celular/PC
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(textoConvite);
+            mostrarAlertaSeringal("Mesa Armada!", `O convite com os dados do prêmio (${p.nome}) foi copiado para a sua área de transferência!\n\nBasta colar no chat do oponente.`);
+        } else {
+            // Plano B caso o navegador bloqueie a área de transferência direta
+            prompt("Copie o convite da mesa abaixo:", textoConvite);
+        }
+
+    } catch (error) {
+        console.error("Erro ao abrir mesa:", error);
+        mostrarAlertaSeringal("Erro", "Não foi possível registrar a mesa no servidor.");
+    }
 };
 
 // ==========================================
