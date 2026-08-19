@@ -522,33 +522,34 @@
 
 
     <!-- TELA 1: INÍCIO -->
-             <div id="screen-start" class="screen hidden transparent w-full h-full bg-black">
-       <!-- FAIXA SUPERIOR: BOTÃO DE INSTALAÇÃO (PWA) -->
-<div class="fixed top-0 left-0 z-[1000] p-2">
-    <button id="btn-instalar-app" onclick="instalarAppPWA()" 
-        class="hidden bg-[#000000] border border-[#d4af37] text-[#d4af37] text-[10px] px-3 py-1 rounded shadow-lg uppercase tracking-widest font-bold hover:bg-[#1a0f0a] transition-all">
-        📱 INSTALAR
-    </button>
-</div>
+    <div id="screen-start" class="screen hidden transparent w-full h-full bg-black">
+       
+       <!-- FAIXA SUPERIOR: BOTÃO DE INSTALAÇÃO (PWA) - AJUSTADO PARA ABSOLUTE -->
+        <div class="absolute top-0 left-0 z-[1000] p-2">
+            <button id="btn-instalar-app" onclick="instalarAppPWA()" 
+                class="hidden bg-[#000000] border border-[#d4af37] text-[#d4af37] text-[10px] px-3 py-1 rounded shadow-lg uppercase tracking-widest font-bold hover:bg-[#1a0f0a] transition-all">
+                📱 INSTALAR
+            </button>
+        </div>
 
-<!-- SELETOR DE IDIOMAS (FLUTUANDO SOBRE A IMAGEM) -->
-<div class="fixed top-14 left-4 z-[999] flex flex-col gap-2">
-    <button onclick="mudarIdioma('pt')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
-        <span>🇧🇷</span> PT
-    </button>
-    <button onclick="mudarIdioma('en')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
-        <span>🇺🇸</span> EN
-    </button>
-    <button onclick="mudarIdioma('es')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
-        <span>🇪🇸</span> ES
-    </button>
-</div>
+        <!-- SELETOR DE IDIOMAS - AJUSTADO PARA ABSOLUTE -->
+        <div class="absolute top-14 left-4 z-[999] flex flex-col gap-2">
+            <button onclick="mudarIdioma('pt')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
+                <span>🇧🇷</span> PT
+            </button>
+            <button onclick="mudarIdioma('en')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
+                <span>🇺🇸</span> EN
+            </button>
+            <button onclick="mudarIdioma('es')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
+                <span>🇪🇸</span> ES
+            </button>
+        </div>
     
-  <audio id="som-botoes" src="gurgel.mp3"></audio>
+        <audio id="som-botoes" src="gurgel.mp3"></audio>
         
         <div class="absolute inset-0 w-full h-full bg-cover bg-bottom z-0" style="background-image: url('telaincial.webp');"></div>
         
-             <div class="absolute inset-x-0 bottom-[14%] flex justify-center px-6 z-50">
+        <div class="absolute inset-x-0 bottom-[14%] flex justify-center px-6 z-50">
             <div class="flex flex-col w-full max-w-[260px] gap-3 px-4 py-3 bg-black border-2 border-[#d4af37]/80 rounded-xl shadow-2xl transform -translate-x-7">
                 
                 <button onclick="tocarSomBotao(); openLoginScreen();" 
@@ -563,7 +564,7 @@
                 
             </div>
         </div>
-  </div>
+    </div>
       
     <!-- TELA DE INTRODUÇÃO -->
                       <div id="screen-intro" class="screen hidden transparent relative overflow-hidden h-full w-full bg-black">
