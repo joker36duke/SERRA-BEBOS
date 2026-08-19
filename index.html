@@ -5610,7 +5610,10 @@ if(trickMsg) {
     window.addEventListener('resize', ajustarTelaDoJogo);
     window.addEventListener('DOMContentLoaded', ajustarTelaDoJogo);
     
-    // 1. Lógica do Botão de Instalação (PWA)
+    <script>
+    // ==========================================
+    // 1. PWA: Lógica do Botão de Instalação
+    // ==========================================
     let deferredPrompt;
     window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
@@ -5630,7 +5633,9 @@ if(trickMsg) {
         }
     };
 
+    // ==========================================
     // 2. Lógica de Tradução
+    // ==========================================
     window.mudarIdioma = function(lang) {
         localStorage.setItem('serra_idioma', lang);
         const textos = {
@@ -5642,10 +5647,79 @@ if(trickMsg) {
         if (tituloElemento && textos[lang]) {
             tituloElemento.innerText = textos[lang].titulo;
         }
-        console.log("Idioma alterado para:", lang);
+        mostrarAlertaSeringal("Idioma", "Idioma alterado para " + lang.toUpperCase());
     };
+
+    // ==========================================
+    // 3. GERAR MESA E COMPARTILHAMENTO
+    // ==========================================
+    window.gerarConviteMesa = async function() {
+        if (!window.produtosCatalogo || window.produtosCatalogo.length === 0) {
+            mostrarAlertaSeringal("Aviso", "Nenhum prêmio selecionado na Adega.");
+            return;
+        }
         
-    </script>
+        const p = window.produtosCatalogo[window.indiceCarrosselAtual];
+        if (!p) return;
+
+        try {
+            const novaMesaRef = push(ref(database, 'salas'));
+            const mesaId = novaMesaRef.key;
+
+            const dadosMesa = {
+                premioId: p.id || "produto",
+                premioNome: p.nome,
+                premioPreco: p.preco,
+                status: "aguardando_oponente",
+                criador: window.nomeUsuarioAtual || "Guardião do Seringal"
+            };
+
+            await set(novaMesaRef, dadosMesa);
+            window.fecharCatalogo();
+
+            // Salva o ID na memória para não perder ao voltar do WhatsApp
+            localStorage.setItem('serra_ultima_mesa', mesaId);
+            localStorage.setItem('serra_status_mesa', 'aguardando');
+
+            const baseUrl = window.location.href.split('?')[0];
+            const linkPartida = `${baseUrl}?sala=${mesaId}`;
+
+            const textoConvite = `🃏 *DESAFIO NO SERRABEBOS* 🃏\n\nEntre na minha mesa: ${linkPartida}`;
+
+            if (navigator.share) {
+                await navigator.share({ title: 'Desafio SerraBebos', text: textoConvite });
+            } else {
+                navigator.clipboard.writeText(textoConvite);
+                mostrarAlertaSeringal("Mesa Armada!", "O convite foi copiado!");
+            }
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                mostrarAlertaSeringal("Erro", "Não foi possível registrar a mesa.");
+            }
+        }
+    };
+
+    // ==========================================
+    // 4. RESTAURAÇÃO DE ESTADO AO ABRIR O JOGO
+    // ==========================================
+    window.addEventListener('load', () => {
+        const mesaId = localStorage.getItem('serra_ultima_mesa');
+        const status = localStorage.getItem('serra_status_mesa');
+
+        // Se o celular recarregar, ele verifica se tem uma sala pendente
+        if (mesaId && status === 'aguardando') {
+            console.log("Restaurando sala:", mesaId);
+            if (typeof window.abrirTelaDeEspera === 'function') {
+                window.abrirTelaDeEspera(mesaId);
+            }
+        }
+    });
+
+    window.limparStatusMesa = function() {
+        localStorage.removeItem('serra_ultima_mesa');
+        localStorage.removeItem('serra_status_mesa');
+    };
+</script>
 
 </body> 
 </html>
