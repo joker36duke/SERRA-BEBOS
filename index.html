@@ -2556,21 +2556,18 @@ window.atualizarVisualCarrossel = function() {
 };
 
 // ==========================================
-// GERAR MESA DE APOSTA COM COMPARTILHAMENTO NATIVO
+// GERAR MESA E SALVAR NA MEMÓRIA DO CELULAR
 // ==========================================
 window.gerarConviteMesa = async function() {
-    // Valida se há produtos carregados no carrossel
     if (!window.produtosCatalogo || window.produtosCatalogo.length === 0) {
         mostrarAlertaSeringal("Aviso", "Nenhum prêmio selecionado na Adega.");
         return;
     }
     
-    // Pega o produto exato que está aparecendo agora no carrossel
     const p = window.produtosCatalogo[window.indiceCarrosselAtual];
     if (!p) return;
 
     try {
-        // 1. Registra a mesa aberta no Firebase na aba 'salas'
         const novaMesaRef = push(ref(database, 'salas'));
         const mesaId = novaMesaRef.key;
 
@@ -2587,41 +2584,80 @@ window.gerarConviteMesa = async function() {
         await set(novaMesaRef, dadosMesa);
         window.fecharCatalogo();
 
-        // 2. Monta o link da partida
-        const linkPartida = `${window.location.origin}?sala=${mesaId}`;
+        const baseUrl = window.location.href.split('?')[0];
+        const linkPartida = `${baseUrl}?sala=${mesaId}`;
 
-        // 3. Formata a mensagem do convite
+        // Salva a última mesa criada na memória do celular para não perder se recarregar
+        localStorage.setItem('serra_ultima_mesa', mesaId);
+        localStorage.setItem('serra_status_mesa', 'aguardando');
+
         const textoConvite = `🃏 *DESAFIO NO SERRABEBOS* 🃏\n\n` +
-            `Fui pra mesa e armei um duelo valendo um prêmio de respeito na Adega do Bebo-Mor!\n\n` +
+            `Fui pra mesa e armei um duelo valendo um prêmio de respeito da nossa Adega!\n\n` +
             `🏆 *Prêmio:* ${p.nome}\n` +
             `📝 *Detalhes:* ${p.desc || 'Safra especial do Seringal'}\n` +
             `💰 *Valor:* R$ ${p.preco}\n\n` +
             `Tem coragem de peitar essa roda? Entre na mesa por aqui:\n${linkPartida}`;
 
-        // 4. Abre o menu nativo de compartilhamento do celular (Sem sair do jogo!)
         if (navigator.share) {
             await navigator.share({
                 title: 'Desafio SerraBebos',
                 text: textoConvite,
             });
         } else {
-            // Plano B caso o navegador não suporte (copia para o clipboard)
             if (navigator.clipboard) {
                 await navigator.clipboard.writeText(textoConvite);
-                mostrarAlertaSeringal("Mesa Armada!", `O convite do prêmio (${p.nome}) foi copiado para a área de transferência!`);
-            } else {
-                prompt("Copie o convite da mesa abaixo:", textoConvite);
+                mostrarAlertaSeringal("Mesa Armada!", "O convite foi copiado para a área de transferência!");
             }
         }
 
     } catch (error) {
-        // Se o usuário cancelar a janela de compartilhamento, não tratamos como erro crítico
         if (error.name !== 'AbortError') {
             console.error("Erro ao abrir mesa:", error);
             mostrarAlertaSeringal("Erro", "Não foi possível registrar a mesa no servidor.");
         }
     }
 };
+
+// ==========================================
+// RECUPERAÇÃO AUTOMÁTICA AO RECARREGAR A PÁGINA
+// ==========================================
+window.addEventListener('DOMContentLoaded', async () => {
+    // 1. Verifica se entrou via link de convite (URL)
+    const urlParams = new URLSearchParams(window.location.search);
+    const salaIdUrl = urlParams.get('sala');
+
+    if (salaIdUrl) {
+        try {
+            const snapshot = await get(ref(database, 'salas/' + salaIdUrl));
+            if (snapshot.exists()) {
+                const dados = snapshot.val();
+                setTimeout(() => {
+                    mostrarAlertaSeringal("⚔️ MESA ENCONTRADA!", `Você aceitou o desafio de ${dados.criador}!\n\n🏆 Prêmio: ${dados.premioNome} (R$ ${dados.premioPreco})`);
+                }, 1000);
+            }
+        } catch (e) { console.error(e); }
+        return;
+    }
+
+    // 2. Verifica se o próprio criador voltou da troca de app e a página recarregou
+    const mesaSalva = localStorage.getItem('serra_ultima_mesa');
+    const statusMesa = localStorage.getItem('serra_status_mesa');
+
+    if (mesaSalva && statusMesa === 'aguardando') {
+        try {
+            const snapshot = await get(ref(database, 'salas/' + mesaSalva));
+            if (snapshot.exists()) {
+                setTimeout(() => {
+                    mostrarAlertaSeringal("Mesa Ativa", "Sua mesa de aposta continua armada! Aguardando o oponente entrar na disputa.");
+                }, 800);
+            } else {
+                // Limpa se a mesa já não existir mais
+                localStorage.removeItem('serra_ultima_mesa');
+                localStorage.removeItem('serra_status_mesa');
+            }
+        } catch (e) { console.error(e); }
+    }
+});
 
 // ==========================================
 // INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL E FIREBASE (V9 MODULAR)
