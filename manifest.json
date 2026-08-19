@@ -1,1 +1,16 @@
+{
+  "name": "Serra Bebos",
+  "short_name": "SerraBebos",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#d4af37",
+  "icons": [
+    {
+      "src": "arena.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ]
+}
 
