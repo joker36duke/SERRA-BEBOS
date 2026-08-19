@@ -523,7 +523,28 @@
 
     <!-- TELA 1: INÍCIO -->
              <div id="screen-start" class="screen hidden transparent w-full h-full bg-black">
-        <audio id="som-botoes" src="gurgel.mp3"></audio>
+       <!-- FAIXA SUPERIOR: BOTÃO DE INSTALAÇÃO (PWA) -->
+<div class="fixed top-0 left-0 z-[1000] p-2">
+    <button id="btn-instalar-app" onclick="instalarAppPWA()" 
+        class="hidden bg-[#000000] border border-[#d4af37] text-[#d4af37] text-[10px] px-3 py-1 rounded shadow-lg uppercase tracking-widest font-bold hover:bg-[#1a0f0a] transition-all">
+        📱 INSTALAR
+    </button>
+</div>
+
+<!-- SELETOR DE IDIOMAS (FLUTUANDO SOBRE A IMAGEM) -->
+<div class="fixed top-14 left-4 z-[999] flex flex-col gap-2">
+    <button onclick="mudarIdioma('pt')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
+        <span>🇧🇷</span> PT
+    </button>
+    <button onclick="mudarIdioma('en')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
+        <span>🇺🇸</span> EN
+    </button>
+    <button onclick="mudarIdioma('es')" class="bg-[#1a0f0a]/80 border border-[#d4af37]/50 text-white text-[10px] px-2 py-1 rounded-md flex items-center gap-2 hover:border-[#d4af37] transition-all">
+        <span>🇪🇸</span> ES
+    </button>
+</div>
+    
+  <audio id="som-botoes" src="gurgel.mp3"></audio>
         
         <div class="absolute inset-0 w-full h-full bg-cover bg-bottom z-0" style="background-image: url('telaincial.webp');"></div>
         
