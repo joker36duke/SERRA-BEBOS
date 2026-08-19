@@ -5658,7 +5658,43 @@ if(trickMsg) {
     // Fica de olho se a tela mudar de tamanho
     window.addEventListener('resize', ajustarTelaDoJogo);
     window.addEventListener('DOMContentLoaded', ajustarTelaDoJogo);
-</script>
+    
+    // 1. Lógica do Botão de Instalação (PWA)
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        const btn = document.getElementById('btn-instalar-app');
+        if (btn) btn.classList.remove('hidden');
+    });
+
+    window.instalarAppPWA = async function() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                document.getElementById('btn-instalar-app').classList.add('hidden');
+            }
+            deferredPrompt = null;
+        }
+    };
+
+    // 2. Lógica de Tradução
+    window.mudarIdioma = function(lang) {
+        localStorage.setItem('serra_idioma', lang);
+        const textos = {
+            pt: { titulo: "Sejam Bem-Vindos ao Castelo de El Dionysos" },
+            en: { titulo: "Welcome to El Dionysos Castle" },
+            es: { titulo: "Bienvenidos al Castillo de El Dionysos" }
+        };
+        const tituloElemento = document.querySelector('.titulo-castelo'); 
+        if (tituloElemento && textos[lang]) {
+            tituloElemento.innerText = textos[lang].titulo;
+        }
+        console.log("Idioma alterado para:", lang);
+    };
+        
+    </script>
 
 </body> 
 </html>
