@@ -2617,47 +2617,92 @@ window.gerarConviteMesa = async function() {
         }
     }
 };
-
 // ==========================================
-// RECUPERAÇÃO AUTOMÁTICA AO RECARREGAR A PÁGINA
+// GERAR MESA E MOSTRAR MODAL INTERNO DE COMPARTILHAMENTO
 // ==========================================
-window.addEventListener('DOMContentLoaded', async () => {
-    // 1. Verifica se entrou via link de convite (URL)
-    const urlParams = new URLSearchParams(window.location.search);
-    const salaIdUrl = urlParams.get('sala');
-
-    if (salaIdUrl) {
-        try {
-            const snapshot = await get(ref(database, 'salas/' + salaIdUrl));
-            if (snapshot.exists()) {
-                const dados = snapshot.val();
-                setTimeout(() => {
-                    mostrarAlertaSeringal("⚔️ MESA ENCONTRADA!", `Você aceitou o desafio de ${dados.criador}!\n\n🏆 Prêmio: ${dados.premioNome} (R$ ${dados.premioPreco})`);
-                }, 1000);
-            }
-        } catch (e) { console.error(e); }
+window.gerarConviteMesa = async function() {
+    if (!window.produtosCatalogo || window.produtosCatalogo.length === 0) {
+        mostrarAlertaSeringal("Aviso", "Nenhum prêmio selecionado na Adega.");
         return;
     }
+    
+    const p = window.produtosCatalogo[window.indiceCarrosselAtual];
+    if (!p) return;
 
-    // 2. Verifica se o próprio criador voltou da troca de app e a página recarregou
-    const mesaSalva = localStorage.getItem('serra_ultima_mesa');
-    const statusMesa = localStorage.getItem('serra_status_mesa');
+    try {
+        // Cria a mesa no Firebase
+        const novaMesaRef = push(ref(database, 'salas'));
+        const mesaId = novaMesaRef.key;
 
-    if (mesaSalva && statusMesa === 'aguardando') {
-        try {
-            const snapshot = await get(ref(database, 'salas/' + mesaSalva));
-            if (snapshot.exists()) {
-                setTimeout(() => {
-                    mostrarAlertaSeringal("Mesa Ativa", "Sua mesa de aposta continua armada! Aguardando o oponente entrar na disputa.");
-                }, 800);
-            } else {
-                // Limpa se a mesa já não existir mais
-                localStorage.removeItem('serra_ultima_mesa');
-                localStorage.removeItem('serra_status_mesa');
-            }
-        } catch (e) { console.error(e); }
+        const dadosMesa = {
+            premioId: p.id || "produto",
+            premioNome: p.nome,
+            premioPreco: p.preco,
+            premioDesc: p.desc || "Safra especial do Seringal.",
+            criador: window.nomeUsuarioAtual || "Guardião do Seringal",
+            status: "aguardando_oponente",
+            criadoEm: Date.now()
+        };
+
+        await set(novaMesaRef, dadosMesa);
+        window.fecharCatalogo();
+
+        // Monta o link correto da sala
+        const baseUrl = window.location.href.split('?')[0];
+        const linkPartida = `${baseUrl}?sala=${mesaId}`;
+
+        // Texto do convite
+        const textoConvite = `🃏 *DESAFIO NO SERRABEBOS* 🃏\n\n` +
+            `Fui pra mesa e armei um duelo valendo um prêmio de respeito da nossa Adega!\n\n` +
+            `🏆 *Prêmio:* ${p.nome}\n` +
+            `📝 *Detalhes:* ${p.desc || 'Safra especial do Seringal'}\n` +
+            `💰 *Valor:* R$ ${p.preco}\n\n` +
+            `Tem coragem de peitar essa roda? Entre na mesa por aqui:\n${linkPartida}`;
+
+        // Copia automaticamente para a memória
+        if (navigator.clipboard) {
+            await navigator.clipboard.writeText(textoConvite);
+        }
+
+        // Exibe um modal limpo na tela do jogo com o texto pronto para conferência
+        mostrarModalConvitePronto(textoConvite);
+
+    } catch (error) {
+        console.error("Erro ao abrir mesa:", error);
+        mostrarAlertaSeringal("Erro", "Não foi possível registrar a mesa no servidor.");
     }
-});
+};
+
+// Função para exibir o modal de convite sem sair do jogo
+function mostrarModalConvitePronto(texto) {
+    // Cria ou reutiliza um modal na tela
+    let modalDiv = document.getElementById('modal-compartilhar-custom');
+    if (!modalDiv) {
+        modalDiv = document.createElement('div');
+        modalDiv.id = 'modal-compartilhar-custom';
+        modalDiv.className = 'fixed inset-0 z-[4000] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4';
+        document.body.appendChild(modalDiv);
+    }
+
+    modalDiv.innerHTML = `
+        <div class="w-full max-w-sm bg-[#1a0f0a] border-2 border-[#d4af37] rounded-xl p-6 shadow-[0_0_40px_rgba(212,175,55,0.3)] flex flex-col items-center text-center">
+            <h2 class="font-cinzel font-black text-xl text-[#d4af37] tracking-widest uppercase mb-2">Mesa Armada!</h2>
+            <p class="font-inter text-white/80 text-xs mb-4">O convite foi copiado para a sua área de transferência. Cole no chat do Instagram, WhatsApp ou onde preferir:</p>
+            
+            <textarea readonly class="w-full h-28 bg-black border border-[#d4af37]/50 rounded p-2 text-white text-[11px] font-inter mb-4 resize-none select-all">${texto}</textarea>
+            
+            <div class="flex flex-col gap-2 w-full">
+                <button onclick="navigator.clipboard.writeText(` + '`' + texto + '`' + `); mostrarAlertaSeringal('Copiado!', 'Link copiado novamente com sucesso.');" class="w-full py-3 font-bold text-xs rounded border border-[#d4af37] bg-[#001f3f] text-[#d4af37] uppercase tracking-widest active:scale-95">
+                    📋 Copiar Texto Novamente
+                </button>
+                <button onclick="document.getElementById('modal-compartilhar-custom').remove();" class="w-full py-2 font-bold text-xs rounded border border-red-900 bg-[#722f1b] text-white uppercase tracking-widest active:scale-95">
+                    Voltar ao Jogo
+                </button>
+            </div>
+        </div>
+    `;
+    modalDiv.classList.remove('hidden');
+}
 
 // ==========================================
 // INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL E FIREBASE (V9 MODULAR)
