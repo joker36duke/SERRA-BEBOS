@@ -2616,6 +2616,14 @@ window.gerarConviteMesa = async function() {
         localStorage.setItem('serra_ultima_mesa', mesaId);
         localStorage.setItem('serra_status_mesa', 'aguardando');
 
+        // --- NOVO: MUDA A TELA ANTES DE ABRIR O WHATSAPP ---
+        // Esconde o lobby se ele estiver aberto
+        document.getElementById('screen-lobby').classList.add('hidden'); 
+        
+        // Chama a sua tela de espera (certifique-se de que essa função existe no seu código!)
+        if (typeof window.abrirTelaDeEspera === 'function') {
+            window.abrirTelaDeEspera(mesaId);
+        }
         const textoConvite = `🃏 *DESAFIO NO SERRABEBOS* 🃏\n\n` +
             `Fui pra mesa e armei um duelo valendo um prêmio de respeito na Adega do Bebo-Mor!\n\n` +
             `🏆 *Prêmio:* ${p.nome}\n` +
@@ -2645,13 +2653,20 @@ window.gerarConviteMesa = async function() {
     }
 };
 
-// Restaura o estado da mesa se o celular recarregar a página ao voltar do mensageiro
-window.addEventListener('load', () => {
+// --- NOVO: TROQUEI DE 'load' PARA 'DOMContentLoaded' PARA SER MAIS RÁPIDO ---
+window.addEventListener('DOMContentLoaded', () => {
     const mesaId = localStorage.getItem('serra_ultima_mesa');
     const status = localStorage.getItem('serra_status_mesa');
 
     if (mesaId && status === 'aguardando') {
         console.log("Restaurando mesa pendente:", mesaId);
+        
+        // --- NOVO: FORÇA AS TELAS DE INÍCIO A SUMIREM ---
+        document.getElementById('screen-loader').classList.add('hidden');
+        document.getElementById('screen-start').classList.add('hidden');
+        document.getElementById('screen-lobby').classList.add('hidden');
+        // ------------------------------------------------
+        
         if (typeof window.abrirTelaDeEspera === 'function') {
             window.abrirTelaDeEspera(mesaId);
         }
