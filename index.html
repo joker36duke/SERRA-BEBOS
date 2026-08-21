@@ -2285,6 +2285,33 @@ window.update = update;
 window.signInAnonymously = signInAnonymously;
 
 // ==========================================
+// CAPTURA DO LINK DE CONVITE (FORASTEIRO)
+// ==========================================
+window.addEventListener('DOMContentLoaded', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const conviteId = urlParams.get('sala');
+
+    // SE O FORASTEIRO ENTROU PELO LINK:
+    if (conviteId) {
+        console.log("Forasteiro chegou com convite:", conviteId);
+        localStorage.setItem('serra_convite_pendente', conviteId);
+        
+        // Limpa a URL lá em cima para ficar bonito e esconder o código
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Joga o visitante direto pro Carrossel
+        setTimeout(() => {
+            document.getElementById('screen-loader').classList.add('hidden');
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-login').classList.add('hidden');
+            document.getElementById('screen-avatar-carousel').classList.remove('hidden', 'transparent');
+            if (typeof updateCarouselUI === 'function') window.updateCarouselUI();
+            mostrarAlertaSeringal("Desafio Aceito!", "Forasteiro, escolha o Guardião que vai te representar!");
+        }, 1200);
+    }
+});
+                
+// ==========================================
 // A PORTA SECRETA DO MESTRE
 // ==========================================
 window.abrirEscritorio = function() {
