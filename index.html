@@ -2263,24 +2263,26 @@ function confirmGuardian() {
 
             <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, push, remove, update, runTransaction, onDisconnect, increment } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, updateProfile } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyBTAaHa5R7MZPDeIWdCqSlVByqsVfXQmUU",
-            projectId: "serra-bebos",
-            storageBucket: "serra-bebos.firebasestorage.app",
-            databaseURL: "https://serra-bebos-default-rtdb.firebaseio.com" 
-        };
+import { getDatabase, ref, set, onValue, get, push, remove, update, runTransaction, onDisconnect, increment } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-database.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail, updateProfile, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-auth.js";
 
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
-        const auth = getAuth(app); 
+const firebaseConfig = {
+    apiKey: "AIzaSyBTAaHa5R7MZPDeIWdCqSlVByqsVfXQmUU",
+    projectId: "serra-bebos",
+    storageBucket: "serra-bebos.firebasestorage.app",
+    databaseURL: "https://serra-bebos-default-rtdb.firebaseio.com" 
+};
 
-        // ✨ A PONTE PARA O RANKING ENXERGAR O BANCO DE DADOS
-        window.database = database;
-        window.ref = ref;
-        window.get = get; 
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const auth = getAuth(app); 
+
+// ✨ A PONTE PARA O RANKING ENXERGAR O BANCO DE DADOS
+window.database = database;
+window.ref = ref;
+window.get = get; 
+window.update = update;
+window.signInAnonymously = signInAnonymously;
 
 // ==========================================
 // A PORTA SECRETA DO MESTRE
