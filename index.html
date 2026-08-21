@@ -2011,16 +2011,88 @@ function iniciarFluxoJogo() {
     });
 }
 
-// Navegação: Do Carrossel para o Sorteio
-function confirmGuardian() {
+// ==========================================
+// CONFIRMAR LOOK & ENTRAR NA MESA DO DONO
+// ==========================================
+window.confirmGuardian = async function() {
     const guardian = amazoniaGuardians[currentAvatarIndex];
+    window.player_name = guardian.name; 
     
-    // Troca "Damião" pelo nome do Guardião
-    player_name = guardian.name; 
+    const convitePendente = localStorage.getItem('serra_convite_pendente');
     
-    // Vai direto para o Sorteio (a Sorte no Seringal)
-    navTo('screen-avatar-carousel', 'screen-luck', renderLuckGrid);
-}
+    if (convitePendente) {
+        // PERGUNTA O NOME DO FORASTEIRO
+        let nomeForasteiro = prompt("Antes de sentar à mesa... Qual o seu nome (apelido)?");
+        if (!nomeForasteiro || nomeForasteiro.trim() === "") nomeForasteiro = "Visitante";
+        
+        mostrarAlertaSeringal("Preparando a Mesa...", "O Bebo-Mor está limpando as cartas para você...");
+        
+        try {
+            // MÁGICA 1: Cria a conta fantasma e acopla o nome + Guardião!
+            const userCred = await window.signInAnonymously(auth);
+            await updateProfile(userCred.user, { 
+                displayName: nomeForasteiro.trim().toUpperCase() + " " + guardian.name.toUpperCase() 
+            });
+            
+            localStorage.removeItem('serra_convite_pendente');
+            document.getElementById('screen-avatar-carousel').classList.add('hidden');
+            
+            // MÁGICA 2: Joga o forasteiro na mesa do Dono!
+            window.aceitarConviteMesa(convitePendente);
+            
+        } catch (error) {
+            console.error("Erro no login fantasma:", error);
+            mostrarAlertaSeringal("Erro", "A conexão falhou. Não foi possível entrar na mesa.");
+        }
+    } else {
+        // Fluxo normal offline (Sem convite)
+        navTo('screen-avatar-carousel', 'screen-luck', window.renderLuckGrid || renderLuckGrid);
+    }
+};
+
+window.aceitarConviteMesa = async function(salaId) {
+    try {
+        const salaRef = window.ref(window.database, `salas/${salaId}`);
+        const snap = await window.get(salaRef);
+        
+        if (snap.exists()) {
+            const sala = snap.val();
+            
+            if (sala.config && sala.config.status === 'aguardando') {
+                mostrarAlertaSeringal("Mesa Encontrada!", "Puxando uma cadeira na Adega do Bebo-Mor...");
+                
+                const meuUid = auth.currentUser.uid;
+                let meuNome = auth.currentUser.displayName ? auth.currentUser.displayName.toUpperCase() : "FORASTEIRO";
+                
+                const atualizacoes = {};
+                atualizacoes[`salas/${salaId}/jogadores/${meuUid}`] = { nome: meuNome, equipa: 'B' };
+                atualizacoes[`salas/${salaId}/config/status`] = 'sorteio'; // Aciona o gatilho da sua tela!
+                
+                if (!sala.mesa_sorteio) {
+                     atualizacoes[`salas/${salaId}/mesa_sorteio`] = window.gerar8CartasSorteio();
+                }
+                
+                await window.update(window.ref(window.database), atualizacoes);
+                
+                state.salaId = salaId;
+                state.isOnline = true;
+                state.tipoJogo = '1v1';
+                
+                window.ouvirEventosSala(salaId);
+            } else {
+                mostrarAlertaSeringal("Aviso", "Esta mesa já está cheia ou a partida já começou!");
+                navTo('screen-start', 'screen-lobby');
+            }
+        } else {
+            mostrarAlertaSeringal("Mesa Fantasma", "Essa mesa não existe mais no Seringal.");
+            navTo('screen-start', 'screen-lobby');
+        }
+    } catch(e) {
+        console.error("Erro ao aceitar convite:", e);
+        mostrarAlertaSeringal("Erro", "A conexão com a mesa caiu.");
+        navTo('screen-start', 'screen-lobby');
+    }
+};
 
             // Função exclusiva para o botão "Jogar Agora"
     function clicarJogarAgora() {
