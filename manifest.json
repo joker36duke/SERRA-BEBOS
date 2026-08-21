@@ -1,6 +1,6 @@
 {
   "name": "Serra Bebos",
-  "short_name": "SerraBebos",
+  "short_name": "Serra Bebos",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#000000",
