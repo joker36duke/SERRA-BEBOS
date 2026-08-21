@@ -2021,31 +2021,31 @@ window.confirmGuardian = async function() {
     const convitePendente = localStorage.getItem('serra_convite_pendente');
     
     if (convitePendente) {
-        // PERGUNTA O NOME DO FORASTEIRO
         let nomeForasteiro = prompt("Antes de sentar à mesa... Qual o seu nome (apelido)?");
         if (!nomeForasteiro || nomeForasteiro.trim() === "") nomeForasteiro = "Visitante";
         
         mostrarAlertaSeringal("Preparando a Mesa...", "O Bebo-Mor está limpando as cartas para você...");
         
         try {
-            // MÁGICA 1: Cria a conta fantasma e acopla o nome + Guardião!
-            const userCred = await window.signInAnonymously(auth);
-            await updateProfile(userCred.user, { 
+            // MÁGICA 1: Usa as ferramentas globais do Firebase para não dar erro
+            const userCred = await window.signInAnonymously(window.auth);
+            
+            await window.updateProfile(userCred.user, { 
                 displayName: nomeForasteiro.trim().toUpperCase() + " " + guardian.name.toUpperCase() 
             });
             
             localStorage.removeItem('serra_convite_pendente');
             document.getElementById('screen-avatar-carousel').classList.add('hidden');
             
-            // MÁGICA 2: Joga o forasteiro na mesa do Dono!
+            // MÁGICA 2: Joga na mesa!
             window.aceitarConviteMesa(convitePendente);
             
         } catch (error) {
-            console.error("Erro no login fantasma:", error);
-            mostrarAlertaSeringal("Erro", "A conexão falhou. Não foi possível entrar na mesa.");
+            // Se der erro, agora a gente consegue ler o motivo no console F12!
+            console.error("ERRO GRAVE NO LOGIN FANTASMA:", error);
+            mostrarAlertaSeringal("Erro de Conexão", "Falha ao se conectar com a floresta. Verifique sua internet.");
         }
     } else {
-        // Fluxo normal offline (Sem convite)
         navTo('screen-avatar-carousel', 'screen-luck', window.renderLuckGrid || renderLuckGrid);
     }
 };
