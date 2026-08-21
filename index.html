@@ -1210,6 +1210,30 @@
     </div>
 </div>
 
+        <!-- TELA DE ESPERA DA MESA DE APOSTA -->
+    <div id="screen-waiting" class="screen hidden transparent w-full h-full bg-[#0a0a0a] z-[200]">
+        <div class="absolute inset-0 w-full h-full bg-cover bg-center opacity-30 z-0" style="background-image: url('lobby.webp');"></div>
+        <div class="relative z-10 flex flex-col items-center justify-center w-full h-full px-6 text-center">
+            
+            <span class="text-6xl mb-6 animate-bounce drop-shadow-lg">⏳</span>
+            <h2 class="font-cinzel font-black text-3xl text-[#d4af37] tracking-widest uppercase mb-2 drop-shadow-md">
+                Mesa Armada
+            </h2>
+            <p class="font-cinzel text-white/80 text-sm uppercase tracking-wider mb-8">
+                Aguardando o forasteiro aceitar o convite...
+            </p>
+            
+            <!-- Mostra o ID só por charme e garantia -->
+            <div class="text-[#d4af37] text-xs font-inter bg-black/80 p-4 rounded-xl border border-[#d4af37]/30 mb-8 w-full max-w-xs shadow-inner">
+                SALA: <span id="waiting-room-id" class="font-bold tracking-widest"></span>
+            </div>
+            
+            <button onclick="cancelarMesaEspera()" class="w-full max-w-xs py-3 font-cinzel font-black text-sm tracking-[2px] rounded border border-[#ef4444] bg-[#1a0f0a] text-[#ef4444] uppercase shadow-[0_0_15px_rgba(239,68,68,0.3)] hover:bg-[#ef4444] hover:text-black transition-all active:scale-95">
+                Cancelar Mesa
+            </button>
+        </div>
+    </div>
+
     <script>
         // --- CONSTANTES DO JOGO ---
         const suits = ['Paus', 'Espadas', 'Copas', 'Ouros'];
