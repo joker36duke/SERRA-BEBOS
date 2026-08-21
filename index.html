@@ -2604,8 +2604,11 @@ window.atualizarVisualCarrossel = function() {
 };
                 
 // ==========================================
-// GERAR MESA, SALVAR NA MEMÓRIA E RESTAURAR
+// GERAR MESA, SALVAR NA MEMÓRIA E RESTAURAR (VERSÃO BLINDADA)
 // ==========================================
+
+// Precisamos exportar o remove para podermos cancelar a sala
+window.remove = remove; 
 
 window.gerarConviteMesa = async function() {
     if (!window.produtosCatalogo || window.produtosCatalogo.length === 0) {
@@ -2620,88 +2623,136 @@ window.gerarConviteMesa = async function() {
         const novaMesaRef = push(ref(database, 'salas'));
         const mesaId = novaMesaRef.key;
 
+        // Puxa o nome real do jogador
+        let meuNome = "Guardião do Seringal";
+        if (typeof auth !== 'undefined' && auth.currentUser && auth.currentUser.displayName) {
+            meuNome = auth.currentUser.displayName.toUpperCase();
+        } else if (typeof player_name !== 'undefined' && player_name) {
+            meuNome = player_name.toUpperCase();
+        }
+        const meuUid = auth.currentUser ? auth.currentUser.uid : 'visitante';
+
         const dadosMesa = {
+            config: { tipo: '1v1', maxJogadores: 2, status: 'aguardando', criador: meuUid },
+            jogadores: { [meuUid]: { nome: meuNome, equipa: 'A' } },
             premioId: p.id || "produto",
             premioNome: p.nome,
             premioPreco: p.preco,
             premioDesc: p.desc || "Safra especial do Seringal.",
-            criador: window.nomeUsuarioAtual || "Guardião do Seringal",
-            status: "aguardando_oponente",
+            status_aposta: "aguardando_oponente",
             criadoEm: Date.now()
         };
 
         await set(novaMesaRef, dadosMesa);
         window.fecharCatalogo();
 
-        const baseUrl = window.location.href.split('?')[0];
-        const linkPartida = `${baseUrl}?sala=${mesaId}`;
-
-        // Salva na memória do celular para reter o estado caso o app recarregue
+        // 1. Salva na memória RAM do Moto G35 (Trava do PWA)
         localStorage.setItem('serra_ultima_mesa', mesaId);
         localStorage.setItem('serra_status_mesa', 'aguardando');
 
-        // --- NOVO: MUDA A TELA ANTES DE ABRIR O WHATSAPP ---
-        // Esconde o lobby se ele estiver aberto
-        document.getElementById('screen-lobby').classList.add('hidden'); 
-        
-        // Chama a sua tela de espera (certifique-se de que essa função existe no seu código!)
+        // 2. Muda a tela ANTES de invocar o WhatsApp
         if (typeof window.abrirTelaDeEspera === 'function') {
             window.abrirTelaDeEspera(mesaId);
         }
+
+        const baseUrl = window.location.href.split('?')[0];
+        const linkPartida = `${baseUrl}?sala=${mesaId}`;
+
         const textoConvite = `🃏 *DESAFIO NO SERRABEBOS* 🃏\n\n` +
             `Fui pra mesa e armei um duelo valendo um prêmio de respeito na Adega do Bebo-Mor!\n\n` +
             `🏆 *Prêmio:* ${p.nome}\n` +
-            `📝 *Detalhes:* ${p.desc || 'Safra especial do Seringal'}\n` +
             `💰 *Valor:* R$ ${p.preco}\n\n` +
-            `Tem coragem de peitar essa roda? Entre na mesa por aqui:\n${linkPartida}`;
+            `Aceita o desafio? Entre na mesa por aqui:\n${linkPartida}`;
 
-        if (navigator.share) {
-            await navigator.share({
-                title: 'Desafio SerraBebos',
-                text: textoConvite,
-            });
-        } else {
-            if (navigator.clipboard) {
-                await navigator.clipboard.writeText(textoConvite);
-                mostrarAlertaSeringal("Mesa Armada!", "O convite foi copiado para a área de transferência!");
+        // 3. Aguarda a tela desenhar para não engasgar o Android
+        setTimeout(async () => {
+            if (navigator.share) {
+                try {
+                    await navigator.share({ title: 'Desafio SerraBebos', text: textoConvite });
+                } catch(e) { console.log("Usuário fechou a gaveta de compartilhamento."); }
             } else {
-                prompt("Copie o convite da mesa abaixo:", textoConvite);
+                if (navigator.clipboard) {
+                    await navigator.clipboard.writeText(textoConvite);
+                    mostrarAlertaSeringal("Mesa Armada!", "Convite copiado! Cole no WhatsApp do seu adversário.");
+                } else {
+                    prompt("Copie o convite da mesa abaixo:", textoConvite);
+                }
             }
-        }
+        }, 400);
 
     } catch (error) {
-        if (error.name !== 'AbortError') {
-            console.error("Erro ao abrir mesa:", error);
-            mostrarAlertaSeringal("Erro", "Não foi possível registrar a mesa no servidor.");
-        }
+        console.error("Erro ao abrir mesa:", error);
+        mostrarAlertaSeringal("Erro na Mata", "Não foi possível registrar a mesa no servidor.");
     }
 };
 
-// --- NOVO: TROQUEI DE 'load' PARA 'DOMContentLoaded' PARA SER MAIS RÁPIDO ---
-window.addEventListener('DOMContentLoaded', () => {
+window.abrirTelaDeEspera = function(mesaId) {
+    document.getElementById('waiting-room-id').innerText = mesaId;
+    
+    document.getElementById('screen-catalogo').classList.add('hidden');
+    document.getElementById('screen-lobby').classList.add('hidden');
+    document.getElementById('screen-start').classList.add('hidden');
+    document.getElementById('screen-loader').classList.add('hidden');
+    
+    const sw = document.getElementById('screen-waiting');
+    sw.classList.remove('hidden');
+    setTimeout(() => sw.classList.remove('transparent'), 50);
+
+    // Começa a escutar se o oponente clicou no link
+    state.salaId = mesaId;
+    state.isOnline = true;
+    window.ouvirEventosSala(mesaId);
+};
+
+window.cancelarMesaEspera = async function() {
     const mesaId = localStorage.getItem('serra_ultima_mesa');
-    const status = localStorage.getItem('serra_status_mesa');
-
-    if (mesaId && status === 'aguardando') {
-        console.log("Restaurando mesa pendente:", mesaId);
-        
-        // --- NOVO: FORÇA AS TELAS DE INÍCIO A SUMIREM ---
-        document.getElementById('screen-loader').classList.add('hidden');
-        document.getElementById('screen-start').classList.add('hidden');
-        document.getElementById('screen-lobby').classList.add('hidden');
-        // ------------------------------------------------
-        
-        if (typeof window.abrirTelaDeEspera === 'function') {
-            window.abrirTelaDeEspera(mesaId);
-        }
+    if (mesaId) {
+        try { await window.remove(window.ref(window.database, `salas/${mesaId}`)); } catch(e) {}
     }
-});
+    window.limparStatusMesa();
+    
+    const sw = document.getElementById('screen-waiting');
+    sw.classList.add('transparent');
+    setTimeout(() => {
+        sw.classList.add('hidden');
+        document.getElementById('screen-lobby').classList.remove('hidden', 'transparent');
+    }, 500);
+};
 
-// Função auxiliar para limpar o status quando a partida iniciar ou for cancelada
 window.limparStatusMesa = function() {
     localStorage.removeItem('serra_ultima_mesa');
     localStorage.removeItem('serra_status_mesa');
 };
+
+// O GUARDA-COSTAS DO PWA (Executa assim que o script liga)
+const checkRestauracao = () => {
+    const mesaId = localStorage.getItem('serra_ultima_mesa');
+    const status = localStorage.getItem('serra_status_mesa');
+
+    if (mesaId && status === 'aguardando') {
+        console.log("Moto G matou o app no WhatsApp. Restaurando mesa pendente:", mesaId);
+        
+        const loader = document.getElementById('screen-loader');
+        if(loader) loader.style.display = 'none'; // Desliga o loader na força bruta
+        
+        document.getElementById('screen-start').classList.add('hidden');
+        document.getElementById('screen-lobby').classList.add('hidden');
+        document.getElementById('screen-catalogo').classList.add('hidden');
+        
+        setTimeout(() => {
+            if (typeof window.abrirTelaDeEspera === 'function') {
+                window.abrirTelaDeEspera(mesaId);
+            }
+        }, 300);
+    }
+};
+
+// Para módulos, chamar direto é mais rápido e evita piscar a tela
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', checkRestauracao);
+} else {
+    checkRestauracao();
+}
 
 // ==========================================
 // INTEGRAÇÃO DO ESCRITÓRIO COM O CARROSSEL E FIREBASE (V9 MODULAR)
