@@ -3166,42 +3166,60 @@ window.salvarNovoProduto = function() {
             return cartas;
         };
 
-        // 4. OUVIR A SALA (CORRIGIDO COM BLINDAGEM ANTI-FIREBASE PARA O ANDROID)
-        window.ouvirEventosSala = function(idSala) {
-            onValue(ref(database, `salas/${idSala}`), (snapshot) => {
-                if(!snapshot.exists()) return;
-                const sala = snapshot.val();
-                const status = sala.config.status;
-                
-                const cartas = sala.mesa_sorteio || {};
-                
-                if (status === 'sorteio' && document.getElementById('screen-luck').classList.contains('hidden')) {
-                    fecharAlertaSeringal();
-                    navTo('screen-lobby', 'screen-luck');
-                }
+// 4. OUVIR A SALA (CORRIGIDO COM BLINDAGEM ANTI-FIREBASE PARA O ANDROID E MESA DE APOSTA)
+window.ouvirEventosSala = function(idSala) {
+    onValue(ref(database, `salas/${idSala}`), (snapshot) => {
+        if(!snapshot.exists()) return;
+        const sala = snapshot.val();
+        const status = sala.config.status;
+        
+        // ==========================================
+        // MEMÓRIA DA MESA DE APOSTA
+        // ==========================================
+        if (sala.premioNome) {
+            state.isMesaAposta = true;
+            state.dadosPremio = { nome: sala.premioNome, valor: sala.premioPreco };
+        }
 
-                if (status === 'sorteio') {
-                    window.renderizarMesaSorteioOnline(cartas);
+        const cartas = sala.mesa_sorteio || {};
+        
+        if (status === 'sorteio' && document.getElementById('screen-luck').classList.contains('hidden')) {
+            fecharAlertaSeringal();
+            
+            // NOVO: Verifica se o Dono está preso na tela da Ampulheta e liberta ele!
+            const telaEspera = document.getElementById('screen-waiting');
+            if (telaEspera && !telaEspera.classList.contains('hidden')) {
+                telaEspera.classList.add('hidden');
+                document.getElementById('screen-luck').classList.remove('hidden', 'transparent');
+            } else {
+                // Se for o Lobby normal, usa a transição suave padrão
+                navTo('screen-lobby', 'screen-luck');
+            }
+        }
+
+        if (status === 'sorteio') {
+            window.renderizarMesaSorteioOnline(cartas);
+            
+            const arrayCartas = Object.keys(cartas).map(key => cartas[key]);
+            const escolhidas = arrayCartas.filter(c => c && c.escolhidaPor && c.escolhidaPor !== "");
+            
+            // Se as duas cartas foram escolhidas, inicia a contagem APENAS UMA VEZ
+            if (escolhidas.length === sala.config.maxJogadores) {
+                if (!state.timeoutSorteioIniciado) {
+                    state.timeoutSorteioIniciado = true; // Trava o relógio contra disparos duplos
                     
-                    const arrayCartas = Object.keys(cartas).map(key => cartas[key]);
-                    const escolhidas = arrayCartas.filter(c => c && c.escolhidaPor && c.escolhidaPor !== "");
-                    
-                    // Se as duas cartas foram escolhidas, inicia a contagem APENAS UMA VEZ
-                    if (escolhidas.length === sala.config.maxJogadores) {
-                        if (!state.timeoutSorteioIniciado) {
-                            state.timeoutSorteioIniciado = true; // Trava o relógio contra disparos duplos
-                            
-                            setTimeout(() => {
-                                window.finalizarSorteioMultiplayer(cartas, sala.jogadores);
-                            }, 1800);
-                        }
-                    } else {
-                        // Se alguém caiu ou a mesa reiniciou por empate, zera o cronômetro
-                        state.timeoutSorteioIniciado = false;
-                    }
+                    setTimeout(() => {
+                        window.finalizarSorteioMultiplayer(cartas, sala.jogadores);
+                    }, 1800);
                 }
-            });
-        };
+            } else {
+                // Se alguém caiu ou a mesa reiniciou por empate, zera o cronômetro
+                state.timeoutSorteioIniciado = false;
+            }
+        }
+    });
+};
+
 
         // ========================================================
         // TELA DE SORTEIO BLINDADA E COM ANIMAÇÕES SUAVES
