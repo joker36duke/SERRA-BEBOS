@@ -3069,82 +3069,105 @@ window.salvarNovoProduto = function() {
             }); 
         }
                 
-        // =========================================================
-        // MOTOR UNIVERSAL SERRA BEBOS: O DEFINITIVO
-        // =========================================================
+// =========================================================
+// MOTOR UNIVERSAL SERRA BEBOS: O DEFINITIVO (COM FAXINA DE FILA)
+// =========================================================
 
-                window.buscarPartida = async function(tipoJogo) {
+window.buscarPartida = async function(tipoJogo) {
+    try {
+        const user = auth.currentUser;
+        if (!user) {
+            mostrarAlertaSeringal("Erro", "O Bebo-Mor não reconhece você. Faça login.");
+            return;
+        }
+
+        // ==========================================================
+         🧹 FAXINA DE CLONES FANTASMAS (CORREÇÃO DA CARTA TRAVADA)
+        // ==========================================================
+        
+        if (state.salaId) {
             try {
-                state.tipoJogo = tipoJogo; // GRAVA O MODO DE JOGO
-                const user = auth.currentUser;
-                if (!user) {
-                    mostrarAlertaSeringal("Erro", "O Bebo-Mor não reconhece você. Faça login.");
-                    return;
+                // Tira o jogador da sala fantasma
+                await remove(ref(database, `salas/${state.salaId}/jogadores/${user.uid}`));
+                
+                // Se ele era o dono da sala fantasma, apaga ela inteira para não sujar o servidor
+                const snapVelha = await get(ref(database, `salas/${state.salaId}`));
+                if (snapVelha.exists() && snapVelha.val().config.criador === user.uid) {
+                    await remove(ref(database, `salas/${state.salaId}`));
                 }
-
-                mostrarAlertaSeringal("Buscando...", `Preparando a mesa para ${tipoJogo}. Aguarde...`);
-
-                const limites = { '1v1': 2, '2v2': 4, '3v3': 6 };
-                const maxJogadores = limites[tipoJogo];
-                let nomeJogador = user.displayName ? user.displayName.toUpperCase() : "GUARDIÃO";
-
-                const salasRef = ref(database, 'salas');
-                const snapshot = await get(salasRef);
-                let salaEncontrada = null;
-
-                if (snapshot.exists()) {
-                    const salas = snapshot.val();
-                    for (let id in salas) {
-                        const s = salas[id];
-                        if (s.config && s.config.tipo === tipoJogo && s.config.status === 'aguardando' && Object.keys(s.jogadores).length < maxJogadores && !s.jogadores[user.uid]) {
-                            salaEncontrada = id;
-                            break;
-                        }
-                    }
-                }
-
-                if (salaEncontrada) {
-                    const salaRef = ref(database, `salas/${salaEncontrada}`);
-                    const snapSala = await get(salaRef);
-                    const salaAtual = snapSala.val();
-                    const qtdAtual = Object.keys(salaAtual.jogadores).length;
-                    const equipe = qtdAtual % 2 === 0 ? 'A' : 'B';
-
-                    await update(ref(database, `salas/${salaEncontrada}/jogadores/${user.uid}`), {
-                        nome: nomeJogador, equipa: equipe
-                    });
-
-                    if (qtdAtual + 1 === maxJogadores) {
-                        await update(ref(database, `salas/${salaEncontrada}/config`), { status: 'sorteio' });
-                    }
-                    
-                    state.salaId = salaEncontrada;
-                    state.isOnline = true;
-                    onDisconnect(ref(database, `salas/${salaEncontrada}/jogadores/${user.uid}`)).remove();
-
-                } else {
-                    const novaSalaRef = push(ref(database, 'salas'));
-                    const cartasSorteio = window.gerar8CartasSorteio();
-                    
-                    await set(novaSalaRef, {
-                        config: { tipo: tipoJogo, maxJogadores: maxJogadores, status: 'aguardando', criador: user.uid },
-                        jogadores: { [user.uid]: { nome: nomeJogador, equipa: 'A' } },
-                        mesa_sorteio: cartasSorteio
-                    });
-                    
-                    onDisconnect(novaSalaRef).remove();
-                    state.salaId = novaSalaRef.key;
-                    state.isOnline = true;
-                    mostrarAlertaSeringal("Seringalista", `Aguardando oponentes para ${tipoJogo}...\nSua mesa está aberta na floresta.`);
-                }
-
-                window.ouvirEventosSala(state.salaId);
-
-            } catch (error) {
-                alert("Ocorreu um Erro no Motor do Jogo: " + error.message);
-                fecharAlertaSeringal();
+            } catch (e) {
+                console.log("Limpando rastros na floresta...");
             }
-        };
+            state.salaId = null; // Zera a memória da sala antiga
+        }
+        // ==========================================================
+
+        state.tipoJogo = tipoJogo; // GRAVA O MODO DE JOGO
+        mostrarAlertaSeringal("Buscando...", `Preparando a mesa para ${tipoJogo}. Aguarde...`);
+
+        const limites = { '1v1': 2, '2v2': 4, '3v3': 6 };
+        const maxJogadores = limites[tipoJogo];
+        let nomeJogador = user.displayName ? user.displayName.toUpperCase() : "GUARDIÃO";
+
+        const salasRef = ref(database, 'salas');
+        const snapshot = await get(salasRef);
+        let salaEncontrada = null;
+
+        if (snapshot.exists()) {
+            const salas = snapshot.val();
+            for (let id in salas) {
+                const s = salas[id];
+                if (s.config && s.config.tipo === tipoJogo && s.config.status === 'aguardando' && Object.keys(s.jogadores).length < maxJogadores && !s.jogadores[user.uid]) {
+                    salaEncontrada = id;
+                    break;
+                }
+            }
+        }
+
+        if (salaEncontrada) {
+            const salaRef = ref(database, `salas/${salaEncontrada}`);
+            const snapSala = await get(salaRef);
+            const salaAtual = snapSala.val();
+            const qtdAtual = Object.keys(salaAtual.jogadores).length;
+            const equipe = qtdAtual % 2 === 0 ? 'A' : 'B';
+
+            await update(ref(database, `salas/${salaEncontrada}/jogadores/${user.uid}`), {
+                nome: nomeJogador, equipa: equipe
+            });
+
+            if (qtdAtual + 1 === maxJogadores) {
+                await update(ref(database, `salas/${salaEncontrada}/config`), { status: 'sorteio' });
+            }
+            
+            state.salaId = salaEncontrada;
+            state.isOnline = true;
+            onDisconnect(ref(database, `salas/${salaEncontrada}/jogadores/${user.uid}`)).remove();
+
+        } else {
+            const novaSalaRef = push(ref(database, 'salas'));
+            const cartasSorteio = window.gerar8CartasSorteio();
+            
+            await set(novaSalaRef, {
+                config: { tipo: tipoJogo, maxJogadores: maxJogadores, status: 'aguardando', criador: user.uid },
+                jogadores: { [user.uid]: { nome: nomeJogador, equipa: 'A' } },
+                mesa_sorteio: cartasSorteio
+            });
+            
+            onDisconnect(novaSalaRef).remove();
+            state.salaId = novaSalaRef.key;
+            state.isOnline = true;
+            
+            // Aviso atualizado para o jogador entender que ainda está na fila mesmo se clicar em "Entendido"
+            mostrarAlertaSeringal("Na Fila!", `Sua mesa ${tipoJogo} está aberta na floresta.\n\nO aviso sumirá, mas você continua na fila. O jogo começará sozinho quando os oponentes entrarem!`);
+        }
+
+        window.ouvirEventosSala(state.salaId);
+
+    } catch (error) {
+        alert("Ocorreu um Erro no Motor do Jogo: " + error.message);
+        fecharAlertaSeringal();
+    }
+};
 
         // ATALHOS DOS BOTÕES DO LOBBY
         window.buscarPartida1x1 = () => window.buscarPartida('1v1');
