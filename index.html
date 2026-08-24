@@ -3186,34 +3186,35 @@ window.buscarPartida = async function(tipoJogo) {
             return cartas;
         };
 
-// 4. OUVIR A SALA (AGORA COM PROTEÇÃO ANTI-ECO PARA O 2x2 e 3x3)
+// 4. OUVIR A SALA (CORRIGIDO COM BLINDAGEM ANTI-FIREBASE PARA O ANDROID)
 window.ouvirEventosSala = function(idSala) {
-
-     // 🛑 PROTEÇÃO ANTI-ECO (O SEGREDO PARA A CARTA NÃO TRAVAR)
+    
+    // =======================================================
+    // 🛑 PROTEÇÃO ANTI-ECO (DESLIGA O OUVIDO VELHO)
+    // =======================================================
     if (window.escutaSalaAtual) {
-        window.escutaSalaAtual(); // Aperta o botão de desligar do Firebase
+        window.escutaSalaAtual(); 
     }
 
-    // Liga o novo radar e guarda o "botão de desligar" na memória
     window.escutaSalaAtual = onValue(ref(database, `salas/${idSala}`), (snapshot) => {
         if(!snapshot.exists()) return;
         const sala = snapshot.val();
         const status = sala.config.status;
         
         // ==========================================
-        // MEMÓRIA DA MESA DE APOSTA
+        // MEMÓRIA DA MESA DE APOSTA (Caso venha de convite)
         // ==========================================
         if (sala.premioNome) {
             state.isMesaAposta = true;
             state.dadosPremio = { nome: sala.premioNome, valor: sala.premioPreco };
         }
-
+        
         const cartas = sala.mesa_sorteio || {};
         
-        // Transição de tela
         if (status === 'sorteio' && document.getElementById('screen-luck').classList.contains('hidden')) {
             fecharAlertaSeringal();
             
+            // VERIFICA SE É MESA DE APOSTA (TELA DE ESPERA) OU LOBBY NORMAL
             const telaEspera = document.getElementById('screen-waiting');
             if (telaEspera && !telaEspera.classList.contains('hidden')) {
                 telaEspera.classList.add('hidden');
@@ -3223,22 +3224,23 @@ window.ouvirEventosSala = function(idSala) {
             }
         }
 
-        // Lógica do Sorteio
         if (status === 'sorteio') {
             window.renderizarMesaSorteioOnline(cartas);
             
             const arrayCartas = Object.keys(cartas).map(key => cartas[key]);
             const escolhidas = arrayCartas.filter(c => c && c.escolhidaPor && c.escolhidaPor !== "");
             
+            // Se as cartas foram escolhidas, inicia a contagem APENAS UMA VEZ
             if (escolhidas.length === sala.config.maxJogadores) {
                 if (!state.timeoutSorteioIniciado) {
-                    state.timeoutSorteioIniciado = true; 
+                    state.timeoutSorteioIniciado = true; // Trava o relógio contra disparos duplos
                     
                     setTimeout(() => {
                         window.finalizarSorteioMultiplayer(cartas, sala.jogadores);
                     }, 1800);
                 }
             } else {
+                // Se alguém caiu ou a mesa reiniciou por empate, zera o cronômetro
                 state.timeoutSorteioIniciado = false;
             }
         }
