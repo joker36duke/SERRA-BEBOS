@@ -3189,9 +3189,16 @@ window.buscarPartida = async function(tipoJogo) {
             return cartas;
         };
 
-// 4. OUVIR A SALA (CORRIGIDO COM BLINDAGEM ANTI-FIREBASE PARA O ANDROID E MESA DE APOSTA)
+// 4. OUVIR A SALA (AGORA COM PROTEÇÃO ANTI-ECO PARA O 2x2 e 3x3)
 window.ouvirEventosSala = function(idSala) {
-    onValue(ref(database, `salas/${idSala}`), (snapshot) => {
+
+     // 🛑 PROTEÇÃO ANTI-ECO (O SEGREDO PARA A CARTA NÃO TRAVAR)
+    if (window.escutaSalaAtual) {
+        window.escutaSalaAtual(); // Aperta o botão de desligar do Firebase
+    }
+
+    // Liga o novo radar e guarda o "botão de desligar" na memória
+    window.escutaSalaAtual = onValue(ref(database, `salas/${idSala}`), (snapshot) => {
         if(!snapshot.exists()) return;
         const sala = snapshot.val();
         const status = sala.config.status;
@@ -3206,37 +3213,35 @@ window.ouvirEventosSala = function(idSala) {
 
         const cartas = sala.mesa_sorteio || {};
         
+        // Transição de tela
         if (status === 'sorteio' && document.getElementById('screen-luck').classList.contains('hidden')) {
             fecharAlertaSeringal();
             
-            // NOVO: Verifica se o Dono está preso na tela da Ampulheta e liberta ele!
             const telaEspera = document.getElementById('screen-waiting');
             if (telaEspera && !telaEspera.classList.contains('hidden')) {
                 telaEspera.classList.add('hidden');
                 document.getElementById('screen-luck').classList.remove('hidden', 'transparent');
             } else {
-                // Se for o Lobby normal, usa a transição suave padrão
                 navTo('screen-lobby', 'screen-luck');
             }
         }
 
+        // Lógica do Sorteio
         if (status === 'sorteio') {
             window.renderizarMesaSorteioOnline(cartas);
             
             const arrayCartas = Object.keys(cartas).map(key => cartas[key]);
             const escolhidas = arrayCartas.filter(c => c && c.escolhidaPor && c.escolhidaPor !== "");
             
-            // Se as duas cartas foram escolhidas, inicia a contagem APENAS UMA VEZ
             if (escolhidas.length === sala.config.maxJogadores) {
                 if (!state.timeoutSorteioIniciado) {
-                    state.timeoutSorteioIniciado = true; // Trava o relógio contra disparos duplos
+                    state.timeoutSorteioIniciado = true; 
                     
                     setTimeout(() => {
                         window.finalizarSorteioMultiplayer(cartas, sala.jogadores);
                     }, 1800);
                 }
             } else {
-                // Se alguém caiu ou a mesa reiniciou por empate, zera o cronômetro
                 state.timeoutSorteioIniciado = false;
             }
         }
