@@ -3070,11 +3070,12 @@ window.salvarNovoProduto = function() {
         }
                 
 // =========================================================
-// MOTOR UNIVERSAL SERRA BEBOS: O DEFINITIVO (COM FAXINA DE FILA)
+// MOTOR UNIVERSAL SERRA BEBOS: O DEFINITIVO
 // =========================================================
 
 window.buscarPartida = async function(tipoJogo) {
     try {
+        state.tipoJogo = tipoJogo; // GRAVA O MODO DE JOGO
         const user = auth.currentUser;
         if (!user) {
             mostrarAlertaSeringal("Erro", "O Bebo-Mor não reconhece você. Faça login.");
@@ -3082,15 +3083,12 @@ window.buscarPartida = async function(tipoJogo) {
         }
 
         // ==========================================================
-         🧹 FAXINA DE CLONES FANTASMAS (CORREÇÃO DA CARTA TRAVADA)
+        // 🧹 FAXINA DE CLONES FANTASMAS (CORREÇÃO DA CARTA TRAVADA)
+        // Se o jogador já estava em uma sala e buscou outra, limpamos a antiga!
         // ==========================================================
-        
         if (state.salaId) {
             try {
-                // Tira o jogador da sala fantasma
                 await remove(ref(database, `salas/${state.salaId}/jogadores/${user.uid}`));
-                
-                // Se ele era o dono da sala fantasma, apaga ela inteira para não sujar o servidor
                 const snapVelha = await get(ref(database, `salas/${state.salaId}`));
                 if (snapVelha.exists() && snapVelha.val().config.criador === user.uid) {
                     await remove(ref(database, `salas/${state.salaId}`));
@@ -3098,11 +3096,10 @@ window.buscarPartida = async function(tipoJogo) {
             } catch (e) {
                 console.log("Limpando rastros na floresta...");
             }
-            state.salaId = null; // Zera a memória da sala antiga
+            state.salaId = null; 
         }
         // ==========================================================
 
-        state.tipoJogo = tipoJogo; // GRAVA O MODO DE JOGO
         mostrarAlertaSeringal("Buscando...", `Preparando a mesa para ${tipoJogo}. Aguarde...`);
 
         const limites = { '1v1': 2, '2v2': 4, '3v3': 6 };
@@ -3157,8 +3154,8 @@ window.buscarPartida = async function(tipoJogo) {
             state.salaId = novaSalaRef.key;
             state.isOnline = true;
             
-            // Aviso atualizado para o jogador entender que ainda está na fila mesmo se clicar em "Entendido"
-            mostrarAlertaSeringal("Na Fila!", `Sua mesa ${tipoJogo} está aberta na floresta.\n\nO aviso sumirá, mas você continua na fila. O jogo começará sozinho quando os oponentes entrarem!`);
+            // Aviso levemente atualizado para o jogador entender que, mesmo saindo da tela, a fila continua!
+            mostrarAlertaSeringal("Na Fila!", `Sua mesa ${tipoJogo} está aberta na floresta.\n\nO aviso pode ser fechado, mas você continuará na fila. O jogo começará sozinho!`);
         }
 
         window.ouvirEventosSala(state.salaId);
