@@ -3953,17 +3953,22 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
             } else {
                 if (btnContinue) btnContinue.classList.remove('hidden');
                 if (btnGoOnline) btnGoOnline.classList.add('hidden');
-            }
-            
-            showModal(matchEndReason, matchEndDesc, "Ir para a Adega", () => { 
-                window.irParaRanking(); 
-            });
+If (matchOver) {
+        const btnContinue = document.getElementById('btn-continue');
+        const btnGoOnline = document.getElementById('btn-go-online');
+
+        if (pWon && !state.isOnline) {
+            if (btnGoOnline) btnGoOnline.classList.remove('hidden'); 
+            if (btnContinue) btnContinue.classList.add('hidden'); 
+        } else {
+            if (btnContinue) btnContinue.classList.remove('hidden');
+            if (btnGoOnline) btnGoOnline.classList.add('hidden');
         }
-    } else {
         
-        // =========================================================
-        // LÓGICA DE FIM DE RODADA (Próxima mão/Dar as cartas - INTACTO)
-        // =========================================================
+        showModal(matchEndReason, matchEndDesc, "Ir para a Adega", () => { 
+            window.irParaRanking(); 
+        });
+    } else {
         if (state.isOnline) {
             const btn = document.getElementById('btn-continue');
             if (pWon) {
