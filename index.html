@@ -2789,7 +2789,10 @@ window.gerarConviteMesa = async function() {
     }
 };
 
-window.abrirTelaDeEspera = function(mesaId) {
+// ==========================================
+// ABRIR TELA DE ESPERA (COM MEMÓRIA DE APOSTA)
+// ==========================================
+window.abrirTelaDeEspera = function(mesaId, premioNome, premioPreco) { // 👉 1. ADICIONE OS PRÊMIOS AQUI!
     document.getElementById('waiting-room-id').innerText = mesaId;
     
     document.getElementById('screen-catalogo').classList.add('hidden');
@@ -2801,9 +2804,15 @@ window.abrirTelaDeEspera = function(mesaId) {
     sw.classList.remove('hidden');
     setTimeout(() => sw.classList.remove('transparent'), 50);
 
-    // Começa a escutar se o oponente clicou no link
     state.salaId = mesaId;
     state.isOnline = true;
+    
+    if (premioNome) {
+        state.isMesaAposta = true;
+        state.dadosPremio = { nome: premioNome, valor: premioPreco };
+        localStorage.setItem('serra_aposta_ativa', JSON.stringify(state.dadosPremio)); // Salva no bolso!
+    }
+
     window.ouvirEventosSala(mesaId);
 };
 
