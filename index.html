@@ -3903,57 +3903,6 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
     }
 
     if (matchOver) {
-        // =========================================================
-        // 1. PUXA A MEMÓRIA DA APOSTA (Para não esquecer do prêmio)
-        // =========================================================
-        const apostaSalva = localStorage.getItem('serra_aposta_ativa');
-        if (apostaSalva) {
-            state.isMesaAposta = true;
-            state.dadosPremio = JSON.parse(apostaSalva);
-            localStorage.removeItem('serra_aposta_ativa'); // Limpa para o próximo jogo não puxar o prêmio antigo
-        }
-
-        // =========================================================
-        // 2. CAMINHO DA MESA DE APOSTA (Direto pro WhatsApp! 💸)
-        // =========================================================
-        if (state.isMesaAposta) {
-            if (state.salaId) {
-                // Informa o servidor que a mesa acabou
-                window.update(window.ref(window.database, `salas/${state.salaId}/config`), { status: 'finalizada' });
-            }
-            
-            matchEndDesc += `\n\n💰 PRÊMIO DA MESA: ${state.dadosPremio.nome}`;
-            
-            showModal(matchEndReason, matchEndDesc, "Acerto de Contas", () => {
-                const msg = pWon 
-                    ? `GANHEI a aposta no SerraBebos! Vim cobrar meu prêmio: ${state.dadosPremio.nome}!`
-                    : `Fui derrotado na aposta do SerraBebos... Como faço para pagar o ${state.dadosPremio.nome}?`;
-                    
-                // ⚠️ SEU NÚMERO DE WHATSAPP AQUI! (com 55, DDD e número)
-                const numeroAdmin = "5599999999999"; 
-                
-                // Se o forasteiro for anônimo, desloga ele para não sujar o sistema
-                if (typeof auth !== 'undefined' && auth.currentUser && auth.currentUser.isAnonymous) {
-                    auth.signOut();
-                }
-                
-                window.location.href = `https://wa.me/${numeroAdmin}?text=${encodeURIComponent(msg)}`;
-            });
-        } 
-        // =========================================================
-        // 3. CAMINHO DO JOGO NORMAL (O seu código original Intacto! 🃏)
-        // =========================================================
-        else {
-            const btnContinue = document.getElementById('btn-continue');
-            const btnGoOnline = document.getElementById('btn-go-online');
-
-            if (pWon && !state.isOnline) {
-                if (btnGoOnline) btnGoOnline.classList.remove('hidden'); 
-                if (btnContinue) btnContinue.classList.add('hidden'); 
-            } else {
-                if (btnContinue) btnContinue.classList.remove('hidden');
-                if (btnGoOnline) btnGoOnline.classList.add('hidden');
-If (matchOver) {
         const btnContinue = document.getElementById('btn-continue');
         const btnGoOnline = document.getElementById('btn-go-online');
 
@@ -3997,6 +3946,7 @@ If (matchOver) {
             });
         }
     }
+};
                 
 // === NOVA FUNÇÃO: SALVA O PLACAR DAS EQUIPES NA NUVEM ===
 window.salvarFimDeRodadaEquipes = function(meuUid) {
