@@ -4592,7 +4592,7 @@ if (qtdJaJogada + 1 < maxJogadores) {
 };
 
 // ==========================================
-// TESOURARIA DO SERINGAL (VERSÃO FINAL)
+// TESOURARIA DO SERINGAL (VERSÃO BLINDADA)
 // ==========================================
 
 window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, equipeVencedora, motivoFim, sofreuLavadaNaPartida = false) {
@@ -4604,7 +4604,12 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
     const rosasParticipacao = 12; // 🌹 12 Rosas fixas para quem termina a partida
 
     // 1. PROCESSA OS VENCEDORES
-    vencedoresUids.forEach((uid) => {
+    for (const uid of vencedoresUids) {
+        
+        // 🛑 O SEGURANÇA DA PORTA: Verifica se o jogador tem registro na Adega!
+        const snapFicha = await get(ref(database, `ranking/${uid}`));
+        if (!snapFicha.exists()) continue; // Se não tem registro, é Forasteiro! Pula ele!
+
         let uvasGanhas = 0; 
         let rosasGanhas = rosasParticipacao; // 12 🌹
         let ganhouVinho = false;
@@ -4638,10 +4643,15 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
         if (ganhouChampagne) atualizacoes[`ranking/${uid}/capote7S`] = increment(1); // 🍾
         if (ganhouVinho) atualizacoes[`ranking/${uid}/vinhos`] = increment(1); // 🍷
         if (ganhouFerramenta) atualizacoes[`ranking/${uid}/${ganhouFerramenta}`] = increment(1);
-    });
+    }
 
     // 2. PROCESSA OS PERDEDORES
-    perdedoresUids.forEach((uid) => {
+    for (const uid of perdedoresUids) {
+        
+        // 🛑 O SEGURANÇA DA PORTA: Verifica se o jogador tem registro na Adega!
+        const snapFicha = await get(ref(database, `ranking/${uid}`));
+        if (!snapFicha.exists()) continue; // Se não tem registro, é Forasteiro! Pula ele!
+
         // 🔥 Perdedores NÃO ganham Uvas! Apenas as Rosas de participação, SE não tomarem Lavada.
         let perdeuConsolacao = (motivoFim === '7 SERRA!' || motivoFim === 'CHUVA' || sofreuLavadaNaPartida);
         let rosasGanhas = perdeuConsolacao ? 0 : rosasParticipacao;
@@ -4657,11 +4667,14 @@ window.distribuirRecompensas = async function(vencedoresUids, perdedoresUids, eq
         if (rosasGanhas > 0) {
             atualizacoes[`ranking/${uid}/rosas`] = increment(rosasGanhas);
         }
-    });
+    }
 
     try {
-        await update(ref(database), atualizacoes);
-        console.log("Tesouraria Atualizada: Uvas e Rosas distribuídas com rigor!");
+        // Só tenta atualizar o Firebase se houver dados de jogadores registrados
+        if (Object.keys(atualizacoes).length > 0) {
+            await update(ref(database), atualizacoes);
+            console.log("Tesouraria Atualizada: Uvas e Rosas distribuídas com rigor!");
+        }
     } catch (e) {
         console.error("Erro na distribuição das riquezas:", e);
     }
