@@ -3902,7 +3902,7 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
 
-        if (matchOver) {
+    if (matchOver) {
         const btnContinue = document.getElementById('btn-continue');
         const btnGoOnline = document.getElementById('btn-go-online');
 
@@ -3922,11 +3922,11 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                         () => {
                             const msg = encodeURIComponent(`🃏 *O SERINGAL FALOU!* 🃏\n\nTe venci na mesa do SerraBebos! Passa pra cá o meu prêmio:\n🏆 *${nomePremio}* (R$ ${valorPremio})\n\nFoi um bom jogo, forasteiro. 🤝`);
                             window.open(`https://wa.me/?text=${msg}`, '_blank');
-                            if (window.limparStatusMesa) window.limparStatusMesa(); // Limpa a memória pra não dar fantasma
+                            if (window.limparStatusMesa) window.limparStatusMesa(); // Limpa a memória
                             window.irParaRanking(); 
                         }
                     );
-                    return; // 👈 IMPORTANTE: Para o código aqui, anulando o modal padrão!
+                    return; // Para o código aqui
                 } else {
                     // VOCÊ PERDEU A APOSTA
                     showModal(
@@ -3938,16 +3938,13 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
                             window.irParaRanking(); 
                         }
                     );
-                    return; // 👈 IMPORTANTE: Para o código aqui
+                    return; // Para o código aqui
                 }
             }
         } catch (erroAposta) {
-            // Se a memória corromper, o erro morre aqui em silêncio e o jogo continua normal.
             console.error("Modo aposta ignorado por segurança:", erroAposta);
         }
         // --- FIM DA TRAVA DE SEGURANÇA ---
-
-        // O FINAL PADRÃO DA SUA MESA (SE NÃO FOR APOSTA OU DER ERRO LÁ EM CIMA)
         if (pWon && !state.isOnline) {
             if (btnGoOnline) btnGoOnline.classList.remove('hidden'); 
             if (btnContinue) btnContinue.classList.add('hidden'); 
@@ -3959,7 +3956,6 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         showModal(matchEndReason, matchEndDesc, "Ir para a Adega", () => { 
             window.irParaRanking(); 
         });
-    }
             
     } else {
         if (state.isOnline) {
