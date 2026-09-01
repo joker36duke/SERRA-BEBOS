@@ -3902,10 +3902,52 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         }
     }
 
-    if (matchOver) {
+        if (matchOver) {
         const btnContinue = document.getElementById('btn-continue');
         const btnGoOnline = document.getElementById('btn-go-online');
 
+        // --- INÍCIO DA TRAVA DE SEGURANÇA DA APOSTA ---
+        try {
+            // Só ativa a cobrança SE for jogo online E se a memória do prêmio estiver intacta
+            if (state.isOnline && state.isMesaAposta && state.dadosPremio) {
+                let nomePremio = state.dadosPremio.nome || "Prêmio da Rodada";
+                let valorPremio = state.dadosPremio.valor || "Indefinido";
+
+                if (pWon) {
+                    // VOCÊ VENCEU A APOSTA
+                    showModal(
+                        "VITÓRIA NA APOSTA!", 
+                        `Você amassou o forasteiro e faturou:\n🏆 ${nomePremio}\n💰 R$ ${valorPremio}\n\nO Bebo-Mor preparou a mensagem de cobrança!`, 
+                        "Cobrar no WhatsApp", 
+                        () => {
+                            const msg = encodeURIComponent(`🃏 *O SERINGAL FALOU!* 🃏\n\nTe venci na mesa do SerraBebos! Passa pra cá o meu prêmio:\n🏆 *${nomePremio}* (R$ ${valorPremio})\n\nFoi um bom jogo, forasteiro. 🤝`);
+                            window.open(`https://wa.me/?text=${msg}`, '_blank');
+                            if (window.limparStatusMesa) window.limparStatusMesa(); // Limpa a memória pra não dar fantasma
+                            window.irParaRanking(); 
+                        }
+                    );
+                    return; // 👈 IMPORTANTE: Para o código aqui, anulando o modal padrão!
+                } else {
+                    // VOCÊ PERDEU A APOSTA
+                    showModal(
+                        "PERDEU A APOSTA", 
+                        `O forasteiro dominou a mesa e levou:\n🏆 ${nomePremio}\n\nHonre sua palavra, Seringueiro.`, 
+                        "Sair de Cabeça Erguida", 
+                        () => {
+                            if (window.limparStatusMesa) window.limparStatusMesa();
+                            window.irParaRanking(); 
+                        }
+                    );
+                    return; // 👈 IMPORTANTE: Para o código aqui
+                }
+            }
+        } catch (erroAposta) {
+            // Se a memória corromper, o erro morre aqui em silêncio e o jogo continua normal.
+            console.error("Modo aposta ignorado por segurança:", erroAposta);
+        }
+        // --- FIM DA TRAVA DE SEGURANÇA ---
+
+        // O FINAL PADRÃO DA SUA MESA (SE NÃO FOR APOSTA OU DER ERRO LÁ EM CIMA)
         if (pWon && !state.isOnline) {
             if (btnGoOnline) btnGoOnline.classList.remove('hidden'); 
             if (btnContinue) btnContinue.classList.add('hidden'); 
@@ -3917,6 +3959,8 @@ window.renderizarCaixasMultiplayer = function(jogadoresOrdenados, turnoAtualUid)
         showModal(matchEndReason, matchEndDesc, "Ir para a Adega", () => { 
             window.irParaRanking(); 
         });
+    }
+            
     } else {
         if (state.isOnline) {
             const btn = document.getElementById('btn-continue');
